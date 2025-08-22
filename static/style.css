@@ -1,0 +1,6 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+header { background: #333; color: white; padding: 10px; }
+header nav a { color: white; margin: 0 10px; text-decoration: none; }
+.pedido { border: 1px solid #ccc; padding: 10px; margin: 10px 0; background: #f9f9f9; }
+button { padding: 8px 15px; background: #28a745; color: white; border: none; cursor: pointer; }
+button:hover { background: #218838; }

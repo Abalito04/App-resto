@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Editar pedido</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="mesa" class="form-label">Mesa:</label>
+        <input type="text" id="mesa" name="mesa" class="form-control" value="{{ pedido.mesa }}" required>
+    </div>
+
+    <h3>Productos:</h3>
+    {% for p in productos %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="prod{{ p.id }}" name="producto" value="{{ p.id }}"
+                   {% for item in pedido.item %}{% if item.producto_id == p.id %}checked{% endif %}{% endfor %}>
+            <label class="form-check-label" for="prod{{ p.id }}">
+                {{ p.nombre }} - ${{ p.precio }}
+            </label>
+        </div>
+    {% endfor %}
+
+    <br>
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a href="{{ url_for('cocina') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

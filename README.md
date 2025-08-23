@@ -1,6 +1,3 @@
-# App-resto
-App para restaurante
-<<<<<<< HEAD
 # Restaurant App 🍽️
 
 Aplicación web para la gestión de pedidos de un restaurante. Permite a los mozos tomar pedidos, ver pedidos activos, registrar el método de pago y gestionar la cocina, incluyendo historial de pedidos entregados.
@@ -50,20 +47,3 @@ source venv/bin/activate
 
 
 pip install -r requirements.txt
-
-restaurant_app/
-│
-├── app.py                 # Archivo principal con rutas y lógica
-├── models.py              # Definición de modelos de la base de datos
-├── restaurant.db          # Base de datos SQLite (se genera automáticamente)
-├── templates/             # Plantillas HTML
-│   ├── base.html
-│   ├── index.html
-│   ├── cocina.html
-│   ├── editar.html
-│   └── historial.html
-├── static/                # Archivos CSS, JS, imágenes
-├── requirements.txt       # Dependencias de Python
-└── README.md
-=======
->>>>>>> 48d2739bf330a14e61eb4d4effc8c45ec9085d44

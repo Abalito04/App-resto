@@ -15,11 +15,6 @@
         {% for producto in productos %}
             <div class="col-6 col-md-4 col-lg-3 mb-2">
                 <div class="card h-100 shadow-sm">
-                    {% if producto.imagen %}
-                        <img src="{{ producto.imagen }}" class="card-img-top" style="height:100px; object-fit:cover;">
-                    {% else %}
-                        <img src="https://via.placeholder.com/100" class="card-img-top">
-                    {% endif %}
                     <div class="card-body p-2">
                         <h6 class="card-title">{{ producto.nombre }}</h6>
                         <p class="card-text">$ {{ producto.precio }}</p>
@@ -110,11 +105,6 @@
                 <ul class="list-group list-group-flush mt-2 mb-2">
                     {% for item in pedido.items %}
                         <li class="list-group-item d-flex align-items-center p-1">
-                            {% if item.producto.imagen %}
-                                <img src="{{ item.producto.imagen }}" style="width:40px;height:40px;object-fit:cover;margin-right:5px;">
-                            {% else %}
-                                <img src="https://via.placeholder.com/40" style="margin-right:5px;">
-                            {% endif %}
                             {{ item.producto.nombre }} - ${{ item.producto.precio }}
                         </li>
                     {% endfor %}

@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2>📦 Historial de Pedidos Entregados</h2>
+    <h2>📜 Historial de pedidos</h2>
 
-    {% if pedidos %}
-        {% for pedido in pedidos %}
+    <!-- Pedidos últimos 7 días -->
+    <h3 class="mt-4">Pedidos últimos 7 días</h3>
+    {% if pedidos_semana %}
+        {% for pedido in pedidos_semana %}
         <div class="card mb-2 shadow-sm p-2">
-            <strong>Mesa {{ pedido.mesa }}</strong> - Entregado a las {{ pedido.fecha.strftime('%H:%M') }}
-            <ul class="mb-1">
+            <strong>Mesa {{ pedido.mesa }}</strong> - 
+            Pago: <span class="badge bg-info">{{ pedido.metodo_pago }}</span> - 
+            Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}
+
+            <ul class="mb-1 mt-2">
                 {% for item in pedido.items %}
                     <li>{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
                 {% endfor %}
@@ -16,7 +21,29 @@
         </div>
         {% endfor %}
     {% else %}
-        <p>No hay pedidos entregados todavía.</p>
+        <p>No hay pedidos en los últimos 7 días.</p>
     {% endif %}
+
+    <!-- Pedidos últimos 30 días -->
+    <h3 class="mt-4">Pedidos últimos 30 días</h3>
+    {% if pedidos_mes %}
+        {% for pedido in pedidos_mes %}
+        <div class="card mb-2 shadow-sm p-2">
+            <strong>Mesa {{ pedido.mesa }}</strong> - 
+            Pago: <span class="badge bg-info">{{ pedido.metodo_pago }}</span> - 
+            Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}
+
+            <ul class="mb-1 mt-2">
+                {% for item in pedido.items %}
+                    <li>{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                {% endfor %}
+            </ul>
+            <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay pedidos en los últimos 30 días.</p>
+    {% endif %}
+
 </div>
 {% endblock %}

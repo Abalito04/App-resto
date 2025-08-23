@@ -150,6 +150,14 @@ def borrar_producto_index(producto_id):
     db.session.commit()
     return redirect(url_for("index"))
 
+# =================== Cocina ===================
+
+@app.route("/cocina")
+def cocina():
+    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").order_by(Pedido.fecha.desc()).all()
+    return render_template("cocina.html", pedidos=pedidos)
+
+
 # =================== RUN ===================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

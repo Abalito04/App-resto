@@ -3,47 +3,67 @@
 <div class="container mt-4">
     <h2>📜 Historial de pedidos</h2>
 
-    <!-- Pedidos últimos 7 días -->
-    <h3 class="mt-4">Pedidos últimos 7 días</h3>
-    {% if pedidos_semana %}
-        {% for pedido in pedidos_semana %}
-        <div class="card mb-2 shadow-sm p-2">
-            <strong>Mesa {{ pedido.mesa }}</strong> - 
-            Pago: <span class="badge bg-info">{{ pedido.metodo_pago }}</span> - 
-            Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}
+    <h4>Pedidos de la última semana:</h4>
+    <div class="row">
+    {% for pedido in pedidos_semana %}
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>Mesa {{ pedido.mesa }}</strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
 
-            <ul class="mb-1 mt-2">
-                {% for item in pedido.items %}
-                    <li>{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
-                {% endfor %}
-            </ul>
-            <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% endfor %}
+                </ul>
+                <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+            </div>
         </div>
-        {% endfor %}
     {% else %}
-        <p>No hay pedidos en los últimos 7 días.</p>
-    {% endif %}
+        <p>No hay pedidos esta semana.</p>
+    {% endfor %}
+    </div>
 
-    <!-- Pedidos últimos 30 días -->
-    <h3 class="mt-4">Pedidos últimos 30 días</h3>
-    {% if pedidos_mes %}
-        {% for pedido in pedidos_mes %}
-        <div class="card mb-2 shadow-sm p-2">
-            <strong>Mesa {{ pedido.mesa }}</strong> - 
-            Pago: <span class="badge bg-info">{{ pedido.metodo_pago }}</span> - 
-            Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}
+    <h4>Pedidos del último mes:</h4>
+    <div class="row">
+    {% for pedido in pedidos_mes %}
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>Mesa {{ pedido.mesa }}</strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
 
-            <ul class="mb-1 mt-2">
-                {% for item in pedido.items %}
-                    <li>{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
-                {% endfor %}
-            </ul>
-            <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% endfor %}
+                </ul>
+                <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+            </div>
         </div>
-        {% endfor %}
     {% else %}
-        <p>No hay pedidos en los últimos 30 días.</p>
-    {% endif %}
+        <p>No hay pedidos este mes.</p>
+    {% endfor %}
+    </div>
 
+    <h4>Todos los pedidos entregados:</h4>
+    <div class="row">
+    {% for pedido in pedidos %}
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>Mesa {{ pedido.mesa }}</strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% endfor %}
+                </ul>
+                <strong>Total: ${{ pedido.items | sum(attribute='producto.precio') }}</strong>
+            </div>
+        </div>
+    {% else %}
+        <p>No hay pedidos entregados.</p>
+    {% endfor %}
+    </div>
 </div>
 {% endblock %}

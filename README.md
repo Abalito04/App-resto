@@ -1,5 +1,6 @@
 # App-resto
 App para restaurante
+<<<<<<< HEAD
 # Restaurant App 🍽️
 
 Aplicación web para la gestión de pedidos de un restaurante. Permite a los mozos tomar pedidos, ver pedidos activos, registrar el método de pago y gestionar la cocina, incluyendo historial de pedidos entregados.
@@ -64,3 +65,5 @@ restaurant_app/
 ├── static/                # Archivos CSS, JS, imágenes
 ├── requirements.txt       # Dependencias de Python
 └── README.md
+=======
+>>>>>>> 48d2739bf330a14e61eb4d4effc8c45ec9085d44

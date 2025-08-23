@@ -1,57 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">📋 Pedidos en Cocina</h2>
-
+    <h2>🧑‍🍳 Cocina - Pedidos activos</h2>
+    <div class="row">
     {% for pedido in pedidos %}
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Mesa {{ pedido.mesa }}</h5>
-            <p class="card-text">
-                Pedido a las <strong>{{ pedido.fecha.strftime('%H:%M') }}</strong> <br>
-                Estado: <span class="badge bg-info">{{ pedido.estado }}</span><br>
-                Tiempo transcurrido: <span id="timer-{{ pedido.id }}"></span>
-            </p>
-            <ul class="list-group list-group-flush mb-3">
-                {% for item in pedido.items %}
-                    <li class="list-group-item">{{ item.producto.nombre }}</li>
-                {% endfor %}
-            </ul>
-
-            <!-- Botones de acción -->
-           <div class="d-flex gap-2 mt-2">
-    <form method="POST" action="{{ url_for('borrar_pedido', pedido_id=pedido.id) }}">
-        <button class="btn btn-danger btn-sm">🗑 Borrar</button>
-    </form>
-    <a href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}" class="btn btn-warning btn-sm">✏ Editar</a>
-    <form method="POST" action="{{ url_for('entregado', pedido_id=pedido.id) }}">
-        <button class="btn btn-success btn-sm">✅ Entregado</button>
-    </form>
-</div>
-
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>Mesa {{ pedido.mesa }}</strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% endfor %}
+                </ul>
+                <form method="POST" action="{{ url_for('entregado', pedido_id=pedido.id) }}">
+                    <button class="btn btn-success btn-sm">✅ Entregado</button>
+                </form>
+            </div>
         </div>
+    {% else %}
+        <p>No hay pedidos pendientes.</p>
+    {% endfor %}
     </div>
-    {% endfor %}
 </div>
-
-<!-- 🚀 Script de timers -->
-<script>
-function startTimers() {
-    {% for pedido in pedidos %}
-    (function(){
-        const start = new Date("{{ pedido.fecha.isoformat() }}");
-        const timerEl = document.getElementById("timer-{{ pedido.id }}");
-        setInterval(() => {
-            const now = new Date();
-            const diff = Math.floor((now - start) / 1000); // en segundos
-            const mins = Math.floor(diff / 60);
-            const secs = diff % 60;
-            timerEl.textContent = mins + "m " + (secs < 10 ? "0" : "") + secs + "s";
-        }, 1000);
-    })();
-    {% endfor %}
-}
-window.onload = startTimers;
-</script>
 {% endblock %}
+
 

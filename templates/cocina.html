@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>🧑‍🍳 Cocina - Pedidos activos</h2>
+    <div class="row">
+    {% for pedido in pedidos %}
+        {% if pedido.estado != "Entregado" %}
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>
+                {% if pedido.tipo_consumo == "Local" %}
+                    Mesa {{ pedido.mesa }}
+                {% else %}
+                    Para llevar: {{ pedido.nombre_cliente }}
+                {% endif %}
+                </strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% endfor %}
+                </ul>
+                <strong>Total: ${{ pedido.total }}</strong>
+                <form method="POST" action="{{ url_for('entregado', pedido_id=pedido.id) }}">
+                    <button class="btn btn-success btn-sm mt-2">✅ Entregado</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <p>No hay pedidos pendientes.</p>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+

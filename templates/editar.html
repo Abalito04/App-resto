@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>✏ Editar Pedido</h2>
+
+    <form method="POST" action="{{ url_for('editar_pedido', pedido_id=pedido.id) }}">
+        <!-- Tipo de consumo -->
+        <div class="mb-2">
+            <label>Tipo de consumo:</label>
+            <select name="tipo_consumo" class="form-select" required id="tipo_consumo">
+                <option value="Local" {% if pedido.tipo_consumo == "Local" %}selected{% endif %}>🍽️ En el local</option>
+                <option value="Llevar" {% if pedido.tipo_consumo == "Llevar" %}selected{% endif %}>🥡 Para llevar</option>
+            </select>
+        </div>
+
+        <!-- Mesa -->
+        <div class="mb-2" id="mesa_div">
+            <label>Mesa:</label>
+            <input type="text" name="mesa" class="form-control" value="{{ pedido.mesa }}">
+        </div>
+
+        <!-- Cliente para llevar -->
+        <div class="mb-2" id="cliente_div" style="display:none;">
+            <label>Nombre del cliente:</label>
+            <input type="text" name="nombre_cliente" class="form-control" value="{{ pedido.nombre_cliente }}">
+            <label>Dirección:</label>
+            <input type="text" name="direccion_cliente" class="form-control" value="{{ pedido.direccion_cliente }}">
+        </div>
+
+        <!-- Productos -->
+        <h4>Productos:</h4>
+        <div class="row">
+        {% for producto in productos %}
+            <div class="col-6 col-md-4 col-lg-3 mb-2">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body p-2">
+                        <h6>{{ producto.nombre }}</h6>
+                        <p>$ {{ producto.precio }}</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}"
+                            {% for item in pedido.items %}
+                                {% if item.producto.id == producto.id %}checked{% endif %}
+                            {% endfor %}>
+                            <label class="form-check-label">Seleccionar</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <!-- Método de pago -->
+        <div class="mb-2">
+            <label>Método de pago:</label>
+            <select class="form-select" name="metodo_pago" required>
+                <option value="Efectivo" {% if pedido.metodo_pago == "Efectivo" %}selected{% endif %}>Efectivo</option>
+                <option value="Tarjeta" {% if pedido.metodo_pago == "Tarjeta" %}selected{% endif %}>Tarjeta</option>
+                <option value="QR" {% if pedido.metodo_pago == "QR" %}selected{% endif %}>QR</option>
+            </select>
+        </div>
+
+        <strong>Total actual: ${{ pedido.total }}</strong>
+
+        <br><br>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script>
+function toggleTipoConsumo() {
+    const tipo = document.getElementById('tipo_consumo').value;
+    if(tipo === "Llevar"){
+        document.getElementById('mesa_div').style.display = 'none';
+        document.getElementById('cliente_div').style.display = 'block';
+    } else {
+        document.getElementById('mesa_div').style.display = 'block';
+        document.getElementById('cliente_div').style.display = 'none';
+    }
+}
+
+document.getElementById('tipo_consumo').addEventListener('change', toggleTipoConsumo);
+window.onload = toggleTipoConsumo;
+</script>
+{% endblock %}

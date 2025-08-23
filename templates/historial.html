@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>📜 Historial de pedidos</h2>
+
+    <!-- 🔘 Botones de filtro -->
+    <div class="mb-3">
+        <a href="{{ url_for('historial', filtro='semana') }}" class="btn btn-primary {% if filtro == 'semana' %}active{% endif %}">Última semana</a>
+        <a href="{{ url_for('historial', filtro='mes') }}" class="btn btn-primary {% if filtro == 'mes' %}active{% endif %}">Último mes</a>
+        <a href="{{ url_for('historial', filtro='todos') }}" class="btn btn-secondary {% if filtro == 'todos' %}active{% endif %}">Todos</a>
+    </div>
+
+    <div class="row">
+    {% for pedido in pedidos %}
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card shadow-sm p-2">
+                <strong>
+                    {% if pedido.tipo_consumo == 'Local' %}
+                        Mesa {{ pedido.mesa }}
+                    {% else %}
+                        {{ pedido.nombre_cliente }}
+                    {% endif %}
+                </strong> - {{ pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                <p class="mt-1 mb-1"><strong>Consumo:</strong> {{ pedido.tipo_consumo }}</p>
+
+                <ul class="list-group list-group-flush mt-2 mb-2">
+                    {% for item in pedido.items %}
+                        <li class="list-group-item p-1">
+                            {{ item.producto.nombre }} - ${{ item.producto.precio }}
+                        </li>
+                    {% endfor %}
+                </ul>
+                <strong>Total: ${{ pedido.total }}</strong>
+            </div>
+        </div>
+    {% else %}
+        <p>No hay pedidos para este filtro.</p>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

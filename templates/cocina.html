@@ -3,25 +3,29 @@
 <div class="container mt-4">
     <h2>🧑‍🍳 Cocina - Pedidos activos</h2>
     <div class="row">
-    {% for pedido in pedidos %}
-        {% if pedido.estado != "Entregado" %}
+    {% for item in lista_pedidos %}
+        {% if item.pedido.estado != "Entregado" %}
         <div class="col-12 col-md-6 col-lg-4 mb-3">
-            <div class="card shadow-sm p-2">
+            <div class="card shadow-sm p-2" data-hora="{{ item.pedido.hora_cocina.isoformat() if item.pedido.hora_cocina else "" }}">
                 <strong>
-                {% if pedido.tipo_consumo == "Local" %}
-                    Mesa {{ pedido.mesa }}
+                {% if item.pedido.tipo_consumo == "Local" %}
+                    Mesa {{ item.pedido.mesa }}
                 {% else %}
-                    Para llevar: {{ pedido.nombre_cliente }}
+                    Para llevar: {{ item.pedido.nombre_cliente }}
                 {% endif %}
-                </strong> - {{ pedido.metodo_pago }}
-                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                </strong> - {{ item.pedido.metodo_pago }}
+                <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+
+                <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+
                 <ul class="list-group list-group-flush mt-2 mb-2">
-                    {% for item in pedido.items %}
-                        <li class="list-group-item p-1">{{ item.producto.nombre }} - ${{ item.producto.precio }}</li>
+                    {% for it in item.pedido.items %}
+                        <li class="list-group-item p-1">{{ it.producto.nombre }} - ${{ it.producto.precio }}</li>
                     {% endfor %}
                 </ul>
-                <strong>Total: ${{ pedido.total }}</strong>
-                <form method="POST" action="{{ url_for('entregado', pedido_id=pedido.id) }}">
+                <strong>Total: ${{ item.pedido.total }}</strong>
+
+                <form method="POST" action="{{ url_for('entregado', pedido_id=item.pedido.id) }}">
                     <button class="btn btn-success btn-sm mt-2">✅ Entregado</button>
                 </form>
             </div>
@@ -32,6 +36,24 @@
     {% endfor %}
     </div>
 </div>
+
+<!-- Script para actualizar tiempo en vivo -->
+<script>
+function actualizarTiempos() {
+    document.querySelectorAll('.card').forEach(card => {
+        const horaStr = card.dataset.hora;
+        if (!horaStr) return;
+        const hora = new Date(horaStr);
+        const ahora = new Date();
+        const diff = Math.floor((ahora - hora) / 1000);
+        const minutos = Math.floor(diff / 60);
+        const segundos = diff % 60;
+        card.querySelector('.tiempo').textContent = `${minutos}m ${segundos}s`;
+    });
+}
+
+// Actualiza cada segundo
+setInterval(actualizarTiempos, 1000);
+actualizarTiempos();
+</script>
 {% endblock %}
-
-

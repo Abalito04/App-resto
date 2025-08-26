@@ -6,22 +6,119 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#f3b927">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- PWA Meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Restó App">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
 </head>
 
 <body>
     <header>
-        <h1>🍽️ Restó App</h1>
-       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('index') }}">Mozo</a>
-    <a class="navbar-brand" href="{{ url_for('cocina') }}">Cocina</a>
-    <a class="navbar-brand" href="{{ url_for('historial') }}">Historial</a>
-  </div>
-</nav>
-
+        <div class="d-flex justify-content-between align-items-center p-3 bg-dark text-white">
+            <h1>🍽️ Restó App</h1>
+            
+            <!-- Botón para habilitar notificaciones -->
+            <button id="enable-notifications" class="btn btn-warning btn-sm" style="display: none;">
+                🔔 Habilitar Notificaciones
+            </button>
+        </div>
+        
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('index') }}">📝 Mozo</a>
+                <a class="navbar-brand" href="{{ url_for('cocina') }}">👨‍🍳 Cocina</a>
+                <a class="navbar-brand" href="{{ url_for('historial') }}">📜 Historial</a>
+                
+                <!-- Indicador de estado PWA -->
+                <span id="pwa-status" class="badge bg-secondary ms-auto">🔌 Conectado</span>
+            </div>
+        </nav>
     </header>
+    
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='notifications.js') }}"></script>
+    <!-- Bootstrap JS Bundle (incluye Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // Registrar Service Worker y configurar PWA
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+            try {
+                const registration = await navigator.serviceWorker.register("/static/sw.js");
+                console.log("✅ ServiceWorker registrado:", registration.scope);
+                
+                // Mostrar botón de notificaciones si no están habilitadas
+                if (Notification.permission === 'default') {
+                    document.getElementById('enable-notifications').style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error("❌ ServiceWorker error:", error);
+            }
+        });
+
+        // Listener para actualizaciones del SW
+        navigator.serviceWorker.addEventListener('message', event => {
+            if (event.data && event.data.type === 'CACHE_UPDATED') {
+                console.log('🔄 Aplicación actualizada');
+            }
+        });
+    }
+
+    // Detectar estado de conexión
+    function updateConnectionStatus() {
+        const statusElement = document.getElementById('pwa-status');
+        if (navigator.onLine) {
+            statusElement.textContent = '🔌 Conectado';
+            statusElement.className = 'badge bg-success ms-auto';
+        } else {
+            statusElement.textContent = '📡 Sin conexión';
+            statusElement.className = 'badge bg-warning ms-auto';
+        }
+    }
+
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+
+    // Prompt para instalar PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Mostrar botón de instalación
+        const installButton = document.createElement('button');
+        installButton.textContent = '📱 Instalar App';
+        installButton.className = 'btn btn-primary btn-sm';
+        installButton.onclick = async () => {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuario ${outcome} la instalación`);
+            deferredPrompt = null;
+            installButton.remove();
+        };
+        
+        document.querySelector('header .d-flex').appendChild(installButton);
+    });
+
+    // Detectar si la app fue instalada
+    window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA instalada correctamente');
+        deferredPrompt = null;
+    });
+    </script>
 </body>
 </html>

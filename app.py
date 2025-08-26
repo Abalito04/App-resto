@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
+# app.py - Versión mejorada con notificaciones PWA y pagos con tarjeta
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, Pedido, Item, Producto
 from datetime import datetime, timedelta
 from escpos.printer import Usb
-
+import json
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
@@ -37,13 +38,24 @@ def imprimir_comanda(pedido):
         total = sum(item.producto.precio for item in pedido.items)
         p.text(f"TOTAL: ${total}\n")
         p.text(f"Método de pago: {pedido.metodo_pago}\n")
+        if pedido.metodo_pago == "Tarjeta":
+            p.text(f"Ticket: {pedido.ticket_numero}\nTitular: {pedido.titular}\n")
         p.text("===================\n\n\n")
         p.cut()
     except Exception as e:
         print("Error imprimiendo comanda:", e)
 
-# =================== RUTAS ===================
+# =================== FUNCIONES DE NOTIFICACIÓN ===================
+def enviar_notificacion_pedido(pedido):
+    """Envía notificación cuando se crea un nuevo pedido"""
+    try:
+        print(f"🔔 Nuevo pedido: Mesa {pedido.mesa} - Total: ${pedido.total}")
+        return True
+    except Exception as e:
+        print(f"Error enviando notificación: {e}")
+        return False
 
+# =================== RUTAS ===================
 @app.route("/")
 def index():
     productos = Producto.query.all()
@@ -52,49 +64,57 @@ def index():
 
 @app.route("/crear_pedido", methods=["POST"])
 def crear_pedido():
-    mesa = request.form["mesa"]
+    mesa = request.form.get("mesa")
+    nombre_cliente = request.form.get("nombre_cliente")
+    direccion_cliente = request.form.get("direccion_cliente")
+    tipo_consumo = request.form.get("tipo_consumo", "Local")
     metodo_pago = request.form.get("metodo_pago", "Efectivo")
+
+    # Campos de pago extra
+    ticket_numero = request.form.get("ticket_numero")
+    titular = request.form.get("titular")
+    transferencia_info = request.form.get("transferencia_info")
+    deuda_nombre = request.form.get("deuda_nombre")
+
     items = request.form.getlist("producto")
 
-    pedido_existente = Pedido.query.filter_by(mesa=mesa, estado="Pendiente").first()
+    # Validación: si es local, la mesa es obligatoria
+    if tipo_consumo == "Local" and (not mesa or mesa.strip() == ""):
+        return "❌ Debe ingresar el número de mesa", 400
 
-    if pedido_existente:
-        for producto_id in items:
-            item = Item(pedido_id=pedido_existente.id, producto_id=int(producto_id))
-            db.session.add(item)
-        pedido_existente.metodo_pago = metodo_pago
-        db.session.commit()
-        imprimir_comanda(pedido_existente)
-    else:
-        nuevo_pedido = Pedido(
-            mesa=mesa,
-            fecha=datetime.now(),
-            estado="Pendiente",
-            metodo_pago=metodo_pago
-        )
-        db.session.add(nuevo_pedido)
-        db.session.commit()
-        for producto_id in items:
-            item = Item(pedido_id=nuevo_pedido.id, producto_id=int(producto_id))
-            db.session.add(item)
-        db.session.commit()
-        imprimir_comanda(nuevo_pedido)
+    if not items:
+        return redirect(url_for("index"))
 
-    return redirect(url_for("index"))
-
-@app.route("/agregar_pedido", methods=["POST"])
-def agregar_pedido():
-    mesa = request.form["mesa"]
-    metodo_pago = request.form["metodo_pago"]
-    tipo_consumo = request.form["tipo_consumo"]
-
-    pedido = Pedido(mesa=mesa, metodo_pago=metodo_pago, tipo_consumo=tipo_consumo)
-    db.session.add(pedido)
+    # Crear nuevo pedido
+    nuevo_pedido = Pedido(
+        mesa=mesa,
+        nombre_cliente=nombre_cliente,
+        direccion_cliente=direccion_cliente,
+        fecha=datetime.now(),
+        estado="Pendiente",
+        metodo_pago=metodo_pago,
+        tipo_consumo=tipo_consumo,
+        ticket_numero=ticket_numero,
+        titular=titular,
+        transferencia_info=transferencia_info,
+        deuda_nombre=deuda_nombre
+    )
+    db.session.add(nuevo_pedido)
+    db.session.commit()
+    
+    for producto_id in items:
+        item = Item(pedido_id=nuevo_pedido.id, producto_id=int(producto_id))
+        db.session.add(item)
     db.session.commit()
 
+    imprimir_comanda(nuevo_pedido)
+    enviar_notificacion_pedido(nuevo_pedido)
+
     return redirect(url_for("index"))
 
 
+
+# =================== Otras rutas (borrar, editar, entregado, historial) ===================
 @app.route("/borrar/<int:pedido_id>", methods=["POST"])
 def borrar_pedido(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
@@ -106,15 +126,30 @@ def borrar_pedido(pedido_id):
 def editar_pedido(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
     productos = Producto.query.all()
+    
     if request.method == "POST":
-        pedido.mesa = request.form["mesa"]
+        pedido.mesa = request.form.get("mesa")
+        pedido.nombre_cliente = request.form.get("nombre_cliente")
+        pedido.direccion_cliente = request.form.get("direccion_cliente")
+        pedido.tipo_consumo = request.form.get("tipo_consumo")
+        pedido.metodo_pago = request.form.get("metodo_pago")
+        if pedido.metodo_pago == "Tarjeta":
+            pedido.ticket_numero = request.form.get("ticket_numero")
+            pedido.titular = request.form.get("titular")
+        else:
+            pedido.ticket_numero = None
+            pedido.titular = None
+        
+        # Eliminar items existentes y agregar los nuevos
         Item.query.filter_by(pedido_id=pedido.id).delete()
         items = request.form.getlist("producto")
         for producto_id in items:
             item = Item(pedido_id=pedido.id, producto_id=int(producto_id))
             db.session.add(item)
+        
         db.session.commit()
         return redirect(url_for("index"))
+    
     return render_template("editar.html", pedido=pedido, productos=productos)
 
 @app.route("/entregado/<int:pedido_id>", methods=["POST"])
@@ -126,7 +161,7 @@ def entregado(pedido_id):
 
 @app.route("/historial")
 def historial():
-    filtro = request.args.get("filtro", "todos")  # por defecto muestra todos
+    filtro = request.args.get("filtro", "todos")
     pedidos = Pedido.query.filter(Pedido.estado == "Entregado").order_by(Pedido.fecha.desc()).all()
     
     fecha_inicio_semana = datetime.now() - timedelta(days=7)
@@ -135,7 +170,6 @@ def historial():
     fecha_inicio_mes = datetime.now() - timedelta(days=30)
     pedidos_mes = [p for p in pedidos if p.fecha >= fecha_inicio_mes]
 
-    # Selección según filtro
     if filtro == "semana":
         pedidos_filtrados = pedidos_semana
     elif filtro == "mes":
@@ -151,9 +185,7 @@ def historial():
         filtro=filtro
     )
 
-
 # =================== PRODUCTOS ===================
-
 @app.route("/agregar_producto_index", methods=["POST"])
 def agregar_producto_index():
     nombre = request.form["nombre"]
@@ -174,21 +206,56 @@ def editar_producto_index(producto_id):
 @app.route("/borrar_producto_index/<int:producto_id>", methods=["POST"])
 def borrar_producto_index(producto_id):
     producto = Producto.query.get_or_404(producto_id)
+    Item.query.filter_by(producto_id=producto.id).delete()
     db.session.delete(producto)
     db.session.commit()
     return redirect(url_for("index"))
 
-# =================== Cocina ===================
 
+# =================== COCINA ===================
 @app.route("/cocina")
 def cocina():
     pedidos = Pedido.query.filter(Pedido.estado != "Entregado").order_by(Pedido.fecha.desc()).all()
-    return render_template("cocina.html", pedidos=pedidos)
+    
+    lista_pedidos = []
+    for p in pedidos:
+        if not p.hora_cocina:
+            p.hora_cocina = datetime.now()
+            db.session.commit()
+        tiempo = None
+        if p.hora_cocina:
+            delta = datetime.now() - p.hora_cocina
+            minutos = int(delta.total_seconds() // 60)
+            segundos = int(delta.total_seconds() % 60)
+            tiempo = f"{minutos}m {segundos}s"
+        lista_pedidos.append({"pedido": p, "tiempo": tiempo})
+    
+    return render_template("cocina.html", lista_pedidos=lista_pedidos)
+
+# =================== API PARA NOTIFICACIONES ===================
+@app.route("/api/pedidos/activos")
+def api_pedidos_activos():
+    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").all()
+    return jsonify({
+        "count": len(pedidos),
+        "pedidos": [{
+            "id": p.id,
+            "mesa": p.mesa,
+            "nombre_cliente": p.nombre_cliente,
+            "tipo_consumo": p.tipo_consumo,
+            "total": p.total,
+            "fecha": p.fecha.isoformat()
+        } for p in pedidos]
+    })
+
+@app.route("/api/subscribe", methods=["POST"])
+def api_subscribe():
+    subscription = request.get_json()
+    print("Nueva suscripción:", subscription)
+    return jsonify({"success": True})
+
 
 
 # =================== RUN ===================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-

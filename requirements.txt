@@ -1,3 +1,24 @@
-Flask==2.3.4
-Flask-SQLAlchemy==3.0.5
-python-escpos==3.0.0
+# Dependencias principales
+Flask>=2.3.0
+Flask-SQLAlchemy>=3.0.0
+
+# Impresión de comandas
+python-escpos>=3.0.0
+
+# Para crear ejecutables
+PyInstaller>=5.13.0
+
+# Para notificaciones push (opcional)
+py-vapid>=1.9.0
+pywebpush>=1.14.0
+
+# Utilidades adicionales
+python-dotenv>=1.0.0
+
+# Para desarrollo (opcional)
+flask-cors>=4.0.0
+
+# Base de datos (SQLite incluido en Python)
+# Para otras BD, agregar:
+# psycopg2>=2.9.0  # PostgreSQL
+# PyMySQL>=1.0.0   # MySQL

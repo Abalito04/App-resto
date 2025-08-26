@@ -15,7 +15,8 @@
             </div>
             <div class="col-md-3" id="div_mesa">
                 <label>Mesa:</label>
-                <input type="text" name="mesa" class="form-control">
+                <input type="text" name="mesa" id="mesa_input" class="form-control">
+                <small id="mesa_error" class="text-danger" style="display:none;">❌ Debe ingresar el número de mesa</small>
             </div>
             <div class="col-md-3" id="div_cliente" style="display:none;">
                 <label>Nombre Cliente:</label>
@@ -30,11 +31,20 @@
         <div class="row g-2 mb-3">
             <div class="col-md-3">
                 <label>Método de pago:</label>
-                <select name="metodo_pago" class="form-select" required>
+                <select name="metodo_pago" id="metodo_pago" class="form-select" required>
                     <option value="Efectivo">Efectivo</option>
                     <option value="Transferencia">Transferencia</option>
                     <option value="Deuda">Deuda</option>
+                    <option value="Tarjeta">Tarjeta 💳</option>
                 </select>
+            </div>
+            <div class="col-md-3" id="div_tarjeta" style="display:none;">
+                <label>N° de Ticket:</label>
+                <input type="text" name="ticket_numero" class="form-control">
+            </div>
+            <div class="col-md-3" id="div_titular" style="display:none;">
+                <label>Titular:</label>
+                <input type="text" name="titular" class="form-control">
             </div>
         </div>
 
@@ -57,14 +67,23 @@
         <button type="submit" class="btn btn-primary mt-3">Agregar pedido</button>
     </form>
 
-    <hr>
-
     <!-- ======== PEDIDOS ACTIVOS ======== -->
+    <hr>
     <h3>Pedidos activos</h3>
     <div class="row">
         {% for pedido in pedidos %}
         <div class="col-12 col-md-6 col-lg-4 mb-3">
-            <div class="card shadow-sm p-2 h-100">
+            <div class="card shadow-sm p-2 h-100 pedido-activo-card"
+                 data-mesa="{{ pedido.mesa or '' }}"
+                 data-nombre="{{ pedido.nombre_cliente or '' }}"
+                 data-direccion="{{ pedido.direccion_cliente or '' }}"
+                 data-metodo_pago="{{ pedido.metodo_pago }}"
+                 data-fecha="{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}"
+                 data-ticket="{{ pedido.ticket_numero or '' }}"
+                 data-titular="{{ pedido.titular or '' }}"
+                 data-transferencia="{{ pedido.transferencia_info or '' }}"
+                 data-deuda="{{ pedido.deuda_nombre or '' }}"
+            >
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     {% if pedido.tipo_consumo == "Local" %}
                         <strong>Mesa {{ pedido.mesa }}</strong>
@@ -101,9 +120,8 @@
         {% endfor %}
     </div>
 
-    <hr>
-
     <!-- ======== GESTIÓN DE PRODUCTOS ======== -->
+    <hr>
     <h3>Gestionar productos</h3>
 
     <!-- Agregar producto -->
@@ -131,21 +149,49 @@
         <tbody>
             {% for producto in productos %}
             <tr>
-                <form method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}">
-                    <td><input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control"></td>
-                    <td><input type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control"></td>
-                    <td class="d-flex gap-1">
+                <td>
+                    <form method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}" class="d-flex gap-1">
+                        <input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control">
+                        <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control">
                         <button type="submit" class="btn btn-warning btn-sm">Guardar</button>
-                        <form method="POST" action="{{ url_for('borrar_producto_index', producto_id=producto.id) }}">
-                            <button type="submit" class="btn btn-danger btn-sm">🗑 Borrar</button>
-                        </form>
-                    </td>
-                </form>
+                    </form>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('borrar_producto_index', producto_id=producto.id) }}">
+                        <button type="submit" class="btn btn-danger btn-sm">🗑 Borrar</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
+</div>
+
+<!-- Modal Pedidos Activos -->
+<div class="modal fade" id="pedidoActivoModal" tabindex="-1" aria-labelledby="pedidoActivoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pedidoActivoModalLabel">Detalles del pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-mesa"></p>
+        <p id="modal-nombre"></p>
+        <p id="modal-direccion"></p>
+        <p id="modal-metodo_pago"></p>
+        <ul id="modal-productos" class="list-group mb-2"></ul>
+        <p id="modal-ticket"></p>
+        <p id="modal-titular"></p>
+        <p id="modal-transferencia"></p>
+        <p id="modal-deuda"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -166,6 +212,67 @@
             divDireccion.style.display = 'none';
         }
     });
-</script>
 
+    // Mostrar u ocultar campos de tarjeta
+    const metodoPago = document.getElementById('metodo_pago');
+    const divTicket = document.getElementById('div_tarjeta');
+    const divTitular = document.getElementById('div_titular');
+
+    metodoPago.addEventListener('change', function() {
+        if(this.value === 'Tarjeta') {
+            divTicket.style.display = 'block';
+            divTitular.style.display = 'block';
+        } else {
+            divTicket.style.display = 'none';
+            divTitular.style.display = 'none';
+        }
+    });
+
+    // Validación de mesa en front-end
+    const formPedido = document.querySelector('form[action="{{ url_for("crear_pedido") }}"]');
+    const mesaInput = document.getElementById('mesa_input');
+    const mesaError = document.getElementById('mesa_error');
+
+    formPedido.addEventListener('submit', function(e) {
+        if(tipoSelect.value === 'Local' && mesaInput.value.trim() === '') {
+            e.preventDefault();
+            mesaError.style.display = 'block';
+            mesaInput.focus();
+        } else {
+            mesaError.style.display = 'none';
+        }
+    });
+
+    // Modal de pedidos activos
+    document.querySelectorAll('.pedido-activo-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const mesa = card.getAttribute('data-mesa');
+            const nombre = card.getAttribute('data-nombre');
+            const direccion = card.getAttribute('data-direccion');
+            const metodo_pago = card.getAttribute('data-metodo_pago');
+            const ticket = card.getAttribute('data-ticket');
+            const titular = card.getAttribute('data-titular');
+            const transferencia = card.getAttribute('data-transferencia');
+            const deuda = card.getAttribute('data-deuda');
+
+            const productosList = document.getElementById('modal-productos');
+            productosList.innerHTML = '';
+            card.querySelectorAll('.list-group-item').forEach(li => {
+                productosList.innerHTML += `<li class="list-group-item">${li.textContent}</li>`;
+            });
+
+            document.getElementById('modal-mesa').textContent = mesa ? `Mesa: ${mesa}` : '';
+            document.getElementById('modal-nombre').textContent = nombre ? `Cliente: ${nombre}` : '';
+            document.getElementById('modal-direccion').textContent = direccion ? `Dirección: ${direccion}` : '';
+            document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `Método de pago: ${metodo_pago}` : '';
+            document.getElementById('modal-ticket').textContent = ticket ? `Ticket: ${ticket}` : '';
+            document.getElementById('modal-titular').textContent = titular ? `Titular: ${titular}` : '';
+            document.getElementById('modal-transferencia').textContent = transferencia ? `Comprobante: ${transferencia}` : '';
+            document.getElementById('modal-deuda').textContent = deuda ? `Deudor: ${deuda}` : '';
+
+            const modal = new bootstrap.Modal(document.getElementById('pedidoActivoModal'));
+            modal.show();
+        });
+    });
+</script>
 {% endblock %}

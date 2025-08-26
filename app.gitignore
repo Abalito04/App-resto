@@ -1,0 +1,7 @@
+env/
+*.pyc
+__pycache__/
+restaurant.db
+*.sqlite3
+*.log
+.DS_Store

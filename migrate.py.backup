@@ -1,0 +1,53 @@
+# migrate.py - Sistema de migraciones simplificado
+import os
+from flask_migrate import Migrate, init, migrate, upgrade
+from app import app, db
+
+# Configurar migraciones
+migrate_obj = Migrate(app, db)
+
+def init_migrations():
+    """Inicializar sistema de migraciones"""
+    with app.app_context():
+        try:
+            init()
+            print("✅ Sistema de migraciones inicializado")
+        except Exception as e:
+            print(f"⚠️  Migraciones ya inicializadas o error: {e}")
+
+def create_migration(message="Auto migration"):
+    """Crear nueva migración"""
+    with app.app_context():
+        try:
+            migrate(message=message)
+            print(f"✅ Migración creada: {message}")
+        except Exception as e:
+            print(f"❌ Error creando migración: {e}")
+
+def apply_migrations():
+    """Aplicar migraciones pendientes"""
+    with app.app_context():
+        try:
+            upgrade()
+            print("✅ Migraciones aplicadas exitosamente")
+        except Exception as e:
+            print(f"❌ Error aplicando migraciones: {e}")
+
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("Uso: python migrate.py [init|migrate|upgrade]")
+        sys.exit(1)
+    
+    command = sys.argv[1]
+    
+    if command == "init":
+        init_migrations()
+    elif command == "migrate":
+        message = sys.argv[2] if len(sys.argv) > 2 else "Auto migration"
+        create_migration(message)
+    elif command == "upgrade":
+        apply_migrations()
+    else:
+        print("Comando no válido. Usa: init, migrate, o upgrade")

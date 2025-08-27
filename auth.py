@@ -156,18 +156,19 @@ def perfil():
 def configuracion():
     if not current_user.es_admin:
         flash('Solo administradores pueden acceder a la configuración', 'error')
-        return redirect(url_for('index_redirect'))
+        return redirect(url_for('index'))
 
-    # Asegurarse que el usuario tenga restaurante
-    if not current_user.restaurante:
+    # Validar restaurante
+    restaurante = current_user.restaurante
+    if not restaurante:
         flash('Usuario sin restaurante asignado', 'error')
-        return redirect(url_for('index_redirect'))
+        return redirect(url_for('index'))
 
-    # Obtener o crear configuración
-    config = current_user.restaurante.configuracion
+    # Obtener o crear configuración de forma segura
+    config = ConfiguracionRestaurante.query.filter_by(restaurante_id=restaurante.id).first()
     if not config:
         config = ConfiguracionRestaurante(
-            restaurante_id=current_user.restaurante.id,
+            restaurante_id=restaurante.id,
             impresora_habilitada=False,
             impresora_tipo='USB',
             impresora_ip='',
@@ -175,10 +176,15 @@ def configuracion():
             tema='default',
             mostrar_precios=True
         )
-        db.session.add(config)
-        db.session.commit()
+        try:
+            db.session.add(config)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creando configuración: {e}', 'error')
+            config = None
 
-    if request.method == 'POST':
+    if request.method == 'POST' and config:
         try:
             config.impresora_habilitada = 'impresora_habilitada' in request.form
             config.impresora_tipo = request.form.get('impresora_tipo', 'USB')
@@ -191,10 +197,10 @@ def configuracion():
             config.mostrar_precios = 'mostrar_precios' in request.form
 
             # Actualizar datos del restaurante
-            current_user.restaurante.nombre = request.form.get('nombre_restaurante', '')
-            current_user.restaurante.direccion = request.form.get('direccion', '')
-            current_user.restaurante.telefono = request.form.get('telefono', '')
-            current_user.restaurante.moneda = request.form.get('moneda', '$')
+            restaurante.nombre = request.form.get('nombre_restaurante', '')
+            restaurante.direccion = request.form.get('direccion', '')
+            restaurante.telefono = request.form.get('telefono', '')
+            restaurante.moneda = request.form.get('moneda', '$')
 
             db.session.commit()
             flash('Configuración actualizada', 'success')
@@ -204,3 +210,5 @@ def configuracion():
             flash(f'Error al guardar configuración: {str(e)}', 'error')
 
     return render_template("auth/configuracion.html", config=config)
+
+

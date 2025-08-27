@@ -8,6 +8,7 @@ from auth import auth_bp, crear_slug
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 

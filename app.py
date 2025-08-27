@@ -1,5 +1,6 @@
 # app.py - Versión SaaS con autenticación
 import os
+import logging
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_login import LoginManager, login_required, current_user
 from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante
@@ -7,16 +8,24 @@ from auth import auth_bp, crear_slug
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+# Configurar logging
+logging.basicConfig(level=logging.DEBUG)
+
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
 
 # Configuración de base de datos
-if os.getenv('FLASK_ENV') == 'production':
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL', "sqlite:///restaurant.db")
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    # Corregir URL de Railway/Heroku si es necesario
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config['DEBUG'] = False
 else:
+    # Desarrollo local
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
     app.config['DEBUG'] = True
 

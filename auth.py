@@ -5,7 +5,8 @@ from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto
 from werkzeug.security import generate_password_hash
 import re
 
-auth_bp = Blueprint('auth', __name__, template_folder='auth')
+# 🔹 CORREGIDO: Quitar template_folder porque los templates están en templates/auth/
+auth_bp = Blueprint('auth', __name__)
 
 
 def validar_email(email):
@@ -38,8 +39,8 @@ def login():
             login_user(usuario)
             session['restaurante_id'] = usuario.restaurante.id
             
-            # 🔹 Redirigir al index_redirect que maneja la lógica de inicio
-            return redirect(url_for('index_redirect'))
+            # Redirigir al dashboard directamente
+            return redirect(url_for('index_logueado'))
         else:
             flash('Email o contraseña incorrectos', 'error')
     
@@ -155,12 +156,12 @@ def perfil():
 def configuracion():
     if not current_user.es_admin:
         flash('Solo administradores pueden acceder a la configuración', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('index_redirect'))
 
     # Asegurarse que el usuario tenga restaurante
     if not current_user.restaurante:
         flash('Usuario sin restaurante asignado', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('index_redirect'))
 
     # Obtener o crear configuración
     config = current_user.restaurante.configuracion
@@ -203,4 +204,3 @@ def configuracion():
             flash(f'Error al guardar configuración: {str(e)}', 'error')
 
     return render_template("auth/configuracion.html", config=config)
-

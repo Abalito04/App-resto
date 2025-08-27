@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Restó App</title>
+    <title>{% if current_restaurante %}{{ current_restaurante.nombre }} - {% endif %}Resto App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3b927">
 
@@ -16,63 +16,99 @@
     <!-- PWA iOS Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Restó App">
+    <meta name="apple-mobile-web-app-title" content="Resto App">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
 </head>
 
 <body>
+    {% if current_user.is_authenticated %}
     <header>
         <div class="d-flex justify-content-between align-items-center p-3 bg-dark text-white">
-            <h1>🍽️ Restó App</h1>
+            <div>
+                <h1 class="mb-0">{{ current_restaurante.nombre }}</h1>
+                <small>Resto App SaaS</small>
+            </div>
             
-            <!-- Botón de notificaciones -->
-            <button id="enable-notifications" class="btn btn-warning btn-sm" style="display: none;">
-                🔔 Habilitar Notificaciones
-            </button>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Estado PWA -->
+                <span id="pwa-status" class="badge bg-secondary">Conectado</span>
+                
+                <!-- Usuario logueado -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        {{ current_user.nombre }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}">Mi Perfil</a></li>
+                        {% if current_user.es_admin %}
+                        <li><a class="dropdown-item" href="{{ url_for('auth.configuracion') }}">Configuración</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Botón de notificaciones -->
+                <button id="enable-notifications" class="btn btn-warning btn-sm" style="display: none;">
+                    Habilitar Notificaciones
+                </button>
+            </div>
         </div>
         
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url_for('index') }}">📝 Mozo</a>
-                <a class="navbar-brand" href="{{ url_for('cocina') }}">👨‍🍳 Cocina</a>
-                <a class="navbar-brand" href="{{ url_for('historial') }}">📜 Historial</a>
+                <a class="navbar-brand" href="{{ url_for('index') }}">Mozo</a>
+                <a class="navbar-brand" href="{{ url_for('cocina') }}">Cocina</a>
+                <a class="navbar-brand" href="{{ url_for('historial') }}">Historial</a>
                 
-                <!-- Estado PWA -->
-                <span id="pwa-status" class="badge bg-secondary ms-auto">🔌 Conectado</span>
+                <!-- Información del plan -->
+                <span class="badge bg-info ms-auto">Plan {{ current_restaurante.plan|title }}</span>
             </div>
         </nav>
     </header>
+    {% else %}
+    <header>
+        <div class="d-flex justify-content-between align-items-center p-3 bg-dark text-white">
+            <h1 class="mb-0">Resto App SaaS</h1>
+            <div>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">Iniciar Sesión</a>
+                <a href="{{ url_for('auth.registro') }}" class="btn btn-light">Registrarse</a>
+            </div>
+        </div>
+    </header>
+    {% endif %}
     
     <main class="container my-3">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Scripts -->
+    {% if current_user.is_authenticated %}
     <script src="{{ url_for('static', filename='notifications.js') }}"></script>
+    {% endif %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
+    {% if current_user.is_authenticated %}
     <script>
     // === Registro del Service Worker ===
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", async () => {
             try {
                 const registration = await navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
-                console.log("✅ ServiceWorker registrado:", registration.scope);
+                console.log("ServiceWorker registrado:", registration.scope);
 
-                // Mostrar botón de notificaciones si no están habilitadas
                 if (Notification.permission === "default") {
                     document.getElementById("enable-notifications").style.display = "block";
                 }
 
             } catch (error) {
-                console.error("❌ Error registrando ServiceWorker:", error);
+                console.error("Error registrando ServiceWorker:", error);
             }
         });
 
-        // Escuchar mensajes del SW (actualizaciones de caché, etc.)
         navigator.serviceWorker.addEventListener("message", event => {
             if (event.data && event.data.type === "CACHE_UPDATED") {
-                console.log("🔄 Aplicación actualizada");
+                console.log("Aplicación actualizada");
             }
         });
     }
@@ -81,11 +117,11 @@
     function updateConnectionStatus() {
         const statusElement = document.getElementById("pwa-status");
         if (navigator.onLine) {
-            statusElement.textContent = "🔌 Conectado";
-            statusElement.className = "badge bg-success ms-auto";
+            statusElement.textContent = "Conectado";
+            statusElement.className = "badge bg-success";
         } else {
-            statusElement.textContent = "📡 Sin conexión";
-            statusElement.className = "badge bg-warning ms-auto";
+            statusElement.textContent = "Sin conexión";
+            statusElement.className = "badge bg-warning";
         }
     }
     window.addEventListener("online", updateConnectionStatus);
@@ -98,9 +134,8 @@
         e.preventDefault();
         deferredPrompt = e;
 
-        // Crear botón dinámico de instalación
         const installButton = document.createElement("button");
-        installButton.textContent = "📱 Instalar App";
+        installButton.textContent = "Instalar App";
         installButton.className = "btn btn-primary btn-sm ms-2";
         installButton.onclick = async () => {
             deferredPrompt.prompt();
@@ -114,9 +149,10 @@
     });
 
     window.addEventListener("appinstalled", () => {
-        console.log("🎉 PWA instalada correctamente");
+        console.log("PWA instalada correctamente");
         deferredPrompt = null;
     });
     </script>
+    {% endif %}
 </body>
 </html>

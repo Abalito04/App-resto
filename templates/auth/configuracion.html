@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Configuración del Restaurante</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Datos del Restaurante</h4>
+                <div class="mb-3">
+                    <label>Nombre:</label>
+                    <input type="text" name="nombre_restaurante" class="form-control" 
+                           value="{{ current_user.restaurante.nombre }}" required>
+                </div>
+                <div class="mb-3">
+                    <label>Dirección:</label>
+                    <input type="text" name="direccion" class="form-control" 
+                           value="{{ current_user.restaurante.direccion or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label>Teléfono:</label>
+                    <input type="text" name="telefono" class="form-control" 
+                           value="{{ current_user.restaurante.telefono or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label>Moneda:</label>
+                    <select name="moneda" class="form-select">
+                        <option value="$" {% if current_user.restaurante.moneda == '$' %}selected{% endif %}>$ (Peso)</option>
+                        <option value="USD" {% if current_user.restaurante.moneda == 'USD' %}selected{% endif %}>USD (Dólar)</option>
+                        <option value="€" {% if current_user.restaurante.moneda == '€' %}selected{% endif %}>€ (Euro)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h4>Configuración de Impresión</h4>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="impresora_habilitada" class="form-check-input" 
+                           id="impresora_habilitada" {% if config.impresora_habilitada %}checked{% endif %}>
+                    <label class="form-check-label" for="impresora_habilitada">
+                        Habilitar impresión de comandas
+                    </label>
+                </div>
+                
+                <div class="mb-3">
+                    <label>Tipo de impresora:</label>
+                    <select name="impresora_tipo" class="form-select">
+                        <option value="USB" {% if config.impresora_tipo == 'USB' %}selected{% endif %}>USB</option>
+                        <option value="NETWORK" {% if config.impresora_tipo == 'NETWORK' %}selected{% endif %}>Red/Ethernet</option>
+                        <option value="NONE" {% if config.impresora_tipo == 'NONE' %}selected{% endif %}>Sin impresora</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label>IP de impresora (solo para red):</label>
+                    <input type="text" name="impresora_ip" class="form-control" 
+                           value="{{ config.impresora_ip or '' }}" placeholder="192.168.1.100">
+                </div>
+                
+                <div class="mb-3">
+                    <label>Puerto (solo para red):</label>
+                    <input type="number" name="impresora_puerto" class="form-control" 
+                           value="{{ config.impresora_puerto or 9100 }}">
+                </div>
+
+                <h4>Configuración de Interfaz</h4>
+                <div class="mb-3">
+                    <label>Tema:</label>
+                    <select name="tema" class="form-select">
+                        <option value="default" {% if config.tema == 'default' %}selected{% endif %}>Por defecto</option>
+                        <option value="dark" {% if config.tema == 'dark' %}selected{% endif %}>Oscuro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="mostrar_precios" class="form-check-input" 
+                           id="mostrar_precios" {% if config.mostrar_precios %}checked{% endif %}>
+                    <label class="form-check-label" for="mostrar_precios">
+                        Mostrar precios en comandas
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+    </form>
+
+    <hr>
+    <div class="card bg-light">
+        <div class="card-body">
+            <h5>Información del Plan</h5>
+            <p><strong>Plan actual:</strong> {{ current_user.restaurante.plan|title }}</p>
+            <p><strong>API Key:</strong> <code>{{ current_user.restaurante.api_key }}</code></p>
+            <small class="text-muted">Usa esta API Key para conectar sistemas externos</small>
+        </div>
+    </div>
+</div>
+{% endblock %>}

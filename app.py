@@ -1,21 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from models import db, Pedido, Item, Producto
-from datetime import datetime, timedelta
+# app.py - Versión SaaS con autenticación
 import os
-from escpos.printer import Usb, Network, File
-from escpos.exceptions import *
-import json
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask_login import LoginManager, login_required, current_user
+from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante
+from auth import auth_bp
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
 
-db.init_app(app)
-
+# Configuración de base de datos
 if os.getenv('FLASK_ENV') == 'production':
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL', "sqlite:///restaurant.db")
     app.config['DEBUG'] = False
@@ -25,59 +22,87 @@ else:
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Inicializar extensiones
+db.init_app(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+login_manager.login_message = 'Debes iniciar sesión para acceder.'
+login_manager.login_message_category = 'error'
+
+# Registrar blueprint de autenticación
+app.register_blueprint(auth_bp, url_prefix='/auth')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Usuario.query.get(int(user_id))
+
+# Filtro de context processor para templates
+@app.context_processor
+def inject_user():
+    return {
+        'current_user': current_user,
+        'current_restaurante': current_user.restaurante if current_user.is_authenticated else None
+    }
+
+# Helper function para filtrar por restaurante
+def get_user_restaurante():
+    """Obtiene el ID del restaurante del usuario logueado"""
+    if not current_user.is_authenticated:
+        return None
+    return current_user.restaurante_id
+
 # =================== CREAR BASE DE DATOS ===================
 with app.app_context():
     db.create_all()
-    if not Producto.query.first():
-        productos = [
-            Producto(nombre="Pizza Muzzarella", precio=2500),
-            Producto(nombre="Hamburguesa Completa", precio=3200),
-            Producto(nombre="Coca-Cola 500ml", precio=1200),
-            Producto(nombre="Agua Mineral", precio=900),
-        ]
-        db.session.add_all(productos)
-        db.session.commit()
 
-# =================== FUNCION DE IMPRESION ===================
+# =================== FUNCIÓN DE IMPRESIÓN (SIMULADA) ===================
 def imprimir_comanda(pedido):
+    """Función de impresión - versión SaaS"""
+    config = pedido.restaurante.configuracion
+    
+    if not config or not config.impresora_habilitada:
+        print(f"Impresión deshabilitada para {pedido.restaurante.nombre}")
+        return False
+    
     try:
-        p = Usb(0x04b8, 0x0202)  # Cambiar por tus IDs
-        p.text("===== COMANDA =====\n")
-        p.text(f"Mesa: {pedido.mesa}\n")
-        p.text(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M:%S')}\n")
-        p.text("-------------------\n")
+        # Simulación de impresión (en producción conectaría con la impresora real)
+        print("=== COMANDA ===")
+        print(f"Restaurante: {pedido.restaurante.nombre}")
+        if pedido.tipo_consumo == "Local":
+            print(f"Mesa: {pedido.mesa}")
+        else:
+            print(f"Para llevar: {pedido.nombre_cliente}")
+        print(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M:%S')}")
+        print("-------------------")
         for item in pedido.items:
-            p.text(f"{item.producto.nombre} - ${item.producto.precio}\n")
-        p.text("-------------------\n")
-        total = sum(item.producto.precio for item in pedido.items)
-        p.text(f"TOTAL: ${total}\n")
-        p.text(f"Método de pago: {pedido.metodo_pago}\n")
-        if pedido.metodo_pago == "Tarjeta":
-            p.text(f"Ticket: {pedido.ticket_numero}\nTitular: {pedido.titular}\n")
-        p.text("===================\n\n\n")
-        p.cut()
-    except Exception as e:
-        print("Error imprimiendo comanda:", e)
-
-# =================== FUNCIONES DE NOTIFICACIÓN ===================
-def enviar_notificacion_pedido(pedido):
-    """Envía notificación cuando se crea un nuevo pedido"""
-    try:
-        print(f"🔔 Nuevo pedido: Mesa {pedido.mesa} - Total: ${pedido.total}")
+            print(f"{item.producto.nombre} - {pedido.restaurante.moneda}{item.producto.precio}")
+        print("-------------------")
+        print(f"TOTAL: {pedido.restaurante.moneda}{pedido.total}")
+        print(f"Método de pago: {pedido.metodo_pago}")
+        print("===================")
         return True
     except Exception as e:
-        print(f"Error enviando notificación: {e}")
+        print("Error imprimiendo comanda:", e)
         return False
 
-# =================== RUTAS ===================
+# =================== RUTAS PRINCIPALES ===================
+
 @app.route("/")
+@login_required
 def index():
-    productos = Producto.query.all()
-    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").order_by(Pedido.fecha.desc()).all()
+    restaurante_id = get_user_restaurante()
+    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
+                         .filter(Pedido.estado != "Entregado")\
+                         .order_by(Pedido.fecha.desc()).all()
     return render_template("index.html", productos=productos, pedidos=pedidos)
 
 @app.route("/crear_pedido", methods=["POST"])
+@login_required
 def crear_pedido():
+    restaurante_id = get_user_restaurante()
+    
     mesa = request.form.get("mesa")
     nombre_cliente = request.form.get("nombre_cliente")
     direccion_cliente = request.form.get("direccion_cliente")
@@ -94,7 +119,7 @@ def crear_pedido():
 
     # Validación: si es local, la mesa es obligatoria
     if tipo_consumo == "Local" and (not mesa or mesa.strip() == ""):
-        return "❌ Debe ingresar el número de mesa", 400
+        return "Debe ingresar el número de mesa", 400
 
     if not items:
         return redirect(url_for("index"))
@@ -111,35 +136,38 @@ def crear_pedido():
         ticket_numero=ticket_numero,
         titular=titular,
         transferencia_info=transferencia_info,
-        deuda_nombre=deuda_nombre
+        deuda_nombre=deuda_nombre,
+        restaurante_id=restaurante_id,
+        usuario_id=current_user.id
     )
     db.session.add(nuevo_pedido)
     db.session.commit()
     
+    # Agregar items (solo productos del mismo restaurante)
     for producto_id in items:
-        item = Item(pedido_id=nuevo_pedido.id, producto_id=int(producto_id))
-        db.session.add(item)
+        producto = Producto.query.filter_by(id=int(producto_id), restaurante_id=restaurante_id).first()
+        if producto:
+            item = Item(pedido_id=nuevo_pedido.id, producto_id=producto.id)
+            db.session.add(item)
     db.session.commit()
 
     imprimir_comanda(nuevo_pedido)
-    enviar_notificacion_pedido(nuevo_pedido)
-
     return redirect(url_for("index"))
 
-
-
-# =================== Otras rutas (borrar, editar, entregado, historial) ===================
 @app.route("/borrar/<int:pedido_id>", methods=["POST"])
+@login_required
 def borrar_pedido(pedido_id):
-    pedido = Pedido.query.get_or_404(pedido_id)
+    pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     db.session.delete(pedido)
     db.session.commit()
     return redirect(url_for("index"))
 
 @app.route("/editar/<int:pedido_id>", methods=["GET", "POST"])
+@login_required
 def editar_pedido(pedido_id):
-    pedido = Pedido.query.get_or_404(pedido_id)
-    productos = Producto.query.all()
+    restaurante_id = get_user_restaurante()
+    pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=restaurante_id).first_or_404()
+    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
     
     if request.method == "POST":
         pedido.mesa = request.form.get("mesa")
@@ -147,6 +175,7 @@ def editar_pedido(pedido_id):
         pedido.direccion_cliente = request.form.get("direccion_cliente")
         pedido.tipo_consumo = request.form.get("tipo_consumo")
         pedido.metodo_pago = request.form.get("metodo_pago")
+        
         if pedido.metodo_pago == "Tarjeta":
             pedido.ticket_numero = request.form.get("ticket_numero")
             pedido.titular = request.form.get("titular")
@@ -158,8 +187,10 @@ def editar_pedido(pedido_id):
         Item.query.filter_by(pedido_id=pedido.id).delete()
         items = request.form.getlist("producto")
         for producto_id in items:
-            item = Item(pedido_id=pedido.id, producto_id=int(producto_id))
-            db.session.add(item)
+            producto = Producto.query.filter_by(id=int(producto_id), restaurante_id=restaurante_id).first()
+            if producto:
+                item = Item(pedido_id=pedido.id, producto_id=producto.id)
+                db.session.add(item)
         
         db.session.commit()
         return redirect(url_for("index"))
@@ -167,16 +198,20 @@ def editar_pedido(pedido_id):
     return render_template("editar.html", pedido=pedido, productos=productos)
 
 @app.route("/entregado/<int:pedido_id>", methods=["POST"])
+@login_required
 def entregado(pedido_id):
-    pedido = Pedido.query.get_or_404(pedido_id)
+    pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     pedido.estado = "Entregado"
     db.session.commit()
     return redirect(request.referrer or url_for("index"))
 
 @app.route("/historial")
+@login_required
 def historial():
+    restaurante_id = get_user_restaurante()
     filtro = request.args.get("filtro", "todos")
-    pedidos = Pedido.query.filter(Pedido.estado == "Entregado").order_by(Pedido.fecha.desc()).all()
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id, estado="Entregado")\
+                         .order_by(Pedido.fecha.desc()).all()
     
     fecha_inicio_semana = datetime.now() - timedelta(days=7)
     pedidos_semana = [p for p in pedidos if p.fecha >= fecha_inicio_semana]
@@ -201,35 +236,41 @@ def historial():
 
 # =================== PRODUCTOS ===================
 @app.route("/agregar_producto_index", methods=["POST"])
+@login_required
 def agregar_producto_index():
     nombre = request.form["nombre"]
     precio = float(request.form["precio"])
-    producto = Producto(nombre=nombre, precio=precio)
+    producto = Producto(nombre=nombre, precio=precio, restaurante_id=get_user_restaurante())
     db.session.add(producto)
     db.session.commit()
     return redirect(url_for("index"))
 
 @app.route("/editar_producto_index/<int:producto_id>", methods=["POST"])
+@login_required
 def editar_producto_index(producto_id):
-    producto = Producto.query.get_or_404(producto_id)
+    producto = Producto.query.filter_by(id=producto_id, restaurante_id=get_user_restaurante()).first_or_404()
     producto.nombre = request.form["nombre"]
     producto.precio = float(request.form["precio"])
     db.session.commit()
     return redirect(url_for("index"))
 
 @app.route("/borrar_producto_index/<int:producto_id>", methods=["POST"])
+@login_required
 def borrar_producto_index(producto_id):
-    producto = Producto.query.get_or_404(producto_id)
+    producto = Producto.query.filter_by(id=producto_id, restaurante_id=get_user_restaurante()).first_or_404()
     Item.query.filter_by(producto_id=producto.id).delete()
     db.session.delete(producto)
     db.session.commit()
     return redirect(url_for("index"))
 
-
 # =================== COCINA ===================
 @app.route("/cocina")
+@login_required
 def cocina():
-    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").order_by(Pedido.fecha.desc()).all()
+    restaurante_id = get_user_restaurante()
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
+                         .filter(Pedido.estado != "Entregado")\
+                         .order_by(Pedido.fecha.desc()).all()
     
     lista_pedidos = []
     for p in pedidos:
@@ -246,119 +287,80 @@ def cocina():
     
     return render_template("cocina.html", lista_pedidos=lista_pedidos)
 
-# =================== API PARA NOTIFICACIONES ===================
+# =================== API PARA MULTITENANCY ===================
 @app.route("/api/pedidos/activos")
+@login_required
 def api_pedidos_activos():
-    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").all()
+    restaurante_id = get_user_restaurante()
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
+                         .filter(Pedido.estado != "Entregado").all()
+    
+    pedidos_data = []
+    for p in pedidos:
+        items_data = []
+        for item in p.items:
+            items_data.append({
+                "nombre": item.producto.nombre,
+                "precio": item.producto.precio
+            })
+        
+        pedido_data = {
+            "id": p.id,
+            "mesa": p.mesa,
+            "nombre_cliente": p.nombre_cliente,
+            "direccion_cliente": p.direccion_cliente,
+            "tipo_consumo": p.tipo_consumo,
+            "metodo_pago": p.metodo_pago,
+            "fecha": p.fecha.isoformat(),
+            "items": items_data,
+            "total": p.total
+        }
+        pedidos_data.append(pedido_data)
+    
     return jsonify({
-        "count": len(pedidos),
-        "pedidos": [{
+        "count": len(pedidos_data),
+        "pedidos": pedidos_data,
+        "restaurante": current_user.restaurante.nombre
+    })
+
+# API publica con API Key
+@app.route("/api/public/pedidos/<api_key>")
+def api_public_pedidos(api_key):
+    """API pública para clientes de impresión externos"""
+    restaurante = Restaurante.query.filter_by(api_key=api_key, activo=True).first()
+    if not restaurante:
+        return jsonify({"error": "API Key inválida"}), 401
+    
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante.id)\
+                         .filter(Pedido.estado != "Entregado").all()
+    
+    pedidos_data = []
+    for p in pedidos:
+        items_data = []
+        for item in p.items:
+            items_data.append({
+                "nombre": item.producto.nombre,
+                "precio": item.producto.precio
+            })
+        
+        pedido_data = {
             "id": p.id,
             "mesa": p.mesa,
             "nombre_cliente": p.nombre_cliente,
             "tipo_consumo": p.tipo_consumo,
-            "total": p.total,
-            "fecha": p.fecha.isoformat()
-        } for p in pedidos]
-    })
-
-@app.route("/api/subscribe", methods=["POST"])
-def api_subscribe():
-    subscription = request.get_json()
-    print("Nueva suscripción:", subscription)
-    return jsonify({"success": True})
-
-
-@app.route("/static/manifest.json")
-def manifest():
-    return app.send_static_file("manifest.json")
-
-@app.route("/static/sw.js")
-def service_worker():
-    return app.send_static_file("sw.js")
-
-# Para debugging de PWA
-@app.route("/pwa-debug")
-def pwa_debug():
-    import os
-    static_files = os.listdir("static") if os.path.exists("static") else []
-    return jsonify({
-        "manifest_exists": "manifest.json" in static_files,
-        "sw_exists": "sw.js" in static_files,
-        "icons_exist": {
-            "192": "icon-192.png" in static_files,
-            "512": "icon-512.png" in static_files
+            "metodo_pago": p.metodo_pago,
+            "fecha": p.fecha.isoformat(),
+            "items": items_data,
+            "total": p.total
         }
+        pedidos_data.append(pedido_data)
+    
+    return jsonify({
+        "count": len(pedidos_data),
+        "pedidos": pedidos_data,
+        "restaurante": restaurante.nombre
     })
 
-# Configuración de impresora desde variables de entorno o config
-PRINTER_TYPE = os.getenv("PRINTER_TYPE", "USB")  # USB, NETWORK, FILE
-PRINTER_VENDOR_ID = int(os.getenv("PRINTER_VENDOR_ID", "0x04b8"), 16)
-PRINTER_PRODUCT_ID = int(os.getenv("PRINTER_PRODUCT_ID", "0x0202"), 16)
-PRINTER_IP = os.getenv("PRINTER_IP", "192.168.1.100")
-PRINTER_PORT = int(os.getenv("PRINTER_PORT", "9100"))
-
-def obtener_impresora():
-    """Factory function para obtener la impresora según configuración"""
-    try:
-        if PRINTER_TYPE == "USB":
-            return Usb(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID)
-        elif PRINTER_TYPE == "NETWORK":
-            return Network(PRINTER_IP, port=PRINTER_PORT)
-        elif PRINTER_TYPE == "FILE":
-            # Para testing - imprime a archivo
-            return File("/tmp/comanda.txt")
-        else:
-            raise ValueError(f"Tipo de impresora no soportado: {PRINTER_TYPE}")
-    except Exception as e:
-        print(f"Error conectando impresora: {e}")
-        return None
-
-def imprimir_comanda(pedido):
-    # Impresión deshabilitada para deployment cloud
-    print(f"COMANDA VIRTUAL - Mesa: {pedido.mesa}, Total: ${pedido.total}")
-    try:
-        # TODO: Implementar impresión remota
-        print("=== COMANDA ===")
-        print(f"Mesa: {pedido.mesa}")
-        print(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M:%S')}")
-        print("-------------------")
-        for item in pedido.items:
-            print(f"{item.producto.nombre} - ${item.producto.precio}")
-        print("-------------------")
-        total = sum(item.producto.precio for item in pedido.items)
-        print(f"TOTAL: ${total}")
-        print(f"Método de pago: {pedido.metodo_pago}")
-        print("===================")
-        return True
-    except Exception as e:
-        print("Error imprimiendo comanda:", e)
-        return False
-
-# Función para testing de impresora
-@app.route("/test-printer")
-def test_printer():
-    """Endpoint para probar la impresora"""
-    printer = obtener_impresora()
-    if not printer:
-        return jsonify({"error": "No se pudo conectar con la impresora"}), 500
-    
-    try:
-        printer.text("TEST DE IMPRESORA\n")
-        printer.text("Conexión exitosa\n")
-        printer.text(f"Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
-        printer.text("\n\n")
-        printer.cut()
-        printer.close()
-        return jsonify({"success": "Test de impresión exitoso"})
-    except Exception as e:
-        return jsonify({"error": f"Error en test: {str(e)}"}), 500
-    
-
-# Agregar este endpoint a app.py (ya lo tienes, pero verificar que funcione)
-
-
-# Endpoint de test para verificar conectividad
 @app.route("/api/test")
 def api_test():
     return jsonify({
@@ -367,8 +369,20 @@ def api_test():
         "message": "API funcionando correctamente"
     })
 
+# =================== MANIFEST PWA ===================
+@app.route("/static/manifest.json")
+def manifest():
+    return app.send_static_file("manifest.json")
 
-# =================== RUN ===================
+@app.route("/static/sw.js")
+def service_worker():
+    return app.send_static_file("sw.js")
+
+# Redirigir a login por defecto
+@app.route("/login")
+def login_redirect():
+    return redirect(url_for('auth.login'))
+
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     debug = os.getenv('FLASK_ENV') != 'production'

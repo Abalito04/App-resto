@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Configuración del Restaurante</h2>
-    
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -13,6 +13,8 @@
         {% endif %}
     {% endwith %}
 
+    {% set es_admin = current_user.es_admin %}
+    
     <form method="POST">
         <div class="row">
             <div class="col-md-6">
@@ -20,23 +22,28 @@
                 <div class="mb-3">
                     <label>Nombre:</label>
                     <input type="text" name="nombre_restaurante" class="form-control" 
-       value="{{ current_user.restaurante.nombre }}" 
-       {% if not es_admin %}disabled{% endif %}>
-
+                           value="{{ current_user.restaurante.nombre or '' }}" 
+                           {% if not es_admin %}readonly{% endif %} required>
                 </div>
                 <div class="mb-3">
                     <label>Dirección:</label>
                     <input type="text" name="direccion" class="form-control" 
-                           value="{{ current_user.restaurante.direccion or '' }}">
+                           value="{{ current_user.restaurante.direccion or '' }}"
+                           {% if not es_admin %}readonly{% endif %}>
                 </div>
                 <div class="mb-3">
                     <label>Teléfono:</label>
                     <input type="text" name="telefono" class="form-control" 
-                           value="{{ current_user.restaurante.telefono or '' }}">
+                           value="{{ current_user.restaurante.telefono or '' }}"
+                           {% if not es_admin %}readonly{% endif %}>
                 </div>
                 <div class="mb-3">
                     <label>Moneda:</label>
                     <select name="moneda" class="form-select" {% if not es_admin %}disabled{% endif %}>
+                        <option value="$" {% if current_user.restaurante.moneda == '$' %}selected{% endif %}>$ (Peso)</option>
+                        <option value="USD" {% if current_user.restaurante.moneda == 'USD' %}selected{% endif %}>USD (Dólar)</option>
+                        <option value="€" {% if current_user.restaurante.moneda == '€' %}selected{% endif %}>€ (Euro)</option>
+                    </select>
                 </div>
             </div>
 
@@ -44,47 +51,50 @@
                 <h4>Configuración de Impresión</h4>
                 <div class="mb-3 form-check">
                     <input type="checkbox" name="impresora_habilitada" class="form-check-input" 
-       id="impresora_habilitada" {% if config.impresora_habilitada %}checked{% endif %}
-       {% if not es_admin %}disabled{% endif %}>
-
+                           id="impresora_habilitada" 
+                           {% if config and config.impresora_habilitada %}checked{% endif %}
+                           {% if not es_admin %}disabled{% endif %}>
                     <label class="form-check-label" for="impresora_habilitada">
                         Habilitar impresión de comandas
                     </label>
                 </div>
-                
+
                 <div class="mb-3">
                     <label>Tipo de impresora:</label>
-                    <select name="impresora_tipo" class="form-select">
-                        <option value="USB" {% if config.impresora_tipo == 'USB' %}selected{% endif %}>USB</option>
-                        <option value="NETWORK" {% if config.impresora_tipo == 'NETWORK' %}selected{% endif %}>Red/Ethernet</option>
-                        <option value="NONE" {% if config.impresora_tipo == 'NONE' %}selected{% endif %}>Sin impresora</option>
+                    <select name="impresora_tipo" class="form-select" {% if not es_admin %}disabled{% endif %}>
+                        <option value="USB" {% if config and config.impresora_tipo == 'USB' %}selected{% endif %}>USB</option>
+                        <option value="NETWORK" {% if config and config.impresora_tipo == 'NETWORK' %}selected{% endif %}>Red/Ethernet</option>
+                        <option value="NONE" {% if config and config.impresora_tipo == 'NONE' %}selected{% endif %}>Sin impresora</option>
                     </select>
                 </div>
-                
+
                 <div class="mb-3">
                     <label>IP de impresora (solo para red):</label>
                     <input type="text" name="impresora_ip" class="form-control" 
-                           value="{{ config.impresora_ip or '' }}" placeholder="192.168.1.100">
+                           value="{{ config.impresora_ip if config else '' }}" 
+                           placeholder="192.168.1.100" {% if not es_admin %}readonly{% endif %}>
                 </div>
-                
+
                 <div class="mb-3">
                     <label>Puerto (solo para red):</label>
                     <input type="number" name="impresora_puerto" class="form-control" 
-                           value="{{ config.impresora_puerto or 9100 }}">
+                           value="{{ config.impresora_puerto if config else 9100 }}" 
+                           {% if not es_admin %}readonly{% endif %}>
                 </div>
 
                 <h4>Configuración de Interfaz</h4>
                 <div class="mb-3">
                     <label>Tema:</label>
-                    <select name="tema" class="form-select">
-                        <option value="default" {% if config.tema == 'default' %}selected{% endif %}>Por defecto</option>
-                        <option value="dark" {% if config.tema == 'dark' %}selected{% endif %}>Oscuro</option>
+                    <select name="tema" class="form-select" {% if not es_admin %}disabled{% endif %}>
+                        <option value="default" {% if config and config.tema == 'default' %}selected{% endif %}>Por defecto</option>
+                        <option value="dark" {% if config and config.tema == 'dark' %}selected{% endif %}>Oscuro</option>
                     </select>
                 </div>
-                
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" name="mostrar_precios" class="form-check-input" 
-                           id="mostrar_precios" {% if config.mostrar_precios %}checked{% endif %}>
+                           id="mostrar_precios" {% if config and config.mostrar_precios %}checked{% endif %}
+                           {% if not es_admin %}disabled{% endif %}>
                     <label class="form-check-label" for="mostrar_precios">
                         Mostrar precios en comandas
                     </label>
@@ -92,10 +102,9 @@
             </div>
         </div>
 
-       {% if es_admin %}
-<button type="submit" class="btn btn-primary">Guardar Configuración</button>
-{% endif %}
-
+        {% if es_admin %}
+        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+        {% endif %}
     </form>
 
     <hr>
@@ -108,4 +117,4 @@
         </div>
     </div>
 </div>
-{% endblock %>}
+{% endblock %}

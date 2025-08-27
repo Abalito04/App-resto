@@ -149,38 +149,34 @@ def perfil():
 @auth_bp.route("/configuracion", methods=["GET", "POST"])
 @login_required
 def configuracion():
-    try:
-        if not current_user.es_admin:
-            flash('Solo administradores pueden acceder a la configuración', 'error')
-            return redirect(url_for('index_redirect'))
+    # Asegurarse que el usuario tenga restaurante
+    if not current_user.restaurante:
+        flash('Usuario sin restaurante asignado', 'error')
+        return redirect(url_for('index_redirect'))
 
-        if not current_user.restaurante:
-            flash('Usuario sin restaurante asignado', 'error')
-            return redirect(url_for('index_redirect'))
+    # Obtener o crear configuración
+    config = current_user.restaurante.configuracion
+    if not config:
+        config = ConfiguracionRestaurante(
+            restaurante_id=current_user.restaurante.id,
+            impresora_habilitada=False,
+            impresora_tipo='USB',
+            impresora_ip='',
+            impresora_puerto=9100,
+            tema='default',
+            mostrar_precios=True
+        )
+        db.session.add(config)
+        db.session.commit()
 
-        # Obtener o crear configuración
-        config = current_user.restaurante.configuracion
-        if not config:
-            config = ConfiguracionRestaurante(
-                restaurante_id=current_user.restaurante.id,
-                impresora_habilitada=False,
-                impresora_tipo='USB',
-                impresora_ip='',
-                impresora_puerto=9100,
-                tema='default',
-                mostrar_precios=True
-            )
-            db.session.add(config)
-            db.session.commit()
-
-        if request.method == 'POST':
+    # Solo permitir POST si es admin
+    if request.method == 'POST' and current_user.es_admin:
+        try:
             config.impresora_habilitada = 'impresora_habilitada' in request.form
             config.impresora_tipo = request.form.get('impresora_tipo', 'USB')
             config.impresora_ip = request.form.get('impresora_ip', '')
-
             puerto_str = request.form.get('impresora_puerto', '').strip()
             config.impresora_puerto = int(puerto_str) if puerto_str.isdigit() else 9100
-
             config.tema = request.form.get('tema', 'default')
             config.mostrar_precios = 'mostrar_precios' in request.form
 
@@ -191,12 +187,9 @@ def configuracion():
 
             db.session.commit()
             flash('Configuración actualizada', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar configuración: {str(e)}', 'error')
 
-        return render_template("auth/configuracion.html", config=config)
-
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Error interno: {str(e)}", "error")
-        print("Error en /configuracion:")
-        print(traceback.format_exc())
-        return redirect(url_for('index_redirect'))
+    # Renderizar plantilla, pasando si es admin o no
+    return render_template("auth/configuracion.html", config=config, es_admin=current_user.es_admin)

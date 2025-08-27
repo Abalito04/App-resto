@@ -20,7 +20,9 @@
                 <div class="mb-3">
                     <label>Nombre:</label>
                     <input type="text" name="nombre_restaurante" class="form-control" 
-                           value="{{ current_user.restaurante.nombre }}" required>
+       value="{{ current_user.restaurante.nombre }}" 
+       {% if not es_admin %}disabled{% endif %}>
+
                 </div>
                 <div class="mb-3">
                     <label>Dirección:</label>
@@ -34,11 +36,7 @@
                 </div>
                 <div class="mb-3">
                     <label>Moneda:</label>
-                    <select name="moneda" class="form-select">
-                        <option value="$" {% if current_user.restaurante.moneda == '$' %}selected{% endif %}>$ (Peso)</option>
-                        <option value="USD" {% if current_user.restaurante.moneda == 'USD' %}selected{% endif %}>USD (Dólar)</option>
-                        <option value="€" {% if current_user.restaurante.moneda == '€' %}selected{% endif %}>€ (Euro)</option>
-                    </select>
+                    <select name="moneda" class="form-select" {% if not es_admin %}disabled{% endif %}>
                 </div>
             </div>
 
@@ -46,7 +44,9 @@
                 <h4>Configuración de Impresión</h4>
                 <div class="mb-3 form-check">
                     <input type="checkbox" name="impresora_habilitada" class="form-check-input" 
-                           id="impresora_habilitada" {% if config.impresora_habilitada %}checked{% endif %}>
+       id="impresora_habilitada" {% if config.impresora_habilitada %}checked{% endif %}
+       {% if not es_admin %}disabled{% endif %}>
+
                     <label class="form-check-label" for="impresora_habilitada">
                         Habilitar impresión de comandas
                     </label>
@@ -92,7 +92,10 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+       {% if es_admin %}
+<button type="submit" class="btn btn-primary">Guardar Configuración</button>
+{% endif %}
+
     </form>
 
     <hr>

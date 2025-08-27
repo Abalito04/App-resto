@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Perfil de {{ usuario.nombre }}</h2>
-<p>Email: {{ usuario.email }}</p>
-<p>Restaurante: {{ usuario.restaurante.nombre }}</p>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="mb-0">Perfil de {{ usuario.nombre }}</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>Email:</strong> {{ usuario.email }}</p>
+          <p><strong>Teléfono:</strong> {{ usuario.telefono or "No registrado" }}</p>
+          <p><strong>Restaurante:</strong> {{ usuario.restaurante.nombre }}</p>
+          <p><strong>Dirección:</strong> {{ usuario.restaurante.direccion or "No registrada" }}</p>
+          <p><strong>Moneda:</strong> {{ usuario.restaurante.moneda }}</p>
+        </div>
+        <div class="card-footer text-center">
+          <a href="{{ url_for('auth.configuracion') }}" class="btn btn-outline-primary">⚙ Configuración</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">Salir</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

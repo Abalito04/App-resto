@@ -5,3 +5,14 @@ restaurant.db
 *.sqlite3
 *.log
 .DS_Store
+# Bases de datos SQLite
+*.db
+*.sqlite
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Entornos virtuales
+venv/
+.env

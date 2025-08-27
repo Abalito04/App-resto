@@ -357,39 +357,8 @@ def test_printer():
 
 # Agregar este endpoint a app.py (ya lo tienes, pero verificar que funcione)
 
-@app.route("/api/pedidos/activos")
-def api_pedidos_activos():
-    pedidos = Pedido.query.filter(Pedido.estado != "Entregado").all()
-    pedidos_data = []
-    
-    for p in pedidos:
-        items_data = []
-        for item in p.items:
-            items_data.append({
-                "nombre": item.producto.nombre,
-                "precio": item.producto.precio
-            })
-        
-        pedido_data = {
-            "id": p.id,
-            "mesa": p.mesa,
-            "nombre_cliente": p.nombre_cliente,
-            "direccion_cliente": p.direccion_cliente,
-            "tipo_consumo": p.tipo_consumo,
-            "metodo_pago": p.metodo_pago,
-            "fecha": p.fecha.isoformat(),
-            "items": items_data,
-            "total": p.total
-        }
-        pedidos_data.append(pedido_data)
-    
-    return jsonify({
-        "count": len(pedidos_data),
-        "pedidos": pedidos_data
-    })
 
 # Endpoint de test para verificar conectividad
-
 @app.route("/api/test")
 def api_test():
     return jsonify({
@@ -397,6 +366,7 @@ def api_test():
         "timestamp": datetime.now().isoformat(),
         "message": "API funcionando correctamente"
     })
+
 
 # =================== RUN ===================
 if __name__ == "__main__":

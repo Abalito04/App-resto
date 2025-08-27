@@ -191,4 +191,5 @@ def configuracion():
             flash(f'Error al guardar configuración: {str(e)}', 'error')
     
     # Renderizar SIEMPRE la plantilla (para GET y POST)
-    return render_template('auth/configuracion.html', config=config)
+    return render_template("auth/configuracion.html", config=config)
+

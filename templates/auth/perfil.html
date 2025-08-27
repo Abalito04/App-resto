@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Perfil de {{ usuario.nombre }}</h2>
+<p>Email: {{ usuario.email }}</p>
+<p>Restaurante: {{ usuario.restaurante.nombre }}</p>
+{% endblock %}

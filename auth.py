@@ -37,11 +37,14 @@ def login():
             
             login_user(usuario)
             session['restaurante_id'] = usuario.restaurante.id
-            return redirect(url_for('index'))
+            
+            # 🔹 Redirigir al index_redirect que maneja la lógica de inicio
+            return redirect(url_for('index_redirect'))
         else:
             flash('Email o contraseña incorrectos', 'error')
     
     return render_template('auth/login.html')
+
 
 @auth_bp.route('/registro', methods=['GET', 'POST'])
 def registro():

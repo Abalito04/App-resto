@@ -1,24 +1,41 @@
-# Dependencias principales
-Flask>=2.3.0
-Flask-SQLAlchemy>=3.0.0
+# requirements.txt
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+python-escpos==3.0a9
+gunicorn==21.2.0
+python-dotenv==1.0.0
 
-# Impresión de comandas
-python-escpos>=3.0.0
+# Procfile (para Railway/Heroku)
+web: gunicorn app:app --bind 0.0.0.0:$PORT
 
-# Para crear ejecutables
-PyInstaller>=5.13.0
+# .env (variables de entorno - NO subir a Git)
+FLASK_ENV=production
+DATABASE_URL=sqlite:///restaurant.db
+PRINTER_TYPE=USB
+PRINTER_VENDOR_ID=0x04b8
+PRINTER_PRODUCT_ID=0x0202
 
-# Para notificaciones push (opcional)
-py-vapid>=1.9.0
-pywebpush>=1.14.0
+# .gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+instance/
+*.db
+.DS_Store
+.env
 
-# Utilidades adicionales
-python-dotenv>=1.0.0
+# railway.toml (para Railway.app)
+[build]
+builder = "nixpacks"
 
-# Para desarrollo (opcional)
-flask-cors>=4.0.0
+[deploy]
+healthcheckPath = "/"
+restartPolicyType = "never"
 
-# Base de datos (SQLite incluido en Python)
-# Para otras BD, agregar:
-# psycopg2>=2.9.0  # PostgreSQL
-# PyMySQL>=1.0.0   # MySQL
+[[services]]
+name = "web"

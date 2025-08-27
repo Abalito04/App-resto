@@ -1,15 +1,29 @@
-# app.py - Versión mejorada con notificaciones PWA y pagos con tarjeta
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, Pedido, Item, Producto
 from datetime import datetime, timedelta
-from escpos.printer import Usb
+import os
+from escpos.printer import Usb, Network, File
+from escpos.exceptions import *
 import json
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+
+if os.getenv('FLASK_ENV') == 'production':
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL', "sqlite:///restaurant.db")
+    app.config['DEBUG'] = False
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
+    app.config['DEBUG'] = True
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # =================== CREAR BASE DE DATOS ===================
 with app.app_context():
@@ -255,7 +269,148 @@ def api_subscribe():
     return jsonify({"success": True})
 
 
+@app.route("/static/manifest.json")
+def manifest():
+    return app.send_static_file("manifest.json")
+
+@app.route("/static/sw.js")
+def service_worker():
+    return app.send_static_file("sw.js")
+
+# Para debugging de PWA
+@app.route("/pwa-debug")
+def pwa_debug():
+    import os
+    static_files = os.listdir("static") if os.path.exists("static") else []
+    return jsonify({
+        "manifest_exists": "manifest.json" in static_files,
+        "sw_exists": "sw.js" in static_files,
+        "icons_exist": {
+            "192": "icon-192.png" in static_files,
+            "512": "icon-512.png" in static_files
+        }
+    })
+
+# Configuración de impresora desde variables de entorno o config
+PRINTER_TYPE = os.getenv("PRINTER_TYPE", "USB")  # USB, NETWORK, FILE
+PRINTER_VENDOR_ID = int(os.getenv("PRINTER_VENDOR_ID", "0x04b8"), 16)
+PRINTER_PRODUCT_ID = int(os.getenv("PRINTER_PRODUCT_ID", "0x0202"), 16)
+PRINTER_IP = os.getenv("PRINTER_IP", "192.168.1.100")
+PRINTER_PORT = int(os.getenv("PRINTER_PORT", "9100"))
+
+def obtener_impresora():
+    """Factory function para obtener la impresora según configuración"""
+    try:
+        if PRINTER_TYPE == "USB":
+            return Usb(PRINTER_VENDOR_ID, PRINTER_PRODUCT_ID)
+        elif PRINTER_TYPE == "NETWORK":
+            return Network(PRINTER_IP, port=PRINTER_PORT)
+        elif PRINTER_TYPE == "FILE":
+            # Para testing - imprime a archivo
+            return File("/tmp/comanda.txt")
+        else:
+            raise ValueError(f"Tipo de impresora no soportado: {PRINTER_TYPE}")
+    except Exception as e:
+        print(f"Error conectando impresora: {e}")
+        return None
+
+def imprimir_comanda(pedido):
+    """Función mejorada de impresión con mejor manejo de errores"""
+    printer = obtener_impresora()
+    
+    if not printer:
+        print("❌ No se pudo conectar con la impresora")
+        return False
+    
+    try:
+        # Header
+        printer.set(align='center', text_type='B', width=2, height=2)
+        printer.text("COMANDA\n")
+        printer.set()  # Reset formatting
+        
+        # Info del pedido
+        printer.text("=" * 32 + "\n")
+        
+        if pedido.tipo_consumo == "Local":
+            printer.text(f"MESA: {pedido.mesa}\n")
+        else:
+            printer.text(f"PARA LLEVAR\n")
+            printer.text(f"Cliente: {pedido.nombre_cliente}\n")
+            if pedido.direccion_cliente:
+                printer.text(f"Dirección: {pedido.direccion_cliente}\n")
+        
+        printer.text(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M')}\n")
+        printer.text(f"Pedido #{pedido.id}\n")
+        printer.text("-" * 32 + "\n")
+        
+        # Items
+        total = 0
+        for item in pedido.items:
+            precio = item.producto.precio
+            total += precio
+            # Formato: Producto................$1234
+            nombre = item.producto.nombre[:20]  # Limitar longitud
+            linea = f"{nombre:<20}${precio:>8.0f}\n"
+            printer.text(linea)
+        
+        printer.text("-" * 32 + "\n")
+        
+        # Total
+        printer.set(text_type='B')  # Bold
+        printer.text(f"TOTAL: ${total:.0f}\n")
+        printer.set()  # Reset
+        
+        # Método de pago
+        printer.text(f"Pago: {pedido.metodo_pago}\n")
+        
+        if pedido.metodo_pago == "Tarjeta" and pedido.ticket_numero:
+            printer.text(f"Ticket: {pedido.ticket_numero}\n")
+            if pedido.titular:
+                printer.text(f"Titular: {pedido.titular}\n")
+        
+        printer.text("=" * 32 + "\n")
+        
+        # Pie
+        printer.set(align='center')
+        printer.text("¡Buen provecho!\n")
+        printer.text("\n\n\n")  # Espacio para cortar
+        
+        # Cortar papel
+        printer.cut()
+        printer.close()
+        
+        print(f"✅ Comanda impresa para pedido #{pedido.id}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error imprimiendo comanda: {e}")
+        try:
+            printer.close()
+        except:
+            pass
+        return False
+
+# Función para testing de impresora
+@app.route("/test-printer")
+def test_printer():
+    """Endpoint para probar la impresora"""
+    printer = obtener_impresora()
+    if not printer:
+        return jsonify({"error": "No se pudo conectar con la impresora"}), 500
+    
+    try:
+        printer.text("TEST DE IMPRESORA\n")
+        printer.text("Conexión exitosa\n")
+        printer.text(f"Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
+        printer.text("\n\n")
+        printer.cut()
+        printer.close()
+        return jsonify({"success": "Test de impresión exitoso"})
+    except Exception as e:
+        return jsonify({"error": f"Error en test: {str(e)}"}), 500
 
 # =================== RUN ===================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') != 'production'
+    app.run(host="0.0.0.0", port=port, debug=debug)

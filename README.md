@@ -1,50 +1,102 @@
-# Restaurant App 🍽️
+# 🍽️ App-resto
 
-Aplicación web para la gestión de pedidos de un restaurante. Permite a los mozos tomar pedidos, ver pedidos activos, registrar el método de pago y gestionar la cocina, incluyendo historial de pedidos entregados.
-
----
-
-## Tecnologías utilizadas
-
-- **Python 3**
-- **Flask**: Framework web
-- **Flask-SQLAlchemy**: ORM para SQLite
-- **SQLite**: Base de datos ligera
-- **HTML / CSS / Bootstrap 5**: Frontend básico
+Aplicación web para la gestión de pedidos en un restaurante.  
+Permite crear, administrar y visualizar pedidos en tiempo real, con soporte para historial, diferentes métodos de pago, y panel de administración para productos.
 
 ---
 
-## Funcionalidades
+## ✨ Funcionalidades
 
-### Para mozo
-- Crear un nuevo pedido indicando:
-  - Mesa
-  - Productos
-  - Método de pago (Efectivo, Transferencia, Deuda)
-- Ver pedidos activos con:
-  - Lista de productos por pedido
-  - Tiempo transcurrido desde que se creó
-  - Total de la cuenta
-- Editar o eliminar pedidos activos
-- Marcar pedidos como **Entregado** (removiéndolos de la lista activa)
+- 📋 **Gestión de pedidos activos**  
+  - Crear pedidos con mesa, cliente, productos y cantidades.  
+  - Seleccionar método de pago: Efectivo, Transferencia, Débito/Crédito, Deuda.  
+  - Campos adicionales automáticos (ejemplo: número de comprobante en Transferencia, nombre de deudor en Deuda).  
+  - Estado del pedido: Activo → Entregado → Historial.  
 
-### Para cocina
-- Ver lista de pedidos activos ordenados por fecha
-- Marcar pedidos como **Entregado**
-- Botones para eliminar pedidos si es necesario
+- 🧾 **Historial de pedidos**  
+  - Registro completo de pedidos entregados.  
+  - Click sobre un pedido muestra **popup con detalles**:  
+    - Mesa  
+    - Cliente  
+    - Fecha y hora  
+    - Método de pago y datos adicionales  
 
-### Historial
-- Ver todos los pedidos entregados
-- Visualización de productos, total y método de pago
+- 🍔 **Gestión de productos**  
+  - Crear nuevos productos.  
+  - Editar productos existentes.  
+  - Eliminar productos.  
+
+- ⚙️ **Administración**  
+  - Base de datos con **SQLite + SQLAlchemy**.  
+  - Organización de frontend con **HTML + CSS + JavaScript**.  
+  - Backend con **Flask (Python)**.  
 
 ---
 
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux / Mac
-source venv/bin/activate
+## 🛠️ Tecnologías utilizadas
 
+- **Python 3.x**
+- **Flask**
+- **SQLAlchemy**
+- **SQLite**
+- **HTML / CSS / JavaScript**
+
+---
+
+## 📦 Instalación
+
+Cloná el repositorio:
+
+```bash
+git clone https://github.com/Abalito04/App-resto.git
+cd App-resto
+
+
+Creá un entorno virtual (recomendado):
+
+python -m venv env
+source env/bin/activate   # Linux/Mac
+env\Scripts\activate      # Windows
+
+
+Instalá las dependencias:
 
 pip install -r requirements.txt
-pip install python-escpos
+
+
+Inicializá la base de datos:
+
+python
+>>> from app import db
+>>> db.create_all()
+>>> exit()
+
+------------------------
+
+▶️ Uso
+
+Iniciá la aplicación:
+
+python app.py
+
+
+Abrí en el navegador:
+
+http://127.0.0.1:5000
+
+------------------------
+🚀 Futuras mejoras
+
+Panel de login para administrar.
+
+Estadísticas de ventas y reportes.
+
+Integración con impresión de tickets.
+
+Versión móvil con Kivy.
+ 
+ ------------------------
+
+Matias Abalo
+📧 Contacto: abalito95@gmail.com
+🌐 GitHub: Abalito04

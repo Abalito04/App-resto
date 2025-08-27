@@ -114,4 +114,5 @@ class ConfiguracionRestaurante(db.Model):
     tema = db.Column(db.String(20), default="default")
     mostrar_precios = db.Column(db.Boolean, default=True)
     
-    restaurante = db.relationship('Restaurante', backref=db.backref('configuracio
+    # LÍNEA CORREGIDA: La relación estaba incompleta
+    restaurante = db.relationship('Restaurante', backref=db.backref('configuracion', uselist=False))

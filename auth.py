@@ -161,21 +161,31 @@ def configuracion():
         db.session.commit()
     
     if request.method == 'POST':
-        # Actualizar configuración
-        config.impresora_habilitada = 'impresora_habilitada' in request.form
-        config.impresora_tipo = request.form.get('impresora_tipo', 'USB')
-        config.impresora_ip = request.form.get('impresora_ip', '')
-        config.impresora_puerto = int(request.form.get('impresora_puerto', 9100))
-        config.tema = request.form.get('tema', 'default')
-        config.mostrar_precios = 'mostrar_precios' in request.form
-        
-        # Actualizar datos del restaurante
-        current_user.restaurante.nombre = request.form.get('nombre_restaurante', '')
-        current_user.restaurante.direccion = request.form.get('direccion', '')
-        current_user.restaurante.telefono = request.form.get('telefono', '')
-        current_user.restaurante.moneda = request.form.get('moneda', '$')
-        
-        db.session.commit()
-        flash('Configuración actualizada', 'success')
+        try:
+            # Actualizar configuración
+            config.impresora_habilitada = 'impresora_habilitada' in request.form
+            config.impresora_tipo = request.form.get('impresora_tipo', 'USB')
+            config.impresora_ip = request.form.get('impresora_ip', '')
+
+            # Validar puerto (si viene vacío, usar 9100 por defecto)
+            puerto_str = request.form.get('impresora_puerto', '').strip()
+            config.impresora_puerto = int(puerto_str) if puerto_str.isdigit() else 9100
+
+            config.tema = request.form.get('tema', 'default')
+            config.mostrar_precios = 'mostrar_precios' in request.form
+            
+            # Actualizar datos del restaurante
+            current_user.restaurante.nombre = request.form.get('nombre_restaurante', '')
+            current_user.restaurante.direccion = request.form.get('direccion', '')
+            current_user.restaurante.telefono = request.form.get('telefono', '')
+            current_user.restaurante.moneda = request.form.get('moneda', '$')
+            
+            db.session.commit()
+            flash('Configuración actualizada', 'success')
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar configuración: {str(e)}', 'error')
     
-        return render_template('configuracion.html', config=config)
+    # Renderizar SIEMPRE la plantilla (para GET y POST)
+    return render_template('auth/configuracion.html', config=config)

@@ -5,7 +5,8 @@ from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto
 from werkzeug.security import generate_password_hash
 import re
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__, template_folder='auth')
+
 
 def validar_email(email):
     """Valida formato de email"""
@@ -177,4 +178,4 @@ def configuracion():
         db.session.commit()
         flash('Configuración actualizada', 'success')
     
-    return render_template('auth/configuracion.html', config=config)
+        return render_template('configuracion.html', config=config)

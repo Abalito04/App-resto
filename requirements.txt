@@ -1,41 +1,5 @@
-# requirements.txt
 Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
 python-escpos==3.0a9
 gunicorn==21.2.0
 python-dotenv==1.0.0
-
-# Procfile (para Railway/Heroku)
-web: gunicorn app:app --bind 0.0.0.0:$PORT
-
-# .env (variables de entorno - NO subir a Git)
-FLASK_ENV=production
-DATABASE_URL=sqlite:///restaurant.db
-PRINTER_TYPE=USB
-PRINTER_VENDOR_ID=0x04b8
-PRINTER_PRODUCT_ID=0x0202
-
-# .gitignore
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-instance/
-*.db
-.DS_Store
-.env
-
-# railway.toml (para Railway.app)
-[build]
-builder = "nixpacks"
-
-[deploy]
-healthcheckPath = "/"
-restartPolicyType = "never"
-
-[[services]]
-name = "web"

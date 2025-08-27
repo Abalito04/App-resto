@@ -315,79 +315,24 @@ def obtener_impresora():
         return None
 
 def imprimir_comanda(pedido):
-    """Función mejorada de impresión con mejor manejo de errores"""
-    printer = obtener_impresora()
-    
-    if not printer:
-        print("❌ No se pudo conectar con la impresora")
-        return False
-    
+    # Impresión deshabilitada para deployment cloud
+    print(f"COMANDA VIRTUAL - Mesa: {pedido.mesa}, Total: ${pedido.total}")
     try:
-        # Header
-        printer.set(align='center', text_type='B', width=2, height=2)
-        printer.text("COMANDA\n")
-        printer.set()  # Reset formatting
-        
-        # Info del pedido
-        printer.text("=" * 32 + "\n")
-        
-        if pedido.tipo_consumo == "Local":
-            printer.text(f"MESA: {pedido.mesa}\n")
-        else:
-            printer.text(f"PARA LLEVAR\n")
-            printer.text(f"Cliente: {pedido.nombre_cliente}\n")
-            if pedido.direccion_cliente:
-                printer.text(f"Dirección: {pedido.direccion_cliente}\n")
-        
-        printer.text(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M')}\n")
-        printer.text(f"Pedido #{pedido.id}\n")
-        printer.text("-" * 32 + "\n")
-        
-        # Items
-        total = 0
+        # TODO: Implementar impresión remota
+        print("=== COMANDA ===")
+        print(f"Mesa: {pedido.mesa}")
+        print(f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M:%S')}")
+        print("-------------------")
         for item in pedido.items:
-            precio = item.producto.precio
-            total += precio
-            # Formato: Producto................$1234
-            nombre = item.producto.nombre[:20]  # Limitar longitud
-            linea = f"{nombre:<20}${precio:>8.0f}\n"
-            printer.text(linea)
-        
-        printer.text("-" * 32 + "\n")
-        
-        # Total
-        printer.set(text_type='B')  # Bold
-        printer.text(f"TOTAL: ${total:.0f}\n")
-        printer.set()  # Reset
-        
-        # Método de pago
-        printer.text(f"Pago: {pedido.metodo_pago}\n")
-        
-        if pedido.metodo_pago == "Tarjeta" and pedido.ticket_numero:
-            printer.text(f"Ticket: {pedido.ticket_numero}\n")
-            if pedido.titular:
-                printer.text(f"Titular: {pedido.titular}\n")
-        
-        printer.text("=" * 32 + "\n")
-        
-        # Pie
-        printer.set(align='center')
-        printer.text("¡Buen provecho!\n")
-        printer.text("\n\n\n")  # Espacio para cortar
-        
-        # Cortar papel
-        printer.cut()
-        printer.close()
-        
-        print(f"✅ Comanda impresa para pedido #{pedido.id}")
+            print(f"{item.producto.nombre} - ${item.producto.precio}")
+        print("-------------------")
+        total = sum(item.producto.precio for item in pedido.items)
+        print(f"TOTAL: ${total}")
+        print(f"Método de pago: {pedido.metodo_pago}")
+        print("===================")
         return True
-        
     except Exception as e:
-        print(f"❌ Error imprimiendo comanda: {e}")
-        try:
-            printer.close()
-        except:
-            pass
+        print("Error imprimiendo comanda:", e)
         return False
 
 # Función para testing de impresora

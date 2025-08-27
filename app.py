@@ -1,9 +1,9 @@
 # app.py - Versión SaaS con autenticación
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_login import LoginManager, login_required, current_user
 from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante
-from auth import auth_bp
+from auth import auth_bp, crear_slug
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -89,14 +89,106 @@ def imprimir_comanda(pedido):
 # =================== RUTAS PRINCIPALES ===================
 
 @app.route("/")
+def index_redirect():
+    """Redirige al setup si no hay usuarios, sino al dashboard"""
+    if not current_user.is_authenticated:
+        # Si no hay usuarios en el sistema, ir a setup
+        if not Usuario.query.first():
+            return redirect(url_for('setup_inicial'))
+        # Si hay usuarios pero no está logueado, ir a login
+        return redirect(url_for('auth.login'))
+    
+    # Si está logueado, mostrar la app normal
+    return index_logueado()
+
+@app.route("/dashboard")
 @login_required
-def index():
+def index_logueado():
+    """Dashboard principal - la función index original"""
     restaurante_id = get_user_restaurante()
     productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
     pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
                          .filter(Pedido.estado != "Entregado")\
                          .order_by(Pedido.fecha.desc()).all()
     return render_template("index.html", productos=productos, pedidos=pedidos)
+
+@app.route("/setup", methods=["GET", "POST"])
+def setup_inicial():
+    """Setup inicial - solo si no hay usuarios en el sistema"""
+    
+    # Verificar si ya hay usuarios en el sistema
+    if Usuario.query.first():
+        flash('El sistema ya está configurado. Usa el login normal.', 'info')
+        return redirect(url_for('auth.login'))
+    
+    if request.method == "POST":
+        # Datos del primer usuario admin
+        nombre = request.form.get('nombre', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        
+        # Datos del primer restaurante
+        nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
+        direccion = request.form.get('direccion', '').strip()
+        telefono = request.form.get('telefono', '').strip()
+        
+        # Validaciones básicas
+        if not all([nombre, email, password, nombre_restaurante]):
+            flash('Todos los campos son obligatorios', 'error')
+            return render_template('setup.html')
+        
+        if len(password) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres', 'error')
+            return render_template('setup.html')
+        
+        try:
+            # Crear el primer restaurante
+            slug = crear_slug(nombre_restaurante)
+            restaurante = Restaurante(
+                nombre=nombre_restaurante,
+                slug=slug,
+                direccion=direccion,
+                telefono=telefono,
+                email_contacto=email,
+                plan="free"
+            )
+            db.session.add(restaurante)
+            db.session.flush()
+            
+            # Crear el primer usuario admin
+            usuario = Usuario(
+                nombre=nombre,
+                email=email,
+                es_admin=True,
+                restaurante_id=restaurante.id
+            )
+            usuario.set_password(password)
+            db.session.add(usuario)
+            
+            # Crear configuración inicial
+            config = ConfiguracionRestaurante(restaurante_id=restaurante.id)
+            db.session.add(config)
+            
+            # Productos de ejemplo
+            productos_ejemplo = [
+                Producto(nombre="Pizza Muzzarella", precio=2500, restaurante_id=restaurante.id),
+                Producto(nombre="Hamburguesa Completa", precio=3200, restaurante_id=restaurante.id),
+                Producto(nombre="Coca-Cola 500ml", precio=1200, restaurante_id=restaurante.id),
+                Producto(nombre="Empanada de Carne", precio=800, restaurante_id=restaurante.id),
+            ]
+            db.session.add_all(productos_ejemplo)
+            
+            db.session.commit()
+            
+            flash('¡Sistema configurado exitosamente! Ya puedes iniciar sesión.', 'success')
+            return redirect(url_for('auth.login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('Error configurando el sistema. Intenta nuevamente.', 'error')
+            print(f"Error en setup: {e}")
+    
+    return render_template('setup.html')
 
 @app.route("/crear_pedido", methods=["POST"])
 @login_required
@@ -122,7 +214,7 @@ def crear_pedido():
         return "Debe ingresar el número de mesa", 400
 
     if not items:
-        return redirect(url_for("index"))
+        return redirect(url_for("index_redirect"))
 
     # Crear nuevo pedido
     nuevo_pedido = Pedido(
@@ -152,7 +244,7 @@ def crear_pedido():
     db.session.commit()
 
     imprimir_comanda(nuevo_pedido)
-    return redirect(url_for("index"))
+    return redirect(url_for("index_redirect"))
 
 @app.route("/borrar/<int:pedido_id>", methods=["POST"])
 @login_required
@@ -160,7 +252,7 @@ def borrar_pedido(pedido_id):
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     db.session.delete(pedido)
     db.session.commit()
-    return redirect(url_for("index"))
+    return redirect(url_for("index_redirect"))
 
 @app.route("/editar/<int:pedido_id>", methods=["GET", "POST"])
 @login_required
@@ -193,7 +285,7 @@ def editar_pedido(pedido_id):
                 db.session.add(item)
         
         db.session.commit()
-        return redirect(url_for("index"))
+        return redirect(url_for("index_redirect"))
     
     return render_template("editar.html", pedido=pedido, productos=productos)
 
@@ -203,7 +295,7 @@ def entregado(pedido_id):
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     pedido.estado = "Entregado"
     db.session.commit()
-    return redirect(request.referrer or url_for("index"))
+    return redirect(request.referrer or url_for("index_redirect"))
 
 @app.route("/historial")
 @login_required
@@ -243,7 +335,7 @@ def agregar_producto_index():
     producto = Producto(nombre=nombre, precio=precio, restaurante_id=get_user_restaurante())
     db.session.add(producto)
     db.session.commit()
-    return redirect(url_for("index"))
+    return redirect(url_for("index_redirect"))
 
 @app.route("/editar_producto_index/<int:producto_id>", methods=["POST"])
 @login_required
@@ -252,7 +344,7 @@ def editar_producto_index(producto_id):
     producto.nombre = request.form["nombre"]
     producto.precio = float(request.form["precio"])
     db.session.commit()
-    return redirect(url_for("index"))
+    return redirect(url_for("index_redirect"))
 
 @app.route("/borrar_producto_index/<int:producto_id>", methods=["POST"])
 @login_required
@@ -261,7 +353,7 @@ def borrar_producto_index(producto_id):
     Item.query.filter_by(producto_id=producto.id).delete()
     db.session.delete(producto)
     db.session.commit()
-    return redirect(url_for("index"))
+    return redirect(url_for("index_redirect"))
 
 # =================== COCINA ===================
 @app.route("/cocina")

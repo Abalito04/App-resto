@@ -1,4 +1,4 @@
-# app.py - Versión SaaS con autenticación
+# app.py - Versión SaaS con autenticación - CORREGIDA
 import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
@@ -49,9 +49,9 @@ def load_user(user_id):
     try:
         return Usuario.query.get(int(user_id))
     except Exception as e:
-        # Si hay error (usuario no existe), limpiar la sesión
         print(f"Error cargando usuario {user_id}: {e}")
         return None
+
 # Filtro de context processor para templates
 @app.context_processor
 def inject_user():
@@ -67,20 +67,90 @@ def get_user_restaurante():
         return None
     return current_user.restaurante_id
 
-# =================== CREAR BASE DE DATOS ===================
-with app.app_context():
-    db.create_all()
+# =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
+def init_db():
+    """Inicializar base de datos con manejo de errores"""
+    try:
+        with app.app_context():
+            db.create_all()
+            print("Base de datos inicializada correctamente")
+    except Exception as e:
+        print(f"Error inicializando base de datos: {e}")
+
+# Llamar a init_db al importar
+init_db()
+
+# =================== RUTAS CON MANEJO DE ERRORES ===================
+
+@app.route("/")
+def index_redirect():
+    """Redirige al setup si no hay usuarios, sino al dashboard"""
+    try:
+        if not current_user.is_authenticated:
+            # Verificar si hay usuarios en el sistema
+            try:
+                usuario_existe = Usuario.query.first()
+                if not usuario_existe:
+                    return redirect(url_for('setup_inicial'))
+            except Exception as e:
+                print(f"Error verificando usuarios: {e}")
+                return redirect(url_for('setup_inicial'))
+            
+            # Si hay usuarios pero no está logueado, ir a login
+            return redirect(url_for('auth.login'))
+        
+        # Si está logueado, mostrar la app normal
+        return index_logueado()
+    
+    except Exception as e:
+        print(f"Error en index_redirect: {e}")
+        return redirect(url_for('setup_inicial'))
+
+@app.route("/clear-session")
+def clear_session():
+    """Limpiar sesión - útil después de resetear DB"""
+    session.clear()
+    flash('Sesión limpiada', 'info')
+    return redirect(url_for('setup_inicial'))
+
+@app.route("/dashboard")
+@login_required
+def index_logueado():
+    """Dashboard principal - la función index original"""
+    try:
+        restaurante_id = get_user_restaurante()
+        productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
+        pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
+                             .filter(Pedido.estado != "Entregado")\
+                             .order_by(Pedido.fecha.desc()).all()
+        return render_template("index.html", productos=productos, pedidos=pedidos)
+    except Exception as e:
+        flash(f'Error cargando dashboard: {str(e)}', 'error')
+        return redirect(url_for('setup_inicial'))
+
+@app.route("/make-superadmin/<email>")
+def make_superadmin(email):
+    """Ruta temporal para hacer superadmin a un usuario - REMOVER EN PRODUCCIÓN"""
+    try:
+        user = Usuario.query.filter_by(email=email).first()
+        if user:
+            user.es_superadmin = True
+            db.session.commit()
+            return f"Usuario {email} ahora es superadmin"
+        return "Usuario no encontrado"
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # =================== FUNCIÓN DE IMPRESIÓN (SIMULADA) ===================
 def imprimir_comanda(pedido):
     """Función de impresión - versión SaaS"""
-    config = pedido.restaurante.configuracion
-    
-    if not config or not config.impresora_habilitada:
-        print(f"Impresión deshabilitada para {pedido.restaurante.nombre}")
-        return False
-    
     try:
+        config = pedido.restaurante.configuracion
+        
+        if not config or not config.impresora_habilitada:
+            print(f"Impresión deshabilitada para {pedido.restaurante.nombre}")
+            return False
+        
         # Simulación de impresión (en producción conectaría con la impresora real)
         print("=== COMANDA ===")
         print(f"Restaurante: {pedido.restaurante.nombre}")
@@ -101,40 +171,19 @@ def imprimir_comanda(pedido):
         print("Error imprimiendo comanda:", e)
         return False
 
-# =================== RUTAS PRINCIPALES ===================
-
-@app.route("/")
-def index_redirect():
-    """Redirige al setup si no hay usuarios, sino al dashboard"""
-    if not current_user.is_authenticated:
-        # Si no hay usuarios en el sistema, ir a setup
-        if not Usuario.query.first():
-            return redirect(url_for('setup_inicial'))
-        # Si hay usuarios pero no está logueado, ir a login
-        return redirect(url_for('auth.login'))
-    
-    # Si está logueado, mostrar la app normal
-    return index_logueado()
-
-@app.route("/dashboard")
-@login_required
-def index_logueado():
-    """Dashboard principal - la función index original"""
-    restaurante_id = get_user_restaurante()
-    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
-    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
-                         .filter(Pedido.estado != "Entregado")\
-                         .order_by(Pedido.fecha.desc()).all()
-    return render_template("index.html", productos=productos, pedidos=pedidos)
-
 @app.route("/setup", methods=["GET", "POST"])
 def setup_inicial():
     """Setup inicial - solo si no hay usuarios en el sistema"""
     
-    # Verificar si ya hay usuarios en el sistema
-    if Usuario.query.first():
-        flash('El sistema ya está configurado. Usa el login normal.', 'info')
-        return redirect(url_for('auth.login'))
+    try:
+        # Verificar si ya hay usuarios en el sistema
+        usuario_existe = Usuario.query.first()
+        if usuario_existe:
+            flash('El sistema ya está configurado. Usa el login normal.', 'info')
+            return redirect(url_for('auth.login'))
+    except Exception as e:
+        print(f"Error verificando usuarios existentes: {e}")
+        # Si hay error, continúa con el setup
     
     if request.method == "POST":
         # Datos del primer usuario admin
@@ -175,7 +224,10 @@ def setup_inicial():
                 nombre=nombre,
                 email=email,
                 es_admin=True,
-                restaurante_id=restaurante.id
+                es_superadmin=True,  # Hacer que el primer usuario sea superadmin
+                restaurante_id=restaurante.id,
+                activo=True,
+                confirmado=True  # No requiere confirmación por email
             )
             usuario.set_password(password)
             db.session.add(usuario)
@@ -204,6 +256,8 @@ def setup_inicial():
             print(f"Error en setup: {e}")
     
     return render_template('setup.html')
+
+# =================== RESTO DE RUTAS (sin cambios) ===================
 
 @app.route("/crear_pedido", methods=["POST"])
 @login_required
@@ -260,6 +314,8 @@ def crear_pedido():
 
     imprimir_comanda(nuevo_pedido)
     return redirect(url_for("index_redirect"))
+
+# [Resto de las rutas permanecen iguales...]
 
 @app.route("/borrar/<int:pedido_id>", methods=["POST"])
 @login_required

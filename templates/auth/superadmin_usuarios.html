@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Usuarios</h3>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for c,m in messages %}
+      <div class="alert alert-{{ 'danger' if c=='error' else c }}">{{ m }}</div>
+    {% endfor %}
+  {% endwith %}
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead>
+      <tr>
+        <th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Confirmado</th><th>Activo</th><th>Restaurante</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.nombre }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('auth.superadmin_cambiar_rol', user_id=u.id) }}" class="d-flex gap-2">
+            <select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="usuario" {{ 'selected' if u.rol=='usuario' else '' }}>usuario</option>
+              <option value="admin" {{ 'selected' if u.rol=='admin' else '' }}>admin</option>
+              <option value="superadmin" {{ 'selected' if u.rol=='superadmin' else '' }}>superadmin</option>
+            </select>
+          </form>
+        </td>
+        <td>{{ 'sí' if u.confirmado else 'no' }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('auth.superadmin_toggle_activo', user_id=u.id) }}">
+            <button class="btn btn-sm {{ 'btn-success' if u.activo else 'btn-secondary' }}">
+              {{ 'Activo' if u.activo else 'Inactivo' }}
+            </button>
+          </form>
+        </td>
+        <td>{{ u.restaurante.nombre if u.restaurante else '-' }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('auth.superadmin_resetpass', user_id=u.id) }}" class="d-flex gap-2">
+            <input class="form-control form-control-sm" name="nueva" placeholder="Nueva pass">
+            <button class="btn btn-sm btn-warning">Reset</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

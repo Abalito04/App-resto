@@ -2,6 +2,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from app import db
+import secrets
+
+
+db = SQLAlchemy()
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 import secrets
 
 db = SQLAlchemy()
@@ -12,44 +22,40 @@ class Usuario(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     nombre = db.Column(db.String(100), nullable=False)
     es_admin = db.Column(db.Boolean, default=False)
-    activo = db.Column(db.Boolean, default=True)
+    es_superadmin = db.Column(db.Boolean, default=False)   # 🔹 Nuevo campo
+    activo = db.Column(db.Boolean, default=False)  # 🔹 por defecto inactivo hasta confirmar email
+    confirmado = db.Column(db.Boolean, default=False)
+    token_confirmacion = db.Column(db.String(128), nullable=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.now)
     
-    # Relación con restaurante
-    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=True)
     restaurante = db.relationship('Restaurante', backref='usuarios')
-    
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class Restaurante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    slug = db.Column(db.String(50), unique=True, nullable=False)  # URL amigable
+    slug = db.Column(db.String(50), unique=True, nullable=False)
     direccion = db.Column(db.String(200))
     telefono = db.Column(db.String(20))
     email_contacto = db.Column(db.String(120))
-    
-    # Configuración específica del restaurante
     moneda = db.Column(db.String(10), default="$")
     zona_horaria = db.Column(db.String(50), default="America/Argentina/Buenos_Aires")
-    
-    # Plan y billing
-    plan = db.Column(db.String(20), default="free")  # free, pro, premium
+    plan = db.Column(db.String(20), default="free")
     fecha_creacion = db.Column(db.DateTime, default=datetime.now)
     activo = db.Column(db.Boolean, default=True)
-    
-    # API key única por restaurante
     api_key = db.Column(db.String(64), unique=True)
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.api_key:
             self.api_key = secrets.token_urlsafe(32)
-
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
@@ -116,3 +122,13 @@ class ConfiguracionRestaurante(db.Model):
     
     # LÍNEA CORREGIDA: La relación estaba incompleta
     restaurante = db.relationship('Restaurante', backref=db.backref('configuracion', uselist=False))
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False, unique=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    rol = db.Column(db.String(50), default="usuario")  
+    confirmado = db.Column(db.Boolean, default=False)
+
+    restaurante_id = db.Column(db.Integer, db.ForeignKey("restaurante.id"))

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width:480px">
+  <h3>Reenviar confirmación</h3>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for c,m in messages %}
+      <div class="alert alert-{{ 'danger' if c=='error' else c }}">{{ m }}</div>
+    {% endfor %}
+  {% endwith %}
+  <form method="POST">
+    <div class="mb-3">
+      <label>Email</label>
+      <input class="form-control" type="email" name="email" required>
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Reenviar</button>
+  </form>
+</div>
+{% endblock %}

@@ -8,9 +8,22 @@ import traceback
 
 auth_bp = Blueprint('auth', __name__, template_folder='auth')
 
+# -------- EMAIL --------
+def enviar_email_confirmacion(email, token):
+    try:
+        msg = MIMEText(f"Confirma tu cuenta ingresando a: {url_for('auth.confirmar', token=token, _external=True)}")
+        msg['Subject'] = 'Confirma tu cuenta'
+        msg['From'] = current_app.config.get("MAIL_USERNAME", "no-reply@miapp.com")
+        msg['To'] = email
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
+            server.send_message(msg)
+    except Exception as e:
+        print("Error enviando email:", e)
 
 def validar_email(email):
-    """Valida formato de email"""
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
 
 
@@ -21,32 +34,34 @@ def crear_slug(nombre):
     return slug[:50]
 
 
+# -------- LOGIN --------
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
 
-        if not email or not password:
-            flash('Email y contraseña son obligatorios', 'error')
+        usuario = Usuario.query.filter_by(email=email).first()
+        if not usuario or not usuario.check_password(password):
+            flash('Email o contraseña incorrectos', 'error')
+            return render_template('auth/login.html')
+        
+        if not usuario.confirmado:
+            flash('Debes confirmar tu cuenta antes de ingresar', 'error')
             return render_template('auth/login.html')
 
-        usuario = Usuario.query.filter_by(email=email, activo=True).first()
+        if not usuario.activo:
+            flash('Tu cuenta está deshabilitada, contacta soporte', 'error')
+            return render_template('auth/login.html')
 
-        if usuario and usuario.check_password(password):
-            if not usuario.restaurante.activo:
-                flash('Restaurante desactivado. Contacta soporte.', 'error')
-                return render_template('auth/login.html')
-
-            login_user(usuario)
-            session['restaurante_id'] = usuario.restaurante.id
-            return redirect(url_for('index_redirect'))
-        else:
-            flash('Email o contraseña incorrectos', 'error')
+        login_user(usuario)
+        session['restaurante_id'] = usuario.restaurante.id if usuario.restaurante else None
+        return redirect(url_for('index_redirect'))
 
     return render_template('auth/login.html')
 
 
+# -------- REGISTRO --------
 @auth_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -54,83 +69,75 @@ def registro():
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         confirmar_password = request.form.get('confirmar_password', '')
-
         nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
-        direccion = request.form.get('direccion', '').strip()
-        telefono = request.form.get('telefono', '').strip()
-
-        errores = []
-
-        if not nombre or len(nombre) < 2:
-            errores.append('Nombre debe tener al menos 2 caracteres')
 
         if not validar_email(email):
-            errores.append('Email inválido')
-
-        if Usuario.query.filter_by(email=email).first():
-            errores.append('Email ya registrado')
-
-        if not password or len(password) < 6:
-            errores.append('Contraseña debe tener al menos 6 caracteres')
-
-        if password != confirmar_password:
-            errores.append('Las contraseñas no coinciden')
-
-        if not nombre_restaurante or len(nombre_restaurante) < 2:
-            errores.append('Nombre del restaurante es obligatorio')
-
-        slug = crear_slug(nombre_restaurante)
-        if Restaurante.query.filter_by(slug=slug).first():
-            errores.append('Ya existe un restaurante con ese nombre. Usa uno diferente.')
-
-        if errores:
-            for error in errores:
-                flash(error, 'error')
+            flash('Email inválido', 'error')
             return render_template('auth/registro.html')
 
-        try:
-            restaurante = Restaurante(
-                nombre=nombre_restaurante,
-                slug=slug,
-                direccion=direccion,
-                telefono=telefono,
-                email_contacto=email
-            )
-            db.session.add(restaurante)
-            db.session.flush()
+        if Usuario.query.filter_by(email=email).first():
+            flash('Email ya registrado', 'error')
+            return render_template('auth/registro.html')
 
-            usuario = Usuario(
-                nombre=nombre,
-                email=email,
-                es_admin=True,
-                restaurante_id=restaurante.id
-            )
-            usuario.set_password(password)
-            db.session.add(usuario)
+        # Crear restaurante
+        slug = nombre_restaurante.lower().replace(" ", "-")
+        restaurante = Restaurante(nombre=nombre_restaurante, slug=slug, email_contacto=email)
+        db.session.add(restaurante)
+        db.session.flush()
 
-            config = ConfiguracionRestaurante(restaurante_id=restaurante.id)
-            db.session.add(config)
+        # Crear usuario
+        token = secrets.token_urlsafe(32)
+        usuario = Usuario(
+            nombre=nombre, email=email,
+            es_admin=True, restaurante_id=restaurante.id,
+            confirmado=False, activo=False, token_confirmacion=token
+        )
+        usuario.set_password(password)
+        db.session.add(usuario)
+        db.session.commit()
 
-            productos_ejemplo = [
-                Producto(nombre="Pizza Muzzarella", precio=2500, restaurante_id=restaurante.id),
-                Producto(nombre="Hamburguesa Completa", precio=3200, restaurante_id=restaurante.id),
-                Producto(nombre="Coca-Cola 500ml", precio=1200, restaurante_id=restaurante.id),
-                Producto(nombre="Agua Mineral", precio=900, restaurante_id=restaurante.id),
-            ]
-            db.session.add_all(productos_ejemplo)
-
-            db.session.commit()
-            flash('Registro exitoso. Ya puedes iniciar sesión.', 'success')
-            return redirect(url_for('auth.login'))
-
-        except Exception as e:
-            db.session.rollback()
-            flash('Error creando cuenta. Intenta nuevamente.', 'error')
-            print("Error en registro:")
-            print(traceback.format_exc())
+        enviar_email_confirmacion(email, token)
+        flash('Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success')
+        return redirect(url_for('auth.login'))
 
     return render_template('auth/registro.html')
 
+# -------- CONFIRMACION --------
+@auth_bp.route('/confirmar/<token>')
+def confirmar(token):
+    usuario = Usuario.query.filter_by(token_confirmacion=token).first()
+    if usuario:
+        usuario.confirmado = True
+        usuario.activo = True
+        usuario.token_confirmacion = None
+        db.session.commit()
+        flash('Cuenta confirmada, ya puedes iniciar sesión', 'success')
+        return redirect(url_for('auth.login'))
+    flash('Token inválido', 'error')
+    return redirect(url_for('auth.login'))
+
+# -------- SUPERADMIN PANEL --------
+@auth_bp.route('/admin/usuarios')
+@login_required
+def admin_usuarios():
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    
+    usuarios = Usuario.query.all()
+    return render_template("auth/admin_usuarios.html", usuarios=usuarios)
+
+@auth_bp.route('/admin/usuarios/toggle/<int:id>')
+@login_required
+def admin_toggle_usuario(id):
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    usuario = Usuario.query.get_or_404(id)
+    usuario.activo = not usuario.activo
+    db.session.commit()
+    flash("Estado actualizado", "success")
+    return redirect(url_for("auth.admin_usuarios"))
 
 @auth_bp.route('/logout')
 @login_required

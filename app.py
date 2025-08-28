@@ -7,7 +7,7 @@ from models import db, Usuario, Restaurante, Pedido, Item, Producto, Configuraci
 from auth import auth_bp, crear_slug
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-
+from auth import auth_bp
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
@@ -46,6 +46,39 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 @login_manager.user_loader
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
+
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = "clave-secreta"   # cámbiala en producción
+
+    # 🔹 Configuración base de BD (ejemplo con Postgres en Railway)
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://user:pass@host:port/db"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # 🔹 Configuración de correo
+    app.config["MAIL_USERNAME"] = "tucorreo@gmail.com"
+    app.config["MAIL_PASSWORD"] = "tu-clave-o-app-password"
+
+    db.init_app(app)
+
+    login_manager = LoginManager(app)
+    login_manager.login_view = "auth.login"
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Usuario.query.get(int(user_id))
+
+    # Registrar blueprint de autenticación
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+
+    # -------- RUTAS PRINCIPALES --------
+    @app.route("/")
+    def index_redirect():
+        if not current_user.is_authenticated:
+            return redirect(url_for("auth.login"))
+        return render_template("index.html")
+
+    return app
 
 # Filtro de context processor para templates
 @app.context_processor

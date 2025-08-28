@@ -265,8 +265,10 @@ def setup_inicial():
             
         except Exception as e:
             db.session.rollback()
-            flash('Error configurando el sistema. Intenta nuevamente.', 'error')
-            print(f"Error en setup: {e}")
+            import traceback
+            print("Error en setup:", e)
+            traceback.print_exc()
+            flash(f'Error configurando el sistema. Intenta nuevamente.', 'error')
     
     return render_template('setup.html')
 

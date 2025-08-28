@@ -21,6 +21,12 @@ database_url = os.getenv('CUSTOM_DATABASE_URL', '')
 if not database_url:
     database_url = os.getenv('DATABASE_URL', '')  # fallback a la original
 
+# Forzar URL pública si detectamos que Railway está usando la interna
+if database_url and 'railway.internal' in database_url:
+    print("⚠️ Railway está usando URL interna, forzando URL pública...")
+    # Usar la URL pública directamente
+    database_url = "postgresql://postgres:hISwhPDoevhhPocdYdIIOlawevrfPgcN@yamabiko.proxy.rlwy.net:35702/railway"
+
 if database_url:
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -32,6 +38,7 @@ if database_url:
     q.setdefault('connect_timeout', '5')
     database_url = urlunparse(parsed._replace(query=urlencode(q)))
 
+    print(f"🔗 Usando URL de DB: {database_url}")
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         "connect_args": {"sslmode": "require", "connect_timeout": 5},

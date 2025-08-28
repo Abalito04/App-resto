@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from app import db
 import secrets
 
 
@@ -56,6 +55,7 @@ class Restaurante(db.Model):
         super().__init__(**kwargs)
         if not self.api_key:
             self.api_key = secrets.token_urlsafe(32)
+
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)

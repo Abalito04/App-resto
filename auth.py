@@ -85,11 +85,15 @@ def login():
 def registro():
     try:
         if request.method == 'POST':
+            print("=== INICIO REGISTRO ===")
+            
             nombre = request.form.get('nombre', '').strip()
             email = request.form.get('email', '').strip().lower()
             password = request.form.get('password', '')
             confirmar_password = request.form.get('confirmar_password', '')
             nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
+            
+            print(f"Datos recibidos: nombre={nombre}, email={email}, restaurante={nombre_restaurante}")
 
             if not validar_email(email):
                 flash('Email inválido', 'error')
@@ -99,12 +103,17 @@ def registro():
                 flash('Email ya registrado', 'error')
                 return render_template('auth/registro.html')
 
+            print("Creando restaurante...")
             # Crear restaurante
             slug = crear_slug(nombre_restaurante)
+            print(f"Slug generado: {slug}")
+            
             restaurante = Restaurante(nombre=nombre_restaurante, slug=slug, email_contacto=email)
             db.session.add(restaurante)
             db.session.flush()
+            print(f"Restaurante creado con ID: {restaurante.id}")
 
+            print("Creando usuario...")
             # Crear usuario
             token = secrets.token_urlsafe(32)
             usuario = Usuario(
@@ -115,21 +124,29 @@ def registro():
             usuario.set_password(password)
             db.session.add(usuario)
             db.session.commit()
+            print(f"Usuario creado con ID: {usuario.id}")
 
+            print("Enviando email...")
             # Enviar email de confirmación
             try:
                 enviar_email_confirmacion(email, token)
                 flash('Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success')
+                print("Email enviado exitosamente")
             except Exception as e:
                 print(f"Error enviando email: {e}")
                 flash('Registro exitoso pero error enviando email. Contacta soporte.', 'warning')
+            
+            print("=== REGISTRO COMPLETADO ===")
             return redirect(url_for('auth.login'))
 
         return render_template('auth/registro.html')
     except Exception as e:
         import traceback
-        print(f"Error en registro: {e}")
+        print(f"=== ERROR EN REGISTRO ===")
+        print(f"Error: {e}")
+        print("Traceback completo:")
         traceback.print_exc()
+        print("=== FIN ERROR ===")
         db.session.rollback()
         flash(f'Error interno del servidor: {str(e)}', 'error')
         return render_template('auth/registro.html')

@@ -126,7 +126,7 @@ def confirmar(token):
     flash('Token inválido', 'error')
     return redirect(url_for('auth.login'))
 
-@auth_bp.route('/resend-confirm', methods=['GET', 'POST'])
+@auth_bp.route('/resend_confirm', methods=['GET', 'POST'])
 def resend_confirm():
     """Reenviar email de confirmación"""
     if request.method == 'POST':

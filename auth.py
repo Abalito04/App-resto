@@ -1,10 +1,13 @@
 # auth.py - Sistema de autenticación con debug
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto
 from werkzeug.security import generate_password_hash
 import re
 import traceback
+import secrets
+import smtplib
+from email.mime.text import MIMEText
 
 auth_bp = Blueprint('auth', __name__, template_folder='auth')
 
@@ -80,7 +83,7 @@ def registro():
             return render_template('auth/registro.html')
 
         # Crear restaurante
-        slug = nombre_restaurante.lower().replace(" ", "-")
+        slug = crear_slug(nombre_restaurante)
         restaurante = Restaurante(nombre=nombre_restaurante, slug=slug, email_contacto=email)
         db.session.add(restaurante)
         db.session.flush()
@@ -212,4 +215,3 @@ def configuracion():
             flash(f'Error al guardar configuración: {str(e)}', 'error')
 
     return render_template("auth/configuracion.html", config=config, es_admin=current_user.es_admin)
-

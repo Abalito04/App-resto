@@ -4,15 +4,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import secrets
 
-
-db = SQLAlchemy()
-
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-import secrets
-
 db = SQLAlchemy()
 
 class Usuario(UserMixin, db.Model):
@@ -21,8 +12,8 @@ class Usuario(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     nombre = db.Column(db.String(100), nullable=False)
     es_admin = db.Column(db.Boolean, default=False)
-    es_superadmin = db.Column(db.Boolean, default=False)   # 🔹 Nuevo campo
-    activo = db.Column(db.Boolean, default=False)  # 🔹 por defecto inactivo hasta confirmar email
+    es_superadmin = db.Column(db.Boolean, default=False)
+    activo = db.Column(db.Boolean, default=False)  # por defecto inactivo hasta confirmar email
     confirmado = db.Column(db.Boolean, default=False)
     token_confirmacion = db.Column(db.String(128), nullable=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.now)
@@ -120,15 +111,5 @@ class ConfiguracionRestaurante(db.Model):
     tema = db.Column(db.String(20), default="default")
     mostrar_precios = db.Column(db.Boolean, default=True)
     
-    # LÍNEA CORREGIDA: La relación estaba incompleta
+    # Relación con restaurante
     restaurante = db.relationship('Restaurante', backref=db.backref('configuracion', uselist=False))
-
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), nullable=False, unique=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    rol = db.Column(db.String(50), default="usuario")  
-    confirmado = db.Column(db.Boolean, default=False)
-
-    restaurante_id = db.Column(db.Integer, db.ForeignKey("restaurante.id"))

@@ -17,7 +17,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
 
 # Configuración de base de datos
-database_url = os.getenv('DATABASE_URL', '')
+database_url = os.getenv('CUSTOM_DATABASE_URL', '')
+if not database_url:
+    database_url = os.getenv('DATABASE_URL', '')  # fallback a la original
 
 if database_url:
     if database_url.startswith('postgres://'):

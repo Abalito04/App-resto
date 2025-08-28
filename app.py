@@ -46,8 +46,12 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Usuario.query.get(int(user_id))
-
+    try:
+        return Usuario.query.get(int(user_id))
+    except Exception as e:
+        # Si hay error (usuario no existe), limpiar la sesión
+        print(f"Error cargando usuario {user_id}: {e}")
+        return None
 # Filtro de context processor para templates
 @app.context_processor
 def inject_user():
@@ -485,6 +489,12 @@ def service_worker():
 @app.route("/login")
 def login_redirect():
     return redirect(url_for('auth.login'))
+
+@app.route("/clear-session")
+def clear_session():
+    """Limpiar sesión - útil después de resetear DB"""
+    session.clear()
+    return redirect(url_for('index_redirect'))
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

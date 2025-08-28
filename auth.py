@@ -34,7 +34,16 @@ def crear_slug(nombre):
     """Crea un slug URL-friendly desde el nombre del restaurante"""
     slug = re.sub(r'[^a-zA-Z0-9\s-]', '', nombre.lower())
     slug = re.sub(r'\s+', '-', slug)
-    return slug[:50]
+    slug = slug[:50]
+    
+    # Verificar si el slug ya existe y agregar número si es necesario
+    base_slug = slug
+    counter = 1
+    while Restaurante.query.filter_by(slug=slug).first():
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+    
+    return slug
 
 
 # -------- LOGIN --------

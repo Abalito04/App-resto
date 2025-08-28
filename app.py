@@ -6,6 +6,7 @@ from flask_login import LoginManager, login_required, current_user
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+from sqlalchemy import text
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
@@ -99,7 +100,7 @@ init_db()
 def health():
     """Ruta de salud para verificar conexión a DB"""
     try:
-        db.session.execute("SELECT 1")
+        db.session.execute(text("SELECT 1"))
         return "ok", 200
     except Exception as e:
         return f"db-error: {e}", 500

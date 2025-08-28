@@ -195,7 +195,7 @@ def admin_usuarios():
         return redirect(url_for("index_redirect"))
     
     usuarios = Usuario.query.all()
-    return render_template("auth/admin_usuarios.html", usuarios=usuarios)
+    return render_template("auth/superadmin_usuarios.html", usuarios=usuarios)
 
 @auth_bp.route('/admin/usuarios/toggle/<int:id>')
 @login_required
@@ -207,6 +207,62 @@ def admin_toggle_usuario(id):
     usuario.activo = not usuario.activo
     db.session.commit()
     flash("Estado actualizado", "success")
+    return redirect(url_for("auth.admin_usuarios"))
+
+@auth_bp.route('/admin/cambiar_rol/<int:user_id>', methods=['POST'])
+@login_required
+def superadmin_cambiar_rol(user_id):
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    
+    usuario = Usuario.query.get_or_404(user_id)
+    rol = request.form.get('rol')
+    
+    if rol == 'superadmin':
+        usuario.es_superadmin = True
+        usuario.es_admin = True
+    elif rol == 'admin':
+        usuario.es_superadmin = False
+        usuario.es_admin = True
+    else:  # usuario
+        usuario.es_superadmin = False
+        usuario.es_admin = False
+    
+    db.session.commit()
+    flash(f"Rol de {usuario.nombre} cambiado a {rol}", "success")
+    return redirect(url_for("auth.admin_usuarios"))
+
+@auth_bp.route('/admin/toggle_activo/<int:user_id>', methods=['POST'])
+@login_required
+def superadmin_toggle_activo(user_id):
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    
+    usuario = Usuario.query.get_or_404(user_id)
+    usuario.activo = not usuario.activo
+    db.session.commit()
+    flash(f"Estado de {usuario.nombre} cambiado", "success")
+    return redirect(url_for("auth.admin_usuarios"))
+
+@auth_bp.route('/admin/resetpass/<int:user_id>', methods=['POST'])
+@login_required
+def superadmin_resetpass(user_id):
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    
+    usuario = Usuario.query.get_or_404(user_id)
+    nueva_pass = request.form.get('nueva')
+    
+    if nueva_pass and len(nueva_pass) >= 6:
+        usuario.set_password(nueva_pass)
+        db.session.commit()
+        flash(f"Contraseña de {usuario.nombre} actualizada", "success")
+    else:
+        flash("La contraseña debe tener al menos 6 caracteres", "error")
+    
     return redirect(url_for("auth.admin_usuarios"))
 
 @auth_bp.route('/logout')

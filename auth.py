@@ -126,6 +126,27 @@ def confirmar(token):
     flash('Token inválido', 'error')
     return redirect(url_for('auth.login'))
 
+@auth_bp.route('/resend-confirm', methods=['GET', 'POST'])
+def resend_confirm():
+    """Reenviar email de confirmación"""
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        usuario = Usuario.query.filter_by(email=email).first()
+        
+        if usuario and not usuario.confirmado:
+            # Generar nuevo token
+            token = secrets.token_urlsafe(32)
+            usuario.token_confirmacion = token
+            db.session.commit()
+            
+            # Enviar email (simulado por ahora)
+            print(f"Email de confirmación enviado a {email} con token: {token}")
+            flash('Email de confirmación reenviado', 'success')
+        else:
+            flash('Email no encontrado o ya confirmado', 'error')
+    
+    return render_template('auth/resend_confirm.html')
+
 # -------- SUPERADMIN PANEL --------
 @auth_bp.route('/admin/usuarios')
 @login_required

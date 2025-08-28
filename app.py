@@ -546,6 +546,14 @@ def service_worker():
 def login_redirect():
     return redirect(url_for('auth.login'))
 
+@app.route("/health")
+def health():
+    try:
+        db.session.execute("SELECT 1")
+        return "ok", 200
+    except Exception as e:
+        return f"db-error: {e}", 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

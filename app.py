@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 from flask_login import LoginManager, login_required, current_user
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,15 +16,27 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
 
 # Configuración de base de datos
-database_url = os.getenv('DATABASE_URL')
+database_url = os.getenv('DATABASE_URL', '')
+
 if database_url:
-    # Corregir URL de Railway/Heroku si es necesario
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+    from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+    parsed = urlparse(database_url)
+    q = dict(parse_qsl(parsed.query))
+    q.setdefault('sslmode', 'require')
+    q.setdefault('connect_timeout', '5')
+    database_url = urlunparse(parsed._replace(query=urlencode(q)))
+
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "connect_args": {"sslmode": "require", "connect_timeout": 5},
+        "pool_pre_ping": True,
+    }
     app.config['DEBUG'] = False
 else:
-    # Desarrollo local
+    # Desarrollo local (sin DATABASE_URL)
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///restaurant.db"
     app.config['DEBUG'] = True
 
@@ -545,14 +558,6 @@ def service_worker():
 @app.route("/login")
 def login_redirect():
     return redirect(url_for('auth.login'))
-
-@app.route("/health")
-def health():
-    try:
-        db.session.execute("SELECT 1")
-        return "ok", 200
-    except Exception as e:
-        return f"db-error: {e}", 500
 
 
 if __name__ == "__main__":

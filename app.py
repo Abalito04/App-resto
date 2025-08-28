@@ -546,11 +546,6 @@ def service_worker():
 def login_redirect():
     return redirect(url_for('auth.login'))
 
-@app.route("/clear-session")
-def clear_session():
-    """Limpiar sesión - útil después de resetear DB"""
-    session.clear()
-    return redirect(url_for('index_redirect'))
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))

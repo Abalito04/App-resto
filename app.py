@@ -95,6 +95,15 @@ init_db()
 
 # =================== RUTAS CON MANEJO DE ERRORES ===================
 
+@app.route("/health")
+def health():
+    """Ruta de salud para verificar conexión a DB"""
+    try:
+        db.session.execute("SELECT 1")
+        return "ok", 200
+    except Exception as e:
+        return f"db-error: {e}", 500
+
 @app.route("/")
 def index_redirect():
     """Redirige al setup si no hay usuarios, sino al dashboard"""

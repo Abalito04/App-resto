@@ -74,43 +74,56 @@ def login():
 # -------- REGISTRO --------
 @auth_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
-    if request.method == 'POST':
-        nombre = request.form.get('nombre', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        confirmar_password = request.form.get('confirmar_password', '')
-        nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
+    try:
+        if request.method == 'POST':
+            nombre = request.form.get('nombre', '').strip()
+            email = request.form.get('email', '').strip().lower()
+            password = request.form.get('password', '')
+            confirmar_password = request.form.get('confirmar_password', '')
+            nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
 
-        if not validar_email(email):
-            flash('Email inválido', 'error')
-            return render_template('auth/registro.html')
+            if not validar_email(email):
+                flash('Email inválido', 'error')
+                return render_template('auth/registro.html')
 
-        if Usuario.query.filter_by(email=email).first():
-            flash('Email ya registrado', 'error')
-            return render_template('auth/registro.html')
+            if Usuario.query.filter_by(email=email).first():
+                flash('Email ya registrado', 'error')
+                return render_template('auth/registro.html')
 
-        # Crear restaurante
-        slug = crear_slug(nombre_restaurante)
-        restaurante = Restaurante(nombre=nombre_restaurante, slug=slug, email_contacto=email)
-        db.session.add(restaurante)
-        db.session.flush()
+            # Crear restaurante
+            slug = crear_slug(nombre_restaurante)
+            restaurante = Restaurante(nombre=nombre_restaurante, slug=slug, email_contacto=email)
+            db.session.add(restaurante)
+            db.session.flush()
 
-        # Crear usuario
-        token = secrets.token_urlsafe(32)
-        usuario = Usuario(
-            nombre=nombre, email=email,
-            es_admin=True, restaurante_id=restaurante.id,
-            confirmado=False, activo=False, token_confirmacion=token
-        )
-        usuario.set_password(password)
-        db.session.add(usuario)
-        db.session.commit()
+            # Crear usuario
+            token = secrets.token_urlsafe(32)
+            usuario = Usuario(
+                nombre=nombre, email=email,
+                es_admin=True, restaurante_id=restaurante.id,
+                confirmado=False, activo=False, token_confirmacion=token
+            )
+            usuario.set_password(password)
+            db.session.add(usuario)
+            db.session.commit()
 
-        enviar_email_confirmacion(email, token)
-        flash('Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success')
-        return redirect(url_for('auth.login'))
+            # Enviar email de confirmación
+            try:
+                enviar_email_confirmacion(email, token)
+                flash('Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success')
+            except Exception as e:
+                print(f"Error enviando email: {e}")
+                flash('Registro exitoso pero error enviando email. Contacta soporte.', 'warning')
+            return redirect(url_for('auth.login'))
 
-    return render_template('auth/registro.html')
+        return render_template('auth/registro.html')
+    except Exception as e:
+        import traceback
+        print(f"Error en registro: {e}")
+        traceback.print_exc()
+        db.session.rollback()
+        flash(f'Error interno del servidor: {str(e)}', 'error')
+        return render_template('auth/registro.html')
 
 # -------- CONFIRMACION --------
 @auth_bp.route('/confirmar/<token>')

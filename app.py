@@ -160,6 +160,27 @@ def index_logueado():
         flash(f'Error cargando dashboard: {str(e)}', 'error')
         return redirect(url_for('setup_inicial'))
 
+@app.route("/debug/users")
+def debug_users():
+    """Ruta temporal para debug - ver usuarios creados"""
+    try:
+        usuarios = Usuario.query.all()
+        result = []
+        for u in usuarios:
+            result.append({
+                "id": u.id,
+                "email": u.email,
+                "nombre": u.nombre,
+                "es_admin": u.es_admin,
+                "es_superadmin": u.es_superadmin,
+                "activo": u.activo,
+                "confirmado": u.confirmado,
+                "restaurante_id": u.restaurante_id
+            })
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/make-superadmin/<email>")
 def make_superadmin(email):
     """Ruta temporal para hacer superadmin a un usuario - REMOVER EN PRODUCCIÓN"""

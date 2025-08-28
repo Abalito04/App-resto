@@ -40,28 +40,35 @@ def crear_slug(nombre):
 # -------- LOGIN --------
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
+    try:
+        if request.method == 'POST':
+            email = request.form.get('email', '').strip().lower()
+            password = request.form.get('password', '')
 
-        usuario = Usuario.query.filter_by(email=email).first()
-        if not usuario or not usuario.check_password(password):
-            flash('Email o contraseña incorrectos', 'error')
-            return render_template('auth/login.html')
-        
-        if not usuario.confirmado:
-            flash('Debes confirmar tu cuenta antes de ingresar', 'error')
-            return render_template('auth/login.html')
+            usuario = Usuario.query.filter_by(email=email).first()
+            if not usuario or not usuario.check_password(password):
+                flash('Email o contraseña incorrectos', 'error')
+                return render_template('auth/login.html')
+            
+            if not usuario.confirmado:
+                flash('Debes confirmar tu cuenta antes de ingresar', 'error')
+                return render_template('auth/login.html')
 
-        if not usuario.activo:
-            flash('Tu cuenta está deshabilitada, contacta soporte', 'error')
-            return render_template('auth/login.html')
+            if not usuario.activo:
+                flash('Tu cuenta está deshabilitada, contacta soporte', 'error')
+                return render_template('auth/login.html')
 
-        login_user(usuario)
-        session['restaurante_id'] = usuario.restaurante.id if usuario.restaurante else None
-        return redirect(url_for('index_redirect'))
+            login_user(usuario)
+            session['restaurante_id'] = usuario.restaurante.id if usuario.restaurante else None
+            return redirect(url_for('index_redirect'))
 
-    return render_template('auth/login.html')
+        return render_template('auth/login.html')
+    except Exception as e:
+        import traceback
+        print(f"Error en login: {e}")
+        traceback.print_exc()
+        flash(f'Error interno del servidor: {str(e)}', 'error')
+        return render_template('auth/login.html')
 
 
 # -------- REGISTRO --------

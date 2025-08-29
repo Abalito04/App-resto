@@ -7,6 +7,7 @@ import re
 import traceback
 import secrets
 import smtplib
+import os
 from email.mime.text import MIMEText
 
 auth_bp = Blueprint('auth', __name__, template_folder='auth')
@@ -14,21 +15,43 @@ auth_bp = Blueprint('auth', __name__, template_folder='auth')
 # -------- EMAIL --------
 def enviar_email_confirmacion(email, token):
     try:
+        # Obtener credenciales de email
+        mail_username = current_app.config.get("MAIL_USERNAME") or os.environ.get("MAIL_USERNAME")
+        mail_password = current_app.config.get("MAIL_PASSWORD") or os.environ.get("MAIL_PASSWORD")
+        
+        if not mail_username or not mail_password:
+            print("❌ Variables de email no configuradas para confirmación")
+            return
+        
         msg = MIMEText(f"Confirma tu cuenta ingresando a: {url_for('auth.confirmar', token=token, _external=True)}")
         msg['Subject'] = 'Confirma tu cuenta'
-        msg['From'] = current_app.config.get("MAIL_USERNAME", "no-reply@miapp.com")
+        msg['From'] = mail_username
         msg['To'] = email
 
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
             server.starttls()
-            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
+            server.login(mail_username, mail_password)
             server.send_message(msg)
+            print(f"✅ Email de confirmación enviado a {email}")
     except Exception as e:
-        print("Error enviando email:", e)
+        print(f"❌ Error enviando email de confirmación: {e}")
 
 def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje):
     """Envía email de solicitud de cambio de plan al administrador"""
     try:
+        # Verificar que las variables de entorno estén configuradas
+        mail_username = current_app.config.get("MAIL_USERNAME") or os.environ.get("MAIL_USERNAME")
+        mail_password = current_app.config.get("MAIL_PASSWORD") or os.environ.get("MAIL_PASSWORD")
+        
+        if not mail_username or not mail_password:
+            error_msg = "Variables de entorno MAIL_USERNAME o MAIL_PASSWORD no configuradas"
+            print(f"❌ {error_msg}")
+            print(f"📧 MAIL_USERNAME disponible: {bool(mail_username)}")
+            print(f"📧 MAIL_PASSWORD disponible: {bool(mail_password)}")
+            raise ValueError(error_msg)
+        
+        print(f"📧 Configuración de email encontrada: {mail_username}")
+        
         # Crear contenido del email
         contenido = f"""
         === SOLICITUD DE CAMBIO DE PLAN ===
@@ -48,20 +71,36 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
         
         msg = MIMEText(contenido)
         msg['Subject'] = f'Solicitud de cambio de plan - {restaurante}'
-        msg['From'] = current_app.config.get("MAIL_USERNAME", "no-reply@miapp.com")
+        msg['From'] = mail_username
         msg['To'] = "abalito95@gmail.com"  # Tu email de administrador
         
-        # Enviar email
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        print("📧 Conectando a servidor SMTP...")
+        
+        # Enviar email con timeout y mejor manejo de errores
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
+            print("📧 Iniciando conexión TLS...")
             server.starttls()
-            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
+            
+            print("📧 Autenticando...")
+            server.login(mail_username, mail_password)
+            
+            print("📧 Enviando mensaje...")
             server.send_message(msg)
             
         print(f"✅ Email de contacto enviado exitosamente a abalito95@gmail.com")
         
+    except smtplib.SMTPAuthenticationError as e:
+        error_msg = f"Error de autenticación SMTP: {e}"
+        print(f"❌ {error_msg}")
+        raise ValueError(error_msg)
+    except smtplib.SMTPException as e:
+        error_msg = f"Error SMTP: {e}"
+        print(f"❌ {error_msg}")
+        raise ValueError(error_msg)
     except Exception as e:
-        print(f"❌ Error enviando email de contacto: {e}")
-        raise e
+        error_msg = f"Error inesperado enviando email: {e}"
+        print(f"❌ {error_msg}")
+        raise ValueError(error_msg)
 
 def validar_email(email):
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
@@ -659,8 +698,11 @@ def contacto_plan():
             # Enviar email real al administrador
             enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje)
             flash('Solicitud enviada exitosamente. Te contactaremos pronto.', 'success')
+        except ValueError as e:
+            print(f"❌ Error de configuración o SMTP: {e}")
+            flash(f'Error enviando email: {str(e)}. Contacta soporte técnico.', 'error')
         except Exception as e:
-            print(f"Error enviando email de contacto: {e}")
+            print(f"❌ Error inesperado enviando email: {e}")
             flash('Solicitud enviada pero hubo un error enviando el email. Te contactaremos por otros medios.', 'warning')
         
         return redirect(url_for('auth.planes'))

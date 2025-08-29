@@ -144,14 +144,7 @@ init_db()
 
 # =================== RUTAS CON MANEJO DE ERRORES ===================
 
-@app.route("/health")
-def health():
-    """Ruta de salud para verificar conexión a DB"""
-    try:
-        db.session.execute(text("SELECT 1"))
-        return "ok", 200
-    except Exception as e:
-        return f"db-error: {e}", 500
+
 
 @app.route("/")
 def index_redirect():
@@ -199,56 +192,11 @@ def index_logueado():
         flash(f'Error cargando dashboard: {str(e)}', 'error')
         return redirect(url_for('setup_inicial'))
 
-@app.route("/debug/users")
-def debug_users():
-    """Ruta temporal para debug - ver usuarios creados"""
-    try:
-        usuarios = Usuario.query.all()
-        result = []
-        for u in usuarios:
-            result.append({
-                "id": u.id,
-                "email": u.email,
-                "nombre": u.nombre,
-                "es_admin": u.es_admin,
-                "es_superadmin": u.es_superadmin,
-                "activo": u.activo,
-                "confirmado": u.confirmado,
-                "restaurante_id": u.restaurante_id
-            })
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
-@app.route("/debug/time")
-def debug_time():
-    """Debug para verificar la hora del servidor"""
-    import time
-    from datetime import datetime
-    
-    # Obtener hora local usando la función
-    hora_local = get_local_time()
-    
-    return jsonify({
-        "hora_servidor_utc": datetime.now(pytz.UTC).isoformat(),
-        "hora_local_calculada": hora_local.isoformat(),
-        "timestamp": time.time(),
-        "zona_horaria_configurada": os.getenv('TZ', 'No configurada'),
-        "timezone_server": os.getenv('SERVER_TIMEZONE', 'No configurada'),
-        "diferencia_horas": (hora_local - datetime.now()).total_seconds() / 3600
-    })
 
-@app.route("/debug/routes")
-def debug_routes():
-    """Debug para verificar las rutas disponibles"""
-    routes = []
-    for rule in app.url_map.iter_rules():
-        routes.append({
-            "endpoint": rule.endpoint,
-            "methods": list(rule.methods),
-            "rule": str(rule)
-        })
-    return jsonify(routes)
+
+
+
 
 @app.route("/make-superadmin/<email>")
 def make_superadmin(email):

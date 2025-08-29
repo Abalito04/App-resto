@@ -3,9 +3,6 @@
 // Registrar el Service Worker
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    // Deshabilitar temporalmente el service worker para debug
-    console.log("🔧 DEBUG: Service Worker deshabilitado temporalmente");
-    /*
     navigator.serviceWorker
       .register("/static/sw.js")
       .then(reg => {
@@ -14,7 +11,6 @@ if ("serviceWorker" in navigator) {
       .catch(err => {
         console.error("❌ Error al registrar el Service Worker:", err);
       });
-    */
   });
 }
 

@@ -1,4 +1,4 @@
-# auth.py - Sistema de autenticación con debug
+# auth.py - Sistema de autenticación
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto
@@ -366,13 +366,6 @@ def perfil():
 @auth_bp.route("/configuracion", methods=["GET", "POST"])
 @login_required
 def configuracion():
-    print("🔧 DEBUG: Accediendo a configuración")
-    print(f"🔧 DEBUG: Usuario: {current_user.email}")
-    print(f"🔧 DEBUG: Restaurante: {current_user.restaurante}")
-    print(f"🔧 DEBUG: Método: {request.method}")
-    print(f"🔧 DEBUG: URL: {request.url}")
-    print(f"🔧 DEBUG: Referrer: {request.referrer}")
-    
     # Verificar que el usuario tenga restaurante
     if not current_user.restaurante:
         flash('Usuario sin restaurante asignado', 'error')

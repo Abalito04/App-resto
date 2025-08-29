@@ -9,20 +9,6 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from sqlalchemy import text
 from collections import Counter
 
-items = request.form.getlist("producto")  # Ejemplo: ['2', '2', '3']
-
-conteo = Counter(items)  # {'2': 2, '3': 1}
-
-for producto_id_str, cantidad in conteo.items():
-    producto_id = int(producto_id_str)
-    item = Item.query.filter_by(pedido_id=pedido.id, producto_id=producto_id).first()
-    if item:
-        item.cantidad += cantidad
-    else:
-        item = Item(pedido_id=pedido.id, producto_id=producto_id, cantidad=cantidad)
-        db.session.add(item)
-db.session.commit()
-
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -388,16 +374,18 @@ def crear_pedido():
         db.session.add(pedido)
         db.session.commit()
 
-    # 3. Agregar productos al pedido existente (sumar ítems)
-    for producto_id in items:
-        producto = Producto.query.filter_by(id=int(producto_id), restaurante_id=restaurante_id).first()
+    # 3. Agregar productos al pedido existente (sumar ítems correctamente)
+    conteo = Counter(items)  # Cuenta cuántas veces se seleccionó cada producto
+
+    for producto_id_str, cantidad in conteo.items():
+        producto_id = int(producto_id_str)
+        producto = Producto.query.filter_by(id=producto_id, restaurante_id=restaurante_id).first()
         if producto:
-            # Si ya existe ese producto en el pedido, suma uno más
             item = Item.query.filter_by(pedido_id=pedido.id, producto_id=producto.id).first()
             if item:
-                item.cantidad += 1
+                item.cantidad += cantidad
             else:
-                item = Item(pedido_id=pedido.id, producto_id=producto.id, cantidad=1)
+                item = Item(pedido_id=pedido.id, producto_id=producto.id, cantidad=cantidad)
                 db.session.add(item)
     db.session.commit()
 

@@ -13,6 +13,16 @@ import pytz
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Configurar zona horaria del servidor para que coincida con la PC local
+import os
+timezone_server = os.getenv('SERVER_TIMEZONE', 'America/Argentina/Buenos_Aires')
+os.environ['TZ'] = timezone_server
+try:
+    import time
+    time.tzset()
+except:
+    pass  # En Windows no existe tzset()
+
 load_dotenv()
 
 
@@ -96,20 +106,8 @@ def get_user_restaurante():
 
 def get_local_time(restaurante_id=None):
     """Obtiene la hora local del restaurante"""
-    if not restaurante_id:
-        restaurante_id = get_user_restaurante()
-    
-    if restaurante_id:
-        restaurante = Restaurante.query.get(restaurante_id)
-        if restaurante and restaurante.zona_horaria:
-            try:
-                tz = pytz.timezone(restaurante.zona_horaria)
-                return datetime.now(tz)
-            except:
-                pass
-    
-    # Fallback a UTC
-    return datetime.now(pytz.UTC)
+    # Usar la hora del servidor que ya está configurada con la zona horaria correcta
+    return datetime.now()
 
 # =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
 def init_db():
@@ -561,15 +559,16 @@ def cocina():
         tiempo = None
         if p.hora_cocina:
             # Calcular tiempo desde que llegó a cocina
-            # Usar datetime.now() sin zona horaria para evitar problemas
             ahora = datetime.now()
             delta = ahora - p.hora_cocina
             minutos = int(delta.total_seconds() // 60)
             segundos = int(delta.total_seconds() % 60)
             tiempo = f"{minutos}m {segundos}s"
         else:
-            # Si no tiene hora_cocina, mostrar "Pendiente"
-            tiempo = "Pendiente"
+            # Si no tiene hora_cocina, establecerla automáticamente
+            p.hora_cocina = datetime.now()
+            db.session.commit()
+            tiempo = "0m 0s"
         lista_pedidos.append({"pedido": p, "tiempo": tiempo})
     
     # Obtener la zona horaria del restaurante

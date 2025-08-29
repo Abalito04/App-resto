@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
+<script>
+console.log("🔧 DEBUG: Template de configuración cargado");
+console.log("🔧 DEBUG: Usuario: {{ current_user.email }}");
+console.log("🔧 DEBUG: Restaurante: {{ current_user.restaurante.nombre if current_user.restaurante else 'Sin restaurante' }}");
+</script>
 <div class="container mt-4">
     <h2>⚙️ Configuración del Restaurante</h2>
 

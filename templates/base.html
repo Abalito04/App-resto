@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+console.log("🔧 DEBUG: Template base cargado");
+console.log("🔧 DEBUG: URL actual:", window.location.href);
+</script>
     <meta charset="UTF-8">
     <title>{% if current_restaurante %}{{ current_restaurante.nombre }} - {% endif %}Resto App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -114,13 +118,18 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('cocina') }}">Cocina</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('historial') }}">Historial</a></li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('auth.configuracion') }}" onclick="console.log('Click en configuración')">
-            <i class="fas fa-cog"></i> Configuración
+          <a class="nav-link" href="{{ url_for('auth.configuracion') }}" onclick="console.log('Click en configuración - url_for'); return true;">
+            <i class="fas fa-cog"></i> Configuración (url_for)
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/auth/configuracion" onclick="console.log('Click en configuración directo')">
-            <i class="fas fa-cog"></i> Config (Directo)
+          <a class="nav-link" href="/auth/configuracion" onclick="console.log('Click en configuración directo'); return true;">
+            <i class="fas fa-cog"></i> Configuración (Directo)
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="console.log('Click en configuración JS'); window.location.href='{{ url_for(\'auth.configuracion\') }}'; return false;">
+            <i class="fas fa-cog"></i> Configuración (JS)
           </a>
         </li>
         {% if current_user.es_superadmin %}

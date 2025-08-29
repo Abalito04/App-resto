@@ -26,6 +26,43 @@ def enviar_email_confirmacion(email, token):
     except Exception as e:
         print("Error enviando email:", e)
 
+def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje):
+    """Envía email de solicitud de cambio de plan al administrador"""
+    try:
+        # Crear contenido del email
+        contenido = f"""
+        === SOLICITUD DE CAMBIO DE PLAN ===
+        
+        Nombre: {nombre}
+        Email: {email}
+        Restaurante: {restaurante}
+        Plan solicitado: {plan_solicitado}
+        
+        Mensaje:
+        {mensaje}
+        
+        ===================================
+        
+        Este email fue enviado desde el sistema de gestión de restaurantes.
+        """
+        
+        msg = MIMEText(contenido)
+        msg['Subject'] = f'Solicitud de cambio de plan - {restaurante}'
+        msg['From'] = current_app.config.get("MAIL_USERNAME", "no-reply@miapp.com")
+        msg['To'] = "abalito95@gmail.com"  # Tu email de administrador
+        
+        # Enviar email
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
+            server.send_message(msg)
+            
+        print(f"✅ Email de contacto enviado exitosamente a abalito95@gmail.com")
+        
+    except Exception as e:
+        print(f"❌ Error enviando email de contacto: {e}")
+        raise e
+
 def validar_email(email):
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
 
@@ -618,19 +655,14 @@ def contacto_plan():
             flash('Todos los campos son obligatorios', 'error')
             return render_template('auth/contacto_plan.html')
         
-        # Aquí podrías enviar un email real
-        # Por ahora solo simulamos el envío
-        print(f"""
-        === SOLICITUD DE CAMBIO DE PLAN ===
-        Nombre: {nombre}
-        Email: {email}
-        Restaurante: {restaurante}
-        Plan solicitado: {plan_solicitado}
-        Mensaje: {mensaje}
-        ===================================
-        """)
+        try:
+            # Enviar email real al administrador
+            enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje)
+            flash('Solicitud enviada exitosamente. Te contactaremos pronto.', 'success')
+        except Exception as e:
+            print(f"Error enviando email de contacto: {e}")
+            flash('Solicitud enviada pero hubo un error enviando el email. Te contactaremos por otros medios.', 'warning')
         
-        flash('Solicitud enviada exitosamente. Te contactaremos pronto.', 'success')
         return redirect(url_for('auth.planes'))
     
     return render_template('auth/contacto_plan.html')

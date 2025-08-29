@@ -118,7 +118,7 @@ def registro():
             token = secrets.token_urlsafe(32)
             usuario = Usuario(
                 nombre=nombre, email=email,
-                es_admin=True, restaurante_id=restaurante.id,
+                es_superadmin=True, restaurante_id=restaurante.id,
                 confirmado=False, activo=False, token_confirmacion=token
             )
             usuario.set_password(password)
@@ -215,14 +215,12 @@ def admin_crear_usuario():
     if not current_user.es_superadmin:
         flash("Acceso denegado", "error")
         return redirect(url_for("index_redirect"))
-    from models import Restaurante  # Importa aquí si no está arriba
     restaurantes = Restaurante.query.all()
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         restaurante_id = request.form.get('restaurante_id')
-        es_admin = bool(request.form.get('es_admin'))
         es_superadmin = bool(request.form.get('es_superadmin'))
 
         # Validaciones básicas
@@ -239,7 +237,6 @@ def admin_crear_usuario():
         usuario = Usuario(
             nombre=nombre,
             email=email,
-            es_admin=es_admin or es_superadmin,
             es_superadmin=es_superadmin,
             restaurante_id=restaurante_id if restaurante_id else None,
             confirmado=True,
@@ -264,13 +261,8 @@ def superadmin_cambiar_rol(user_id):
     
     if rol == 'superadmin':
         usuario.es_superadmin = True
-        usuario.es_admin = True
-    elif rol == 'admin':
-        usuario.es_superadmin = False
-        usuario.es_admin = True
     else:  # usuario
         usuario.es_superadmin = False
-        usuario.es_admin = False
     
     db.session.commit()
     flash(f"Rol de {usuario.nombre} cambiado a {rol}", "success")
@@ -359,7 +351,7 @@ def configuracion():
             config = TempConfig()
 
     # Solo permitir POST si es admin
-    if request.method == 'POST' and current_user.es_admin:
+    if request.method == 'POST' and current_user.es_superadmin:
         try:
             config.impresora_habilitada = 'impresora_habilitada' in request.form
             config.impresora_tipo = request.form.get('impresora_tipo', 'USB')
@@ -380,4 +372,4 @@ def configuracion():
             db.session.rollback()
             flash(f'Error al guardar configuración: {str(e)}', 'error')
 
-    return render_template("auth/configuracion.html", config=config, es_admin=current_user.es_admin)
+    return render_template("auth/configuracion.html", config=config, es_superadmin=current_user.es_superadmin)

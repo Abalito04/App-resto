@@ -10,36 +10,42 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <script src="https://kit.fontawesome.com/4c7c8e0e6e.js" crossorigin="anonymous"></script>
-<style>
-  body.bg-dark {
-    background-color: #181818 !important;
-    color: #f8f9fa !important;
-  }
-  .navbar-dark .navbar-nav .nav-link,
-  .navbar-dark .navbar-brand,
-  .navbar-dark .dropdown-toggle,
-  .navbar-dark .btn-outline-light {
-    color: #fff !important;
-  }
-  .navbar-light .navbar-nav .nav-link,
-  .navbar-light .navbar-brand,
-  .navbar-light .dropdown-toggle,
-  .navbar-light .btn-outline-dark {
-    color: #212529 !important;
-  }
-  .dropdown-menu {
-    background-color: inherit;
-  }
-  .dropdown-menu .dropdown-item {
-    color: inherit;
-  }
-  .btn-outline-light, .btn-outline-dark {
-    border-color: transparent;
-  }
-</style>
+    <style>
+      body.bg-dark {
+        background-color: #181818 !important;
+        color: #f8f9fa !important;
+      }
+      .navbar-dark .navbar-nav .nav-link,
+      .navbar-dark .navbar-brand,
+      .navbar-dark .dropdown-toggle,
+      .navbar-dark .btn-outline-light {
+        color: #fff !important;
+      }
+      .navbar-light .navbar-nav .nav-link,
+      .navbar-light .navbar-brand,
+      .navbar-light .dropdown-toggle,
+      .navbar-light .btn-outline-dark {
+        color: #212529 !important;
+      }
+      .dropdown-menu.bg-dark {
+        background-color: #23272b !important;
+      }
+      .dropdown-menu.bg-light {
+        background-color: #fff !important;
+      }
+      .dropdown-menu .dropdown-item {
+        color: inherit;
+      }
+      .btn-outline-light, .btn-outline-dark {
+        border-color: transparent;
+      }
+      #toggle-theme {
+        min-width: 40px;
+      }
+    </style>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav id="main-navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="{{ url_for('index_redirect') }}">
       {% if current_restaurante %}{{ current_restaurante.nombre }}{% else %}Resto App{% endif %}
@@ -100,14 +106,17 @@
   function setTheme(dark) {
     document.body.classList.toggle('bg-dark', dark);
     document.body.classList.toggle('text-white', dark);
-    const navbar = document.querySelector('.navbar');
+
+    // Navbar
+    const navbar = document.getElementById('main-navbar');
     if (navbar) {
       navbar.classList.toggle('navbar-dark', dark);
       navbar.classList.toggle('navbar-light', !dark);
       navbar.classList.toggle('bg-dark', dark);
       navbar.classList.toggle('bg-light', !dark);
     }
-    // Cambia el icono del botón
+
+    // Cambia el icono y color del botón de tema
     const themeBtn = document.getElementById('toggle-theme');
     if (themeBtn) {
       const icon = themeBtn.querySelector('i');
@@ -115,10 +124,10 @@
         icon.classList.toggle('fa-moon', !dark);
         icon.classList.toggle('fa-sun', dark);
       }
-      // Cambia el color del botón para que siempre sea visible
-      themeBtn.classList.toggle('btn-outline-light', !dark);
-      themeBtn.classList.toggle('btn-outline-dark', dark);
+      themeBtn.classList.toggle('btn-outline-dark', !dark);
+      themeBtn.classList.toggle('btn-outline-light', dark);
     }
+
     // Cambia los dropdowns
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
       menu.classList.toggle('bg-dark', dark);
@@ -126,11 +135,10 @@
       menu.classList.toggle('text-white', dark);
       menu.classList.toggle('text-dark', !dark);
     });
-    // Guarda preferencia
+
     localStorage.setItem('darkTheme', dark ? '1' : '0');
   }
 
-  // Inicializa el tema según preferencia guardada
   document.addEventListener('DOMContentLoaded', function() {
     const dark = localStorage.getItem('darkTheme') === '1';
     setTheme(dark);

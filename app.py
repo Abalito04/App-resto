@@ -484,7 +484,7 @@ def llegada_cocina(pedido_id):
     """Marca cuando un pedido llega a cocina"""
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     if not pedido.hora_cocina:
-        pedido.hora_cocina = get_local_time()
+        pedido.hora_cocina = datetime.now()
         db.session.commit()
         flash("Pedido marcado como recibido en cocina", "success")
     return redirect(url_for("cocina"))
@@ -560,9 +560,10 @@ def cocina():
     for p in pedidos:
         tiempo = None
         if p.hora_cocina:
-            # Calcular tiempo desde que llegó a cocina usando hora local
-            hora_local = get_local_time(restaurante_id)
-            delta = hora_local - p.hora_cocina
+            # Calcular tiempo desde que llegó a cocina
+            # Usar datetime.now() sin zona horaria para evitar problemas
+            ahora = datetime.now()
+            delta = ahora - p.hora_cocina
             minutos = int(delta.total_seconds() // 60)
             segundos = int(delta.total_seconds() % 60)
             tiempo = f"{minutos}m {segundos}s"
@@ -571,7 +572,11 @@ def cocina():
             tiempo = "Pendiente"
         lista_pedidos.append({"pedido": p, "tiempo": tiempo})
     
-    return render_template("cocina.html", lista_pedidos=lista_pedidos)
+    # Obtener la zona horaria del restaurante
+    restaurante = Restaurante.query.get(restaurante_id)
+    zona_horaria = restaurante.zona_horaria if restaurante else 'UTC'
+    
+    return render_template("cocina.html", lista_pedidos=lista_pedidos, zona_horaria=zona_horaria)
 
 # =================== API PARA MULTITENANCY ===================
 @app.route("/api/pedidos/activos")

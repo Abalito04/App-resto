@@ -14,7 +14,7 @@
                     Para llevar: {{ item.pedido.nombre_cliente }}
                 {% endif %}
                 </strong> - {{ item.pedido.metodo_pago }}
-                <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }} ({{ zona_horaria }})</small>
 
                 {% if item.pedido.hora_cocina %}
                     <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>

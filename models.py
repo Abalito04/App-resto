@@ -66,10 +66,10 @@ class Restaurante(db.Model):
             },
             'premium_full': {
                 'productos': -1,  # Sin límite
-                'usuarios': -1,   # Sin límite
+                'usuarios': 10,   # Máximo 10 usuarios
                 'pedidos_dia': -1, # Sin límite
                 'nombre': 'Premium Full',
-                'descripcion': 'Plan completo sin limitaciones'
+                'descripcion': 'Plan completo para restaurantes grandes'
             }
         }
         return limits.get(self.plan, limits['free'])
@@ -84,11 +84,12 @@ class Restaurante(db.Model):
         return current_count < limits['productos'], limits['productos'] - current_count
     
     def can_add_user(self):
-        """Verifica si puede agregar más usuarios"""
+        """Verifica si puede agregar más usuarios al mismo restaurante"""
         limits = self.get_plan_limits()
         if limits['usuarios'] == -1:
             return True, None
         
+        # Contar solo usuarios activos del mismo restaurante
         current_count = Usuario.query.filter_by(restaurante_id=self.id, activo=True).count()
         return current_count < limits['usuarios'], limits['usuarios'] - current_count
     
@@ -103,6 +104,21 @@ class Restaurante(db.Model):
                 Pedido.fecha >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             ).count()
         }
+    
+    def get_usuarios_info(self):
+        """Retorna información detallada de los usuarios del restaurante"""
+        usuarios = Usuario.query.filter_by(restaurante_id=self.id, activo=True).all()
+        return [
+            {
+                'id': u.id,
+                'nombre': u.nombre,
+                'email': u.email,
+                'es_admin': u.es_admin,
+                'es_superadmin': u.es_superadmin,
+                'fecha_creacion': u.fecha_creacion
+            }
+            for u in usuarios
+        ]
 
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -488,9 +488,9 @@ def admin_planes():
         },
         'premium_full': {
             'nombre': 'Premium Full',
-            'descripcion': 'Plan completo sin limitaciones',
+            'descripcion': 'Plan completo para restaurantes grandes',
             'productos': 'Ilimitado',
-            'usuarios': 'Ilimitado',
+            'usuarios': 10,
             'pedidos_dia': 'Ilimitado',
             'precio': '$99/mes'
         }
@@ -562,9 +562,9 @@ def planes():
         },
         'premium_full': {
             'nombre': 'Premium Full',
-            'descripcion': 'Plan completo sin limitaciones',
+            'descripcion': 'Plan completo para restaurantes grandes',
             'productos': 'Ilimitado',
-            'usuarios': 'Ilimitado',
+            'usuarios': 10,
             'pedidos_dia': 'Ilimitado',
             'precio': '$99/mes'
         }
@@ -634,3 +634,19 @@ def contacto_plan():
         return redirect(url_for('auth.planes'))
     
     return render_template('auth/contacto_plan.html')
+
+@auth_bp.route('/usuarios_restaurante')
+@login_required
+def usuarios_restaurante():
+    """Ver usuarios del restaurante actual"""
+    if not current_user.restaurante:
+        flash('Usuario sin restaurante asignado', 'error')
+        return redirect(url_for('index_redirect'))
+    
+    usuarios_info = current_user.restaurante.get_usuarios_info()
+    limits = current_user.restaurante.get_plan_limits()
+    
+    return render_template('auth/usuarios_restaurante.html', 
+                         usuarios=usuarios_info,
+                         limits=limits,
+                         restaurante=current_user.restaurante)

@@ -44,17 +44,18 @@
         </td>
         <td>{{ u.restaurante.nombre if u.restaurante else '-' }}</td>
         <td>
-           <form method="POST" action="{{ url_for('auth.superadmin_resetpass', user_id=u.id) }}" class="d-flex gap-2">
-    <!-- Botón eliminar -->
-    {% if u.id != current_user.id %}
-    <form method="POST" action="{{ url_for('auth.eliminar_usuario', user_id=u.id) }}" style="display:inline;">
-      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este usuario?');">
-        <i class="fas fa-trash"></i>
-      </button>
-    </form>
-    {% endif %}
+          <form method="POST" action="{{ url_for('auth.superadmin_resetpass', user_id=u.id) }}" class="d-flex gap-2">
+          <input class="form-control form-control-sm" name="nueva" placeholder="Nueva pass">
+          <button class="btn btn-sm btn-warning">Reset</button>
+        </form>
+  {% if u.id != current_user.id %}
+  <form method="POST" action="{{ url_for('auth.eliminar_usuario', user_id=u.id) }}" style="display:inline;">
+    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este usuario?');">
+      <i class="fas fa-trash"></i>
+    </button>
   </form>
-        </td>
+  {% endif %}
+</td>
       </tr>
       {% endfor %}
     </tbody>

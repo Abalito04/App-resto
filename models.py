@@ -52,14 +52,14 @@ class Restaurante(db.Model):
         limits = {
             'free': {
                 'productos': 10,
-                'usuarios': 2,
+                'usuarios': 1,
                 'pedidos_dia': 50,
                 'nombre': 'Free',
                 'descripcion': 'Plan gratuito con limitaciones básicas'
             },
             'premium1': {
                 'productos': 30,
-                'usuarios': 5,
+                'usuarios': 3,
                 'pedidos_dia': 200,
                 'nombre': 'Premium 1',
                 'descripcion': 'Plan intermedio para restaurantes pequeños'

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📧 Solicitar Cambio de Plan</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <p class="text-muted mb-4">
+                        Completa el formulario para solicitar un cambio de plan. Nos pondremos en contacto contigo pronto.
+                    </p>
+
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre completo *</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                                           value="{{ current_user.nombre }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="{{ current_user.email }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="restaurante" class="form-label">Restaurante *</label>
+                                    <input type="text" class="form-control" id="restaurante" name="restaurante" 
+                                           value="{{ current_user.restaurante.nombre if current_user.restaurante else '' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="plan_solicitado" class="form-label">Plan solicitado *</label>
+                                    <select class="form-select" id="plan_solicitado" name="plan_solicitado" required>
+                                        <option value="">Selecciona un plan</option>
+                                        <option value="Premium 1">Premium 1 - $29/mes (30 productos, 3 usuarios)</option>
+                                        <option value="Premium Full">Premium Full - $99/mes (Sin límites)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="mensaje" class="form-label">Mensaje *</label>
+                            <textarea class="form-control" id="mensaje" name="mensaje" rows="5" 
+                                      placeholder="Cuéntanos por qué necesitas cambiar de plan y cualquier información adicional..." required></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('auth.planes') }}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Enviar Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

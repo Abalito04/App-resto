@@ -447,6 +447,84 @@ def eliminar_usuario(user_id):
     flash(f"Usuario {usuario.nombre} eliminado.", "success")
     return redirect(url_for("auth.admin_usuarios"))
 
+@auth_bp.route('/admin/planes')
+@login_required
+def admin_planes():
+    """Panel de administración de planes para superadmin"""
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    
+    # Obtener todos los restaurantes con información de uso
+    restaurantes = Restaurante.query.all()
+    restaurantes_info = []
+    
+    for restaurante in restaurantes:
+        limits = restaurante.get_plan_limits()
+        usage = restaurante.get_usage_stats()
+        restaurantes_info.append({
+            'restaurante': restaurante,
+            'limits': limits,
+            'usage': usage
+        })
+    
+    # Obtener todos los planes disponibles
+    all_plans = {
+        'free': {
+            'nombre': 'Free',
+            'descripcion': 'Plan gratuito con limitaciones básicas',
+            'productos': 10,
+            'usuarios': 1,
+            'pedidos_dia': 50,
+            'precio': 'Gratis'
+        },
+        'premium1': {
+            'nombre': 'Premium 1',
+            'descripcion': 'Plan intermedio para restaurantes pequeños',
+            'productos': 30,
+            'usuarios': 3,
+            'pedidos_dia': 200,
+            'precio': '$29/mes'
+        },
+        'premium_full': {
+            'nombre': 'Premium Full',
+            'descripcion': 'Plan completo sin limitaciones',
+            'productos': 'Ilimitado',
+            'usuarios': 'Ilimitado',
+            'pedidos_dia': 'Ilimitado',
+            'precio': '$99/mes'
+        }
+    }
+    
+    return render_template('auth/admin_planes.html', 
+                         restaurantes_info=restaurantes_info,
+                         all_plans=all_plans)
+
+@auth_bp.route('/admin/cambiar_plan_restaurante/<int:restaurante_id>/<plan>')
+@login_required
+def admin_cambiar_plan_restaurante(restaurante_id, plan):
+    """Cambiar el plan de un restaurante desde el panel de admin"""
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("auth.admin_planes"))
+    
+    restaurante = Restaurante.query.get_or_404(restaurante_id)
+    planes_validos = ['free', 'premium1', 'premium_full']
+    
+    if plan not in planes_validos:
+        flash('Plan inválido', 'error')
+        return redirect(url_for('auth.admin_planes'))
+    
+    try:
+        restaurante.plan = plan
+        db.session.commit()
+        flash(f'Plan de {restaurante.nombre} cambiado a {plan} exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error cambiando plan: {str(e)}', 'error')
+    
+    return redirect(url_for('auth.admin_planes'))
+
 @auth_bp.route('/soy_superadmin')
 @login_required
 def soy_superadmin():
@@ -470,7 +548,7 @@ def planes():
             'nombre': 'Free',
             'descripcion': 'Plan gratuito con limitaciones básicas',
             'productos': 10,
-            'usuarios': 2,
+            'usuarios': 1,
             'pedidos_dia': 50,
             'precio': 'Gratis'
         },
@@ -478,7 +556,7 @@ def planes():
             'nombre': 'Premium 1',
             'descripcion': 'Plan intermedio para restaurantes pequeños',
             'productos': 30,
-            'usuarios': 5,
+            'usuarios': 3,
             'pedidos_dia': 200,
             'precio': '$29/mes'
         },
@@ -524,3 +602,35 @@ def cambiar_plan(plan):
         flash(f'Error cambiando plan: {str(e)}', 'error')
     
     return redirect(url_for('auth.planes'))
+
+@auth_bp.route('/contacto_plan', methods=['GET', 'POST'])
+@login_required
+def contacto_plan():
+    """Formulario de contacto para solicitar cambio de plan"""
+    if request.method == 'POST':
+        nombre = request.form.get('nombre', '').strip()
+        email = request.form.get('email', '').strip()
+        restaurante = request.form.get('restaurante', '').strip()
+        plan_solicitado = request.form.get('plan_solicitado', '').strip()
+        mensaje = request.form.get('mensaje', '').strip()
+        
+        if not all([nombre, email, restaurante, plan_solicitado, mensaje]):
+            flash('Todos los campos son obligatorios', 'error')
+            return render_template('auth/contacto_plan.html')
+        
+        # Aquí podrías enviar un email real
+        # Por ahora solo simulamos el envío
+        print(f"""
+        === SOLICITUD DE CAMBIO DE PLAN ===
+        Nombre: {nombre}
+        Email: {email}
+        Restaurante: {restaurante}
+        Plan solicitado: {plan_solicitado}
+        Mensaje: {mensaje}
+        ===================================
+        """)
+        
+        flash('Solicitud enviada exitosamente. Te contactaremos pronto.', 'success')
+        return redirect(url_for('auth.planes'))
+    
+    return render_template('auth/contacto_plan.html')

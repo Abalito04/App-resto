@@ -94,7 +94,9 @@
                             Cambiar a {{ plan.nombre }}
                         </a>
                     {% else %}
-                        <button class="btn btn-secondary" disabled>Contactar Admin</button>
+                        <a href="{{ url_for('auth.contacto_plan') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-envelope me-1"></i>Solicitar Cambio
+                        </a>
                     {% endif %}
                 </div>
             </div>
@@ -109,8 +111,8 @@
         </div>
         <div class="card-body">
             <ul>
-                <li><strong>Free:</strong> Ideal para probar el sistema. Limitado a 10 productos y 2 usuarios.</li>
-                <li><strong>Premium 1:</strong> Para restaurantes pequeños. 30 productos y 5 usuarios.</li>
+                <li><strong>Free:</strong> Ideal para probar el sistema. Limitado a 10 productos y 1 usuario.</li>
+                <li><strong>Premium 1:</strong> Para restaurantes pequeños. 30 productos y 3 usuarios.</li>
                 <li><strong>Premium Full:</strong> Sin limitaciones. Para restaurantes grandes.</li>
                 <li>Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite.</li>
                 <li>Solo los superadmins pueden cambiar planes.</li>

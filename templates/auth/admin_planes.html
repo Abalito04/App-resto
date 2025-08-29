@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>📊 Administración de Planes</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Planes Disponibles -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>📋 Planes Disponibles</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for plan_id, plan in all_plans.items() %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header text-center">
+                            <h5>{{ plan.nombre }}</h5>
+                            <h3 class="text-primary">{{ plan.precio }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">{{ plan.descripcion }}</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Productos: {{ plan.productos }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Usuarios: {{ plan.usuarios }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Pedidos/día: {{ plan.pedidos_dia }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Restaurantes y sus Planes -->
+    <div class="card">
+        <div class="card-header">
+            <h4>🏪 Restaurantes y Planes Actuales</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Restaurante</th>
+                            <th>Plan Actual</th>
+                            <th>Uso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for info in restaurantes_info %}
+                        <tr>
+                            <td>
+                                <strong>{{ info.restaurante.nombre }}</strong><br>
+                                <small class="text-muted">{{ info.restaurante.email_contacto }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if info.restaurante.plan == 'premium_full' else 'warning' if info.restaurante.plan == 'premium1' else 'secondary' }}">
+                                    {{ info.limits.nombre }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <small>📦 {{ info.usage.productos }}/{{ info.limits.productos if info.limits.productos != -1 else '∞' }}</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <small>👥 {{ info.usage.usuarios }}/{{ info.limits.usuarios if info.limits.usuarios != -1 else '∞' }}</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <small>📋 {{ info.usage.pedidos_hoy }}/{{ info.limits.pedidos_dia if info.limits.pedidos_dia != -1 else '∞' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                        Cambiar Plan
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% for plan_id, plan in all_plans.items() %}
+                                            {% if plan_id != info.restaurante.plan %}
+                                            <li>
+                                                <a class="dropdown-item" href="{{ url_for('auth.admin_cambiar_plan_restaurante', restaurante_id=info.restaurante.id, plan=plan_id) }}"
+                                                   onclick="return confirm('¿Cambiar {{ info.restaurante.nombre }} a {{ plan.nombre }}?')">
+                                                    {{ plan.nombre }} - {{ plan.precio }}
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

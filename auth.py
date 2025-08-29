@@ -366,6 +366,10 @@ def perfil():
 @auth_bp.route("/configuracion", methods=["GET", "POST"])
 @login_required
 def configuracion():
+    print("🔧 DEBUG: Accediendo a configuración")
+    print(f"🔧 DEBUG: Usuario: {current_user.email}")
+    print(f"🔧 DEBUG: Restaurante: {current_user.restaurante}")
+    
     # Verificar que el usuario tenga restaurante
     if not current_user.restaurante:
         flash('Usuario sin restaurante asignado', 'error')

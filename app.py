@@ -238,6 +238,18 @@ def debug_time():
         "diferencia_horas": (hora_local - datetime.now()).total_seconds() / 3600
     })
 
+@app.route("/debug/routes")
+def debug_routes():
+    """Debug para verificar las rutas disponibles"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            "endpoint": rule.endpoint,
+            "methods": list(rule.methods),
+            "rule": str(rule)
+        })
+    return jsonify(routes)
+
 @app.route("/make-superadmin/<email>")
 def make_superadmin(email):
     """Ruta temporal para hacer superadmin a un usuario - REMOVER EN PRODUCCIÓN"""

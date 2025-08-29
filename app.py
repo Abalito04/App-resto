@@ -16,11 +16,14 @@ logging.basicConfig(level=logging.DEBUG)
 # Configurar zona horaria del servidor para que coincida con la PC local
 import os
 timezone_server = os.getenv('SERVER_TIMEZONE', 'America/Argentina/Buenos_Aires')
+print(f"🔧 Configurando zona horaria del servidor: {timezone_server}")
 os.environ['TZ'] = timezone_server
 try:
     import time
     time.tzset()
+    print(f"✅ Zona horaria configurada: {timezone_server}")
 except:
+    print("⚠️ No se pudo configurar zona horaria (Windows o sistema no compatible)")
     pass  # En Windows no existe tzset()
 
 load_dotenv()
@@ -199,6 +202,19 @@ def debug_users():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/debug/time")
+def debug_time():
+    """Debug para verificar la hora del servidor"""
+    import time
+    from datetime import datetime
+    
+    return jsonify({
+        "hora_actual": datetime.now().isoformat(),
+        "timestamp": time.time(),
+        "zona_horaria_configurada": os.getenv('TZ', 'No configurada'),
+        "timezone_server": os.getenv('SERVER_TIMEZONE', 'No configurada')
+    })
 
 @app.route("/make-superadmin/<email>")
 def make_superadmin(email):
@@ -565,10 +581,8 @@ def cocina():
             segundos = int(delta.total_seconds() % 60)
             tiempo = f"{minutos}m {segundos}s"
         else:
-            # Si no tiene hora_cocina, establecerla automáticamente
-            p.hora_cocina = datetime.now()
-            db.session.commit()
-            tiempo = "0m 0s"
+            # Si no tiene hora_cocina, mostrar "Pendiente"
+            tiempo = "Pendiente"
         lista_pedidos.append({"pedido": p, "tiempo": tiempo})
     
     # Obtener la zona horaria del restaurante

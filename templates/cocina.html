@@ -16,7 +16,11 @@
                 </strong> - {{ item.pedido.metodo_pago }}
                 <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }} ({{ zona_horaria }})</small>
 
-                <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+                {% if item.pedido.hora_cocina %}
+                    <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+                {% else %}
+                    <small class="d-block text-warning">⏳ Pendiente de recibir en cocina</small>
+                {% endif %}
 
                 <ul class="list-group list-group-flush mt-2 mb-2">
                     {% for it in item.pedido.items %}
@@ -33,6 +37,11 @@
                 <strong>Total: ${{ item.pedido.total }}</strong>
 
                 <div class="d-flex gap-2 mt-2">
+                    {% if not item.pedido.hora_cocina %}
+                        <form method="POST" action="{{ url_for('llegada_cocina', pedido_id=item.pedido.id) }}">
+                            <button class="btn btn-primary btn-sm">📋 Recibir en cocina</button>
+                        </form>
+                    {% endif %}
                     <form method="POST" action="{{ url_for('entregado', pedido_id=item.pedido.id) }}">
                         <button class="btn btn-success btn-sm">✅ Entregado</button>
                     </form>

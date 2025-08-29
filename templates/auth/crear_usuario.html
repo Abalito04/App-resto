@@ -38,8 +38,9 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="restaurante_id" class="form-label">Restaurante</label>
-                                <select class="form-select" id="restaurante_id" name="restaurante_id">
+                                <select class="form-select" id="restaurante_id" name="restaurante_id" onchange="toggleNuevoRestaurante()">
                                     <option value="">Sin restaurante</option>
+                                    <option value="nuevo">➕ Crear nuevo restaurante</option>
                                     {% for restaurante in restaurantes %}
                                         <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
                                     {% endfor %}
@@ -47,7 +48,49 @@
                             </div>
                         </div>
 
+                        <!-- Campos para nuevo restaurante (ocultos por defecto) -->
+                        <div id="nuevo-restaurante" style="display: none;">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <h5 class="text-primary">📋 Datos del Nuevo Restaurante</h5>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre_restaurante" class="form-label">Nombre del Restaurante *</label>
+                                    <input type="text" class="form-control" id="nombre_restaurante" name="nombre_restaurante">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="zona_horaria" class="form-label">Zona Horaria</label>
+                                    <select class="form-select" id="zona_horaria" name="zona_horaria">
+                                        <option value="America/Argentina/Buenos_Aires">Argentina (Buenos Aires)</option>
+                                        <option value="America/Mexico_City">México (Ciudad de México)</option>
+                                        <option value="America/New_York">Estados Unidos (Nueva York)</option>
+                                        <option value="America/Los_Angeles">Estados Unidos (Los Ángeles)</option>
+                                        <option value="Europe/Madrid">España (Madrid)</option>
+                                        <option value="Europe/London">Reino Unido (Londres)</option>
+                                        <option value="Asia/Tokyo">Japón (Tokio)</option>
+                                        <option value="UTC">UTC (Tiempo Universal)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="direccion_restaurante" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="direccion_restaurante" name="direccion_restaurante">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="telefono_restaurante" class="form-label">Teléfono</label>
+                                    <input type="text" class="form-control" id="telefono_restaurante" name="telefono_restaurante">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="es_admin" name="es_admin">
+                                    <label class="form-check-label" for="es_admin">
+                                        Es Admin
+                                    </label>
+                                </div>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="es_superadmin" name="es_superadmin">
@@ -72,4 +115,20 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleNuevoRestaurante() {
+    const select = document.getElementById('restaurante_id');
+    const nuevoRestaurante = document.getElementById('nuevo-restaurante');
+    const nombreRestaurante = document.getElementById('nombre_restaurante');
+    
+    if (select.value === 'nuevo') {
+        nuevoRestaurante.style.display = 'block';
+        nombreRestaurante.required = true;
+    } else {
+        nuevoRestaurante.style.display = 'none';
+        nombreRestaurante.required = false;
+    }
+}
+</script>
 {% endblock %}

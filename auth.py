@@ -223,7 +223,7 @@ def admin_crear_usuario():
             nombre = request.form.get('nombre', '').strip()
             email = request.form.get('email', '').strip().lower()
             password = request.form.get('password', '')
-            restaurante_id = request.form.get('restaurante_id', type=int)
+            restaurante_id = request.form.get('restaurante_id')
             es_admin = 'es_admin' in request.form
             es_superadmin = 'es_superadmin' in request.form
             
@@ -234,6 +234,41 @@ def admin_crear_usuario():
             if Usuario.query.filter_by(email=email).first():
                 flash('Email ya registrado', 'error')
                 return render_template('auth/crear_usuario.html')
+            
+            # Manejar creación de nuevo restaurante
+            if restaurante_id == 'nuevo':
+                nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
+                zona_horaria = request.form.get('zona_horaria', 'America/Argentina/Buenos_Aires')
+                direccion = request.form.get('direccion_restaurante', '').strip()
+                telefono = request.form.get('telefono_restaurante', '').strip()
+                
+                if not nombre_restaurante:
+                    flash('Nombre del restaurante es obligatorio', 'error')
+                    return render_template('auth/crear_usuario.html')
+                
+                # Crear nuevo restaurante
+                slug = crear_slug(nombre_restaurante)
+                restaurante = Restaurante(
+                    nombre=nombre_restaurante,
+                    slug=slug,
+                    direccion=direccion,
+                    telefono=telefono,
+                    zona_horaria=zona_horaria,
+                    plan="free"
+                )
+                db.session.add(restaurante)
+                db.session.flush()  # Para obtener el ID
+                restaurante_id = restaurante.id
+                
+                # Crear configuración inicial para el restaurante
+                config = ConfiguracionRestaurante(restaurante_id=restaurante.id)
+                db.session.add(config)
+                
+                flash(f'Restaurante "{nombre_restaurante}" creado exitosamente', 'success')
+            elif restaurante_id:
+                restaurante_id = int(restaurante_id)
+            else:
+                restaurante_id = None
             
             usuario = Usuario(
                 nombre=nombre,
@@ -364,8 +399,8 @@ def configuracion():
                 mostrar_precios = True
             config = TempConfig()
 
-    # Solo permitir POST si es admin
-    if request.method == 'POST' and current_user.es_superadmin:
+    # Permitir POST si es admin, superadmin o usuario normal
+    if request.method == 'POST':
         try:
             config.impresora_habilitada = 'impresora_habilitada' in request.form
             config.impresora_tipo = request.form.get('impresora_tipo', 'USB')

@@ -71,85 +71,148 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
     """Envía email de solicitud de cambio de plan al administrador"""
     try:
         # Verificar que las variables de entorno estén configuradas
-        mail_username = current_app.config.get("MAIL_USERNAME") or os.environ.get("MAIL_USERNAME")
-        mail_password = current_app.config.get("MAIL_PASSWORD") or os.environ.get("MAIL_PASSWORD")
+        sendgrid_api_key = current_app.config.get("SENDGRID_API_KEY") or os.environ.get("SENDGRID_API_KEY")
         
-        if not mail_username or not mail_password:
-            error_msg = "Variables de entorno MAIL_USERNAME o MAIL_PASSWORD no configuradas"
-            print(f"❌ {error_msg}")
-            print(f"📧 MAIL_USERNAME disponible: {bool(mail_username)}")
-            print(f"📧 MAIL_PASSWORD disponible: {bool(mail_password)}")
-            raise ValueError(error_msg)
-        
-        print(f"📧 Configuración de email encontrada: {mail_username}")
-        
-        # Crear contenido del email
-        contenido = f"""
-        === SOLICITUD DE CAMBIO DE PLAN ===
-        
-        Nombre: {nombre}
-        Email: {email}
-        Restaurante: {restaurante}
-        Plan solicitado: {plan_solicitado}
-        
-        Mensaje:
-        {mensaje}
-        
-        ===================================
-        
-        Este email fue enviado desde el sistema de gestión de restaurantes.
-        """
-        
-        msg = MIMEText(contenido)
-        msg['Subject'] = f'Solicitud de cambio de plan - {restaurante}'
-        msg['From'] = mail_username
-        msg['To'] = "abalito95@gmail.com"  # Tu email de administrador
-        
-        print("📧 Conectando a servidor SMTP...")
-        
-        # Intentar diferentes configuraciones SMTP para Railway
-        smtp_configs = [
-            ("smtp.gmail.com", 587),  # Gmail con TLS
-            ("smtp.gmail.com", 465),  # Gmail con SSL
-            ("smtp-relay.gmail.com", 587),  # Gmail relay
-        ]
-        
-        email_sent = False
-        for smtp_server, port in smtp_configs:
+        if not sendgrid_api_key:
+            # Fallback a Gmail si no hay SendGrid configurado
+            mail_username = current_app.config.get("MAIL_USERNAME") or os.environ.get("MAIL_USERNAME")
+            mail_password = current_app.config.get("MAIL_PASSWORD") or os.environ.get("MAIL_PASSWORD")
+            
+            if not mail_username or not mail_password:
+                error_msg = "Variables de entorno SENDGRID_API_KEY o MAIL_USERNAME/MAIL_PASSWORD no configuradas"
+                print(f"❌ {error_msg}")
+                raise ValueError(error_msg)
+            
+            print(f"📧 Usando Gmail como fallback: {mail_username}")
+            
+            # Crear contenido del email
+            contenido = f"""
+            === SOLICITUD DE CAMBIO DE PLAN ===
+            
+            Nombre: {nombre}
+            Email: {email}
+            Restaurante: {restaurante}
+            Plan solicitado: {plan_solicitado}
+            
+            Mensaje:
+            {mensaje}
+            
+            ===================================
+            
+            Este email fue enviado desde el sistema de gestión de restaurantes.
+            """
+            
+            msg = MIMEText(contenido)
+            msg['Subject'] = f'Solicitud de cambio de plan - {restaurante}'
+            msg['From'] = mail_username
+            msg['To'] = "abalito95@gmail.com"  # Tu email de administrador
+            
+            print("📧 Conectando a servidor SMTP...")
+            
+            # Intentar diferentes configuraciones SMTP para Railway
+            smtp_configs = [
+                ("smtp.gmail.com", 587),  # Gmail con TLS
+                ("smtp.gmail.com", 465),  # Gmail con SSL
+            ]
+            
+            email_sent = False
+            for smtp_server, port in smtp_configs:
+                try:
+                    print(f"📧 Intentando {smtp_server}:{port}...")
+                    
+                    if port == 465:
+                        # Usar SSL en lugar de TLS
+                        import ssl
+                        context = ssl.create_default_context()
+                        with smtplib.SMTP_SSL(smtp_server, port, timeout=30, context=context) as server:
+                            print("📧 Autenticando con SSL...")
+                            server.login(mail_username, mail_password)
+                            print("📧 Enviando mensaje...")
+                            server.send_message(msg)
+                            email_sent = True
+                            print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
+                            break
+                    else:
+                        # Usar TLS
+                        with smtplib.SMTP(smtp_server, port, timeout=30) as server:
+                            print("📧 Iniciando conexión TLS...")
+                            server.starttls()
+                            print("📧 Autenticando...")
+                            server.login(mail_username, mail_password)
+                            print("📧 Enviando mensaje...")
+                            server.send_message(msg)
+                            email_sent = True
+                            print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
+                            break
+                            
+                except Exception as e:
+                    print(f"❌ Error con {smtp_server}:{port}: {e}")
+                    continue
+            
+            if not email_sent:
+                raise ValueError("No se pudo enviar el email con ninguna configuración SMTP")
+        else:
+            # Usar SendGrid
+            print(f"📧 Usando SendGrid para enviar email")
+            
             try:
-                print(f"📧 Intentando {smtp_server}:{port}...")
+                import requests
                 
-                if port == 465:
-                    # Usar SSL en lugar de TLS
-                    import ssl
-                    context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL(smtp_server, port, timeout=30, context=context) as server:
-                        print("📧 Autenticando con SSL...")
-                        server.login(mail_username, mail_password)
-                        print("📧 Enviando mensaje...")
-                        server.send_message(msg)
-                        email_sent = True
-                        print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
-                        break
+                # Crear contenido del email
+                contenido = f"""
+                === SOLICITUD DE CAMBIO DE PLAN ===
+                
+                Nombre: {nombre}
+                Email: {email}
+                Restaurante: {restaurante}
+                Plan solicitado: {plan_solicitado}
+                
+                Mensaje:
+                {mensaje}
+                
+                ===================================
+                
+                Este email fue enviado desde el sistema de gestión de restaurantes.
+                """
+                
+                # Enviar email usando SendGrid API
+                url = "https://api.sendgrid.com/v3/mail/send"
+                headers = {
+                    "Authorization": f"Bearer {sendgrid_api_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                data = {
+                    "personalizations": [
+                        {
+                            "to": [{"email": "abalito95@gmail.com"}]
+                        }
+                    ],
+                    "from": {"email": "abalito95@gmail.com"},
+                    "subject": f"Solicitud de cambio de plan - {restaurante}",
+                    "content": [
+                        {
+                            "type": "text/plain",
+                            "value": contenido
+                        }
+                    ]
+                }
+                
+                print("📧 Enviando email via SendGrid API...")
+                response = requests.post(url, headers=headers, json=data, timeout=30)
+                
+                if response.status_code == 202:
+                    print("✅ Email enviado exitosamente via SendGrid")
                 else:
-                    # Usar TLS
-                    with smtplib.SMTP(smtp_server, port, timeout=30) as server:
-                        print("📧 Iniciando conexión TLS...")
-                        server.starttls()
-                        print("📧 Autenticando...")
-                        server.login(mail_username, mail_password)
-                        print("📧 Enviando mensaje...")
-                        server.send_message(msg)
-                        email_sent = True
-                        print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
-                        break
-                        
+                    print(f"❌ Error SendGrid: {response.status_code} - {response.text}")
+                    raise ValueError(f"Error SendGrid: {response.status_code}")
+                    
+            except ImportError:
+                print("❌ Módulo 'requests' no disponible, usando SMTP como fallback")
+                raise ValueError("SendGrid requiere el módulo 'requests'")
             except Exception as e:
-                print(f"❌ Error con {smtp_server}:{port}: {e}")
-                continue
-        
-        if not email_sent:
-            raise ValueError("No se pudo enviar el email con ninguna configuración SMTP")
+                print(f"❌ Error con SendGrid: {e}")
+                raise ValueError(f"Error con SendGrid: {e}")
             
         print(f"✅ Email de contacto enviado exitosamente a abalito95@gmail.com")
         

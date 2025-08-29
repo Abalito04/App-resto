@@ -51,11 +51,11 @@
             </form>
 
             <!-- Eliminar usuario -->
-            <form method="POST" action="{{ url_for('auth.superadmin_eliminar_usuario', user_id=u.id) }}" 
-                  onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.');">
-              <button class="btn btn-sm btn-danger">
-                <i class="fas fa-trash"></i>
-              </button>
+            <form method="POST" action="{{ url_for('auth.eliminar_usuario', user_id=u.id) }}" 
+            onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.');">
+            <button class="btn btn-sm btn-danger">
+              <i class="fas fa-trash"></i>
+            </button>
             </form>
           </div>
         </td>

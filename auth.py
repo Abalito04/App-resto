@@ -28,11 +28,42 @@ def enviar_email_confirmacion(email, token):
         msg['From'] = mail_username
         msg['To'] = email
 
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
-            server.starttls()
-            server.login(mail_username, mail_password)
-            server.send_message(msg)
+        # Intentar diferentes configuraciones SMTP para Railway
+        smtp_configs = [
+            ("smtp.gmail.com", 587),  # Gmail con TLS
+            ("smtp.gmail.com", 465),  # Gmail con SSL
+        ]
+        
+        email_sent = False
+        for smtp_server, port in smtp_configs:
+            try:
+                if port == 465:
+                    # Usar SSL en lugar de TLS
+                    import ssl
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(smtp_server, port, timeout=30, context=context) as server:
+                        server.login(mail_username, mail_password)
+                        server.send_message(msg)
+                        email_sent = True
+                        break
+                else:
+                    # Usar TLS
+                    with smtplib.SMTP(smtp_server, port, timeout=30) as server:
+                        server.starttls()
+                        server.login(mail_username, mail_password)
+                        server.send_message(msg)
+                        email_sent = True
+                        break
+                        
+            except Exception as e:
+                print(f"❌ Error con {smtp_server}:{port}: {e}")
+                continue
+        
+        if email_sent:
             print(f"✅ Email de confirmación enviado a {email}")
+        else:
+            print(f"❌ No se pudo enviar email de confirmación a {email}")
+            
     except Exception as e:
         print(f"❌ Error enviando email de confirmación: {e}")
 
@@ -76,16 +107,49 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
         
         print("📧 Conectando a servidor SMTP...")
         
-        # Enviar email con timeout y mejor manejo de errores
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as server:
-            print("📧 Iniciando conexión TLS...")
-            server.starttls()
-            
-            print("📧 Autenticando...")
-            server.login(mail_username, mail_password)
-            
-            print("📧 Enviando mensaje...")
-            server.send_message(msg)
+        # Intentar diferentes configuraciones SMTP para Railway
+        smtp_configs = [
+            ("smtp.gmail.com", 587),  # Gmail con TLS
+            ("smtp.gmail.com", 465),  # Gmail con SSL
+            ("smtp-relay.gmail.com", 587),  # Gmail relay
+        ]
+        
+        email_sent = False
+        for smtp_server, port in smtp_configs:
+            try:
+                print(f"📧 Intentando {smtp_server}:{port}...")
+                
+                if port == 465:
+                    # Usar SSL en lugar de TLS
+                    import ssl
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(smtp_server, port, timeout=30, context=context) as server:
+                        print("📧 Autenticando con SSL...")
+                        server.login(mail_username, mail_password)
+                        print("📧 Enviando mensaje...")
+                        server.send_message(msg)
+                        email_sent = True
+                        print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
+                        break
+                else:
+                    # Usar TLS
+                    with smtplib.SMTP(smtp_server, port, timeout=30) as server:
+                        print("📧 Iniciando conexión TLS...")
+                        server.starttls()
+                        print("📧 Autenticando...")
+                        server.login(mail_username, mail_password)
+                        print("📧 Enviando mensaje...")
+                        server.send_message(msg)
+                        email_sent = True
+                        print(f"✅ Email enviado exitosamente usando {smtp_server}:{port}")
+                        break
+                        
+            except Exception as e:
+                print(f"❌ Error con {smtp_server}:{port}: {e}")
+                continue
+        
+        if not email_sent:
+            raise ValueError("No se pudo enviar el email con ninguna configuración SMTP")
             
         print(f"✅ Email de contacto enviado exitosamente a abalito95@gmail.com")
         

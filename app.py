@@ -7,6 +7,21 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from sqlalchemy import text
+from collections import Counter
+
+items = request.form.getlist("producto")  # Ejemplo: ['2', '2', '3']
+
+conteo = Counter(items)  # {'2': 2, '3': 1}
+
+for producto_id_str, cantidad in conteo.items():
+    producto_id = int(producto_id_str)
+    item = Item.query.filter_by(pedido_id=pedido.id, producto_id=producto_id).first()
+    if item:
+        item.cantidad += cantidad
+    else:
+        item = Item(pedido_id=pedido.id, producto_id=producto_id, cantidad=cantidad)
+        db.session.add(item)
+db.session.commit()
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)

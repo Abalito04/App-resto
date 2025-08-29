@@ -46,6 +46,63 @@ class Restaurante(db.Model):
         super().__init__(**kwargs)
         if not self.api_key:
             self.api_key = secrets.token_urlsafe(32)
+    
+    def get_plan_limits(self):
+        """Retorna los límites del plan actual"""
+        limits = {
+            'free': {
+                'productos': 10,
+                'usuarios': 2,
+                'pedidos_dia': 50,
+                'nombre': 'Free',
+                'descripcion': 'Plan gratuito con limitaciones básicas'
+            },
+            'premium1': {
+                'productos': 30,
+                'usuarios': 5,
+                'pedidos_dia': 200,
+                'nombre': 'Premium 1',
+                'descripcion': 'Plan intermedio para restaurantes pequeños'
+            },
+            'premium_full': {
+                'productos': -1,  # Sin límite
+                'usuarios': -1,   # Sin límite
+                'pedidos_dia': -1, # Sin límite
+                'nombre': 'Premium Full',
+                'descripcion': 'Plan completo sin limitaciones'
+            }
+        }
+        return limits.get(self.plan, limits['free'])
+    
+    def can_add_product(self):
+        """Verifica si puede agregar más productos"""
+        limits = self.get_plan_limits()
+        if limits['productos'] == -1:
+            return True, None
+        
+        current_count = Producto.query.filter_by(restaurante_id=self.id, activo=True).count()
+        return current_count < limits['productos'], limits['productos'] - current_count
+    
+    def can_add_user(self):
+        """Verifica si puede agregar más usuarios"""
+        limits = self.get_plan_limits()
+        if limits['usuarios'] == -1:
+            return True, None
+        
+        current_count = Usuario.query.filter_by(restaurante_id=self.id, activo=True).count()
+        return current_count < limits['usuarios'], limits['usuarios'] - current_count
+    
+    def get_usage_stats(self):
+        """Retorna estadísticas de uso del restaurante"""
+        return {
+            'productos': Producto.query.filter_by(restaurante_id=self.id, activo=True).count(),
+            'usuarios': Usuario.query.filter_by(restaurante_id=self.id, activo=True).count(),
+            'pedidos_hoy': Pedido.query.filter_by(
+                restaurante_id=self.id
+            ).filter(
+                Pedido.fecha >= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            ).count()
+        }
 
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)

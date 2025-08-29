@@ -131,6 +131,25 @@
             <p><strong>Plan actual:</strong> <span class="badge bg-info">{{ current_user.restaurante.plan|title }}</span></p>
             <p><strong>API Key:</strong> <code class="bg-dark text-light p-2 rounded">{{ current_user.restaurante.api_key }}</code></p>
             <small class="text-muted">Usa esta API Key para conectar sistemas externos</small>
+            
+            <hr>
+            <div class="row">
+                <div class="col-md-4">
+                    <h6>📦 Productos</h6>
+                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().productos }}/{{ current_user.restaurante.get_plan_limits().productos if current_user.restaurante.get_plan_limits().productos != -1 else '∞' }}</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>👥 Usuarios</h6>
+                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().usuarios }}/{{ current_user.restaurante.get_plan_limits().usuarios if current_user.restaurante.get_plan_limits().usuarios != -1 else '∞' }}</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>📋 Pedidos Hoy</h6>
+                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().pedidos_hoy }}/{{ current_user.restaurante.get_plan_limits().pedidos_dia if current_user.restaurante.get_plan_limits().pedidos_dia != -1 else '∞' }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('auth.planes') }}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-chart-line me-1"></i>Gestionar Plan
+            </a>
         </div>
     </div>
 </div>

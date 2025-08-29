@@ -518,11 +518,30 @@ def historial():
 @app.route("/agregar_producto_index", methods=["POST"])
 @login_required
 def agregar_producto_index():
-    nombre = request.form["nombre"]
-    precio = float(request.form["precio"])
-    producto = Producto(nombre=nombre, precio=precio, restaurante_id=get_user_restaurante())
-    db.session.add(producto)
-    db.session.commit()
+    try:
+        # Verificar límites del plan
+        restaurante = current_user.restaurante
+        can_add, remaining = restaurante.can_add_product()
+        
+        if not can_add:
+            flash(f'No puedes agregar más productos. Límite del plan alcanzado. Contacta al administrador para cambiar de plan.', 'error')
+            return redirect(url_for("index_redirect"))
+        
+        nombre = request.form["nombre"]
+        precio = float(request.form["precio"])
+        producto = Producto(nombre=nombre, precio=precio, restaurante_id=get_user_restaurante())
+        db.session.add(producto)
+        db.session.commit()
+        
+        if remaining is not None:
+            flash(f'Producto agregado exitosamente. Te quedan {remaining} productos disponibles.', 'success')
+        else:
+            flash('Producto agregado exitosamente', 'success')
+            
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error agregando producto: {str(e)}', 'error')
+    
     return redirect(url_for("index_redirect"))
 
 @app.route("/editar_producto_index/<int:producto_id>", methods=["POST"])

@@ -235,6 +235,15 @@ def admin_crear_usuario():
                 flash('Email ya registrado', 'error')
                 return render_template('auth/crear_usuario.html')
             
+            # Verificar límites del plan para usuarios
+            if restaurante_id:
+                restaurante = Restaurante.query.get(restaurante_id)
+                if restaurante:
+                    can_add, remaining = restaurante.can_add_user()
+                    if not can_add:
+                        flash(f'No se pueden agregar más usuarios. Límite del plan alcanzado ({restaurante.get_plan_limits()["usuarios"]} usuarios).', 'error')
+                        return render_template('auth/crear_usuario.html')
+            
             # Manejar creación de nuevo restaurante
             if restaurante_id == 'nuevo':
                 nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
@@ -442,3 +451,76 @@ def eliminar_usuario(user_id):
 @login_required
 def soy_superadmin():
     return f"Usuario: {current_user.email} | es_superadmin: {current_user.es_superadmin}"
+
+@auth_bp.route('/planes')
+@login_required
+def planes():
+    """Página de gestión de planes"""
+    if not current_user.restaurante:
+        flash('Usuario sin restaurante asignado', 'error')
+        return redirect(url_for('index_redirect'))
+    
+    restaurante = current_user.restaurante
+    limits = restaurante.get_plan_limits()
+    usage = restaurante.get_usage_stats()
+    
+    # Obtener todos los planes disponibles
+    all_plans = {
+        'free': {
+            'nombre': 'Free',
+            'descripcion': 'Plan gratuito con limitaciones básicas',
+            'productos': 10,
+            'usuarios': 2,
+            'pedidos_dia': 50,
+            'precio': 'Gratis'
+        },
+        'premium1': {
+            'nombre': 'Premium 1',
+            'descripcion': 'Plan intermedio para restaurantes pequeños',
+            'productos': 30,
+            'usuarios': 5,
+            'pedidos_dia': 200,
+            'precio': '$29/mes'
+        },
+        'premium_full': {
+            'nombre': 'Premium Full',
+            'descripcion': 'Plan completo sin limitaciones',
+            'productos': 'Ilimitado',
+            'usuarios': 'Ilimitado',
+            'pedidos_dia': 'Ilimitado',
+            'precio': '$99/mes'
+        }
+    }
+    
+    return render_template('auth/planes.html', 
+                         restaurante=restaurante,
+                         limits=limits,
+                         usage=usage,
+                         all_plans=all_plans)
+
+@auth_bp.route('/cambiar_plan/<plan>')
+@login_required
+def cambiar_plan(plan):
+    """Cambiar el plan del restaurante (solo superadmin)"""
+    if not current_user.es_superadmin:
+        flash('Solo superadmins pueden cambiar planes', 'error')
+        return redirect(url_for('auth.planes'))
+    
+    if not current_user.restaurante:
+        flash('Usuario sin restaurante asignado', 'error')
+        return redirect(url_for('index_redirect'))
+    
+    planes_validos = ['free', 'premium1', 'premium_full']
+    if plan not in planes_validos:
+        flash('Plan inválido', 'error')
+        return redirect(url_for('auth.planes'))
+    
+    try:
+        current_user.restaurante.plan = plan
+        db.session.commit()
+        flash(f'Plan cambiado a {plan} exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error cambiando plan: {str(e)}', 'error')
+    
+    return redirect(url_for('auth.planes'))

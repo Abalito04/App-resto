@@ -52,6 +52,12 @@
                 <button id="enable-notifications" class="btn btn-warning btn-sm" style="display: none;">
                     Habilitar Notificaciones
                 </button>
+
+                {% if current_user.is_authenticated and current_user.es_superadmin %}
+                <a href="{{ url_for('auth.admin_usuarios') }}" class="btn btn-primary mb-3">
+                     <i class="fas fa-users"></i> Panel de Usuarios
+                            </a>
+                            {% endif %}
             </div>
         </div>
         

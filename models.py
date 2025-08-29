@@ -85,7 +85,7 @@ class Pedido(db.Model):
 
     @property
     def total(self):
-        return sum(item.producto.precio for item in self.items)
+        return sum(item.producto.precio * item.cantidad for item in self.items)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)

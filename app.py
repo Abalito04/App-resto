@@ -381,13 +381,28 @@ def crear_pedido():
         producto_id = int(producto_id_str)
         producto = Producto.query.filter_by(id=producto_id, restaurante_id=restaurante_id).first()
         if producto:
-            item = Item.query.filter_by(pedido_id=pedido.id, producto_id=producto.id).first()
-            if item:
-                item.cantidad += cantidad
+            # Buscar si ya existe un item con este producto en el pedido
+            item_existente = Item.query.filter_by(
+                pedido_id=pedido.id, 
+                producto_id=producto.id
+            ).first()
+            
+            if item_existente:
+                # Si ya existe, sumar la cantidad
+                item_existente.cantidad += cantidad
+                print(f"Sumando {cantidad} al item existente: {producto.nombre}")
             else:
-                item = Item(pedido_id=pedido.id, producto_id=producto.id, cantidad=cantidad)
-                db.session.add(item)
+                # Si no existe, crear nuevo item
+                nuevo_item = Item(
+                    pedido_id=pedido.id, 
+                    producto_id=producto.id, 
+                    cantidad=cantidad
+                )
+                db.session.add(nuevo_item)
+                print(f"Creando nuevo item: {producto.nombre} x{cantidad}")
+    
     db.session.commit()
+    print(f"Pedido actualizado: {pedido.id} con {len(pedido.items)} items")
 
     imprimir_comanda(pedido)
     return redirect(url_for("index_redirect"))

@@ -96,8 +96,12 @@
                 <ul class="list-group list-group-flush mb-2">
                     {% for item in pedido.items %}
                         <li class="list-group-item d-flex justify-content-between p-1">
-                            {{ item.producto.nombre }}
-                            <span>${{ item.producto.precio }}</span>
+                            {% if item.cantidad > 1 %}
+                                {{ item.cantidad }}x {{ item.producto.nombre }}
+                            {% else %}
+                                {{ item.producto.nombre }}
+                            {% endif %}
+                            <span>${{ item.producto.precio * item.cantidad }}</span>
                         </li>
                     {% endfor %}
                 </ul>

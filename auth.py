@@ -213,42 +213,55 @@ def admin_toggle_usuario(id):
 @auth_bp.route('/admin/usuarios/crear', methods=['GET', 'POST'])
 @login_required
 def admin_crear_usuario():
+    """Crear nuevo usuario desde panel de superadmin"""
     if not current_user.es_superadmin:
         flash("Acceso denegado", "error")
         return redirect(url_for("index_redirect"))
-    restaurantes = Restaurante.query.all()
-    if request.method == 'POST':
-        nombre = request.form.get('nombre', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        restaurante_id = request.form.get('restaurante_id')
-        es_superadmin = bool(request.form.get('es_superadmin'))
-
-        # Validaciones básicas
-        if not validar_email(email):
-            flash('Email inválido', 'error')
-            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
-        if Usuario.query.filter_by(email=email).first():
-            flash('Email ya registrado', 'error')
-            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
-        if not password or len(password) < 6:
-            flash('La contraseña debe tener al menos 6 caracteres', 'error')
-            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
-
-        usuario = Usuario(
-            nombre=nombre,
-            email=email,
-            es_superadmin=es_superadmin,
-            restaurante_id=restaurante_id if restaurante_id else None,
-            confirmado=True,
-            activo=True
-        )
-        usuario.set_password(password)
-        db.session.add(usuario)
-        db.session.commit()
-        flash('Usuario creado exitosamente', 'success')
-        return redirect(url_for('auth.admin_usuarios'))
-    return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+    
+    try:
+        if request.method == 'POST':
+            nombre = request.form.get('nombre', '').strip()
+            email = request.form.get('email', '').strip().lower()
+            password = request.form.get('password', '')
+            restaurante_id = request.form.get('restaurante_id', type=int)
+            es_admin = 'es_admin' in request.form
+            es_superadmin = 'es_superadmin' in request.form
+            
+            if not all([nombre, email, password]):
+                flash('Nombre, email y contraseña son obligatorios', 'error')
+                return render_template('auth/crear_usuario.html')
+            
+            if Usuario.query.filter_by(email=email).first():
+                flash('Email ya registrado', 'error')
+                return render_template('auth/crear_usuario.html')
+            
+            usuario = Usuario(
+                nombre=nombre,
+                email=email,
+                es_admin=es_admin,
+                es_superadmin=es_superadmin,
+                restaurante_id=restaurante_id,
+                activo=True,
+                confirmado=True  # No requiere confirmación por email
+            )
+            usuario.set_password(password)
+            db.session.add(usuario)
+            db.session.commit()
+            
+            flash('Usuario creado exitosamente', 'success')
+            return redirect(url_for('auth.admin_usuarios'))
+        
+        # GET: mostrar formulario
+        restaurantes = Restaurante.query.all()
+        return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+        
+    except Exception as e:
+        import traceback
+        print(f"Error creando usuario: {e}")
+        traceback.print_exc()
+        db.session.rollback()
+        flash(f'Error creando usuario: {str(e)}', 'error')
+        return render_template('auth/crear_usuario.html')
 
 @auth_bp.route('/admin/cambiar_rol/<int:user_id>', methods=['POST'])
 @login_required

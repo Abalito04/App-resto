@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from sqlalchemy import text
 from collections import Counter
+import pytz
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
@@ -92,6 +93,23 @@ def get_user_restaurante():
     if not current_user.is_authenticated:
         return None
     return current_user.restaurante_id
+
+def get_local_time(restaurante_id=None):
+    """Obtiene la hora local del restaurante"""
+    if not restaurante_id:
+        restaurante_id = get_user_restaurante()
+    
+    if restaurante_id:
+        restaurante = Restaurante.query.get(restaurante_id)
+        if restaurante and restaurante.zona_horaria:
+            try:
+                tz = pytz.timezone(restaurante.zona_horaria)
+                return datetime.now(tz)
+            except:
+                pass
+    
+    # Fallback a UTC
+    return datetime.now(pytz.UTC)
 
 # =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
 def init_db():
@@ -251,6 +269,7 @@ def setup_inicial():
         nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
         direccion = request.form.get('direccion', '').strip()
         telefono = request.form.get('telefono', '').strip()
+        zona_horaria = request.form.get('zona_horaria', 'America/Argentina/Buenos_Aires')
         
         # Validaciones básicas
         if not all([nombre, email, password, nombre_restaurante]):
@@ -270,6 +289,7 @@ def setup_inicial():
                 direccion=direccion,
                 telefono=telefono,
                 email_contacto=email,
+                zona_horaria=zona_horaria,
                 plan="free"
             )
             db.session.add(restaurante)
@@ -458,6 +478,17 @@ def entregado(pedido_id):
     db.session.commit()
     return redirect(request.referrer or url_for("index_redirect"))
 
+@app.route("/llegada_cocina/<int:pedido_id>", methods=["POST"])
+@login_required
+def llegada_cocina(pedido_id):
+    """Marca cuando un pedido llega a cocina"""
+    pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
+    if not pedido.hora_cocina:
+        pedido.hora_cocina = get_local_time()
+        db.session.commit()
+        flash("Pedido marcado como recibido en cocina", "success")
+    return redirect(url_for("cocina"))
+
 @app.route("/historial")
 @login_required
 def historial():
@@ -527,15 +558,17 @@ def cocina():
     
     lista_pedidos = []
     for p in pedidos:
-        if not p.hora_cocina:
-            p.hora_cocina = datetime.now()
-            db.session.commit()
         tiempo = None
         if p.hora_cocina:
-            delta = datetime.now() - p.hora_cocina
+            # Calcular tiempo desde que llegó a cocina usando hora local
+            hora_local = get_local_time(restaurante_id)
+            delta = hora_local - p.hora_cocina
             minutos = int(delta.total_seconds() // 60)
             segundos = int(delta.total_seconds() % 60)
             tiempo = f"{minutos}m {segundos}s"
+        else:
+            # Si no tiene hora_cocina, mostrar "Pendiente"
+            tiempo = "Pendiente"
         lista_pedidos.append({"pedido": p, "tiempo": tiempo})
     
     return render_template("cocina.html", lista_pedidos=lista_pedidos)

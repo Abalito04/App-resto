@@ -16,18 +16,36 @@
                 </strong> - {{ item.pedido.metodo_pago }}
                 <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
 
-                <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+                {% if item.pedido.hora_cocina %}
+                    <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+                {% else %}
+                    <small class="d-block text-warning">⏳ Pendiente de recibir en cocina</small>
+                {% endif %}
 
                 <ul class="list-group list-group-flush mt-2 mb-2">
                     {% for it in item.pedido.items %}
-                        <li class="list-group-item p-1">{{ it.producto.nombre }} - ${{ it.producto.precio }}</li>
+                        <li class="list-group-item p-1">
+                            {% if it.cantidad > 1 %}
+                                {{ it.cantidad }}x {{ it.producto.nombre }}
+                            {% else %}
+                                {{ it.producto.nombre }}
+                            {% endif %}
+                            - ${{ it.producto.precio * it.cantidad }}
+                        </li>
                     {% endfor %}
                 </ul>
                 <strong>Total: ${{ item.pedido.total }}</strong>
 
-                <form method="POST" action="{{ url_for('entregado', pedido_id=item.pedido.id) }}">
-                    <button class="btn btn-success btn-sm mt-2">✅ Entregado</button>
-                </form>
+                <div class="d-flex gap-2 mt-2">
+                    {% if not item.pedido.hora_cocina %}
+                        <form method="POST" action="{{ url_for('llegada_cocina', pedido_id=item.pedido.id) }}">
+                            <button class="btn btn-primary btn-sm">📋 Recibir en cocina</button>
+                        </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('entregado', pedido_id=item.pedido.id) }}">
+                        <button class="btn btn-success btn-sm">✅ Entregado</button>
+                    </form>
+                </div>
             </div>
         </div>
         {% endif %}
@@ -43,9 +61,19 @@ function actualizarTiempos() {
     document.querySelectorAll('.card').forEach(card => {
         const horaStr = card.dataset.hora;
         if (!horaStr) return;
+        
         const hora = new Date(horaStr);
         const ahora = new Date();
+        
+        // Calcular diferencia en segundos
         const diff = Math.floor((ahora - hora) / 1000);
+        
+        // Si la diferencia es negativa, mostrar 0
+        if (diff < 0) {
+            card.querySelector('.tiempo').textContent = '0m 0s';
+            return;
+        }
+        
         const minutos = Math.floor(diff / 60);
         const segundos = diff % 60;
         card.querySelector('.tiempo').textContent = `${minutos}m ${segundos}s`;

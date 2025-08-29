@@ -209,6 +209,49 @@ def admin_toggle_usuario(id):
     flash("Estado actualizado", "success")
     return redirect(url_for("auth.admin_usuarios"))
 
+@auth_bp.route('/admin/usuarios/crear', methods=['GET', 'POST'])
+@login_required
+def admin_crear_usuario():
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    from models import Restaurante  # Importa aquí si no está arriba
+    restaurantes = Restaurante.query.all()
+    if request.method == 'POST':
+        nombre = request.form.get('nombre', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        restaurante_id = request.form.get('restaurante_id')
+        es_admin = bool(request.form.get('es_admin'))
+        es_superadmin = bool(request.form.get('es_superadmin'))
+
+        # Validaciones básicas
+        if not validar_email(email):
+            flash('Email inválido', 'error')
+            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+        if Usuario.query.filter_by(email=email).first():
+            flash('Email ya registrado', 'error')
+            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+        if not password or len(password) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres', 'error')
+            return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+
+        usuario = Usuario(
+            nombre=nombre,
+            email=email,
+            es_admin=es_admin or es_superadmin,
+            es_superadmin=es_superadmin,
+            restaurante_id=restaurante_id if restaurante_id else None,
+            confirmado=True,
+            activo=True
+        )
+        usuario.set_password(password)
+        db.session.add(usuario)
+        db.session.commit()
+        flash('Usuario creado exitosamente', 'success')
+        return redirect(url_for('auth.admin_usuarios'))
+    return render_template('auth/crear_usuario.html', restaurantes=restaurantes)
+
 @auth_bp.route('/admin/cambiar_rol/<int:user_id>', methods=['POST'])
 @login_required
 def superadmin_cambiar_rol(user_id):

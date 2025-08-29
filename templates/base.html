@@ -15,16 +15,25 @@
         background-color: #181818 !important;
         color: #f8f9fa !important;
       }
-      .navbar-dark .navbar-nav .nav-link,
-      .navbar-dark .navbar-brand,
-      .navbar-dark .dropdown-toggle,
-      .navbar-dark .btn-outline-light {
+      .navbar-custom-dark {
+        background-color: #23272b !important;
         color: #fff !important;
       }
-      .navbar-light .navbar-nav .nav-link,
-      .navbar-light .navbar-brand,
-      .navbar-light .dropdown-toggle,
-      .navbar-light .btn-outline-dark {
+      .navbar-custom-light {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .navbar-custom-dark .navbar-nav .nav-link,
+      .navbar-custom-dark .navbar-brand,
+      .navbar-custom-dark .dropdown-toggle,
+      .navbar-custom-dark .btn-outline-light {
+        color: #fff !important;
+      }
+      .navbar-custom-light .navbar-nav .nav-link,
+      .navbar-custom-light .navbar-brand,
+      .navbar-custom-light .dropdown-toggle,
+      .navbar-custom-light .btn-outline-dark {
         color: #212529 !important;
       }
       .dropdown-menu.bg-dark {
@@ -42,10 +51,21 @@
       #toggle-theme {
         min-width: 40px;
       }
+      /* Asegura que el botón de tema siempre tenga contraste */
+      .btn-theme-dark {
+        background: #23272b !important;
+        color: #fff !important;
+        border: 1px solid #fff !important;
+      }
+      .btn-theme-light {
+        background: #f8f9fa !important;
+        color: #212529 !important;
+        border: 1px solid #212529 !important;
+      }
     </style>
 </head>
 <body class="bg-light">
-<nav id="main-navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav id="main-navbar" class="navbar navbar-expand-lg navbar-custom-dark">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="{{ url_for('index_redirect') }}">
       {% if current_restaurante %}{{ current_restaurante.nombre }}{% else %}Resto App{% endif %}
@@ -73,7 +93,7 @@
         <button id="enable-notifications" class="btn btn-outline-warning btn-sm" style="display:none;">
           <i class="fas fa-bell"></i>
         </button>
-        <button id="toggle-theme" class="btn btn-outline-light btn-sm" title="Cambiar tema">
+        <button id="toggle-theme" class="btn btn-theme-dark btn-sm" title="Cambiar tema">
           <i class="fas fa-moon"></i>
         </button>
         <div class="dropdown">
@@ -110,10 +130,8 @@
     // Navbar
     const navbar = document.getElementById('main-navbar');
     if (navbar) {
-      navbar.classList.toggle('navbar-dark', dark);
-      navbar.classList.toggle('navbar-light', !dark);
-      navbar.classList.toggle('bg-dark', dark);
-      navbar.classList.toggle('bg-light', !dark);
+      navbar.classList.toggle('navbar-custom-dark', dark);
+      navbar.classList.toggle('navbar-custom-light', !dark);
     }
 
     // Cambia el icono y color del botón de tema
@@ -124,8 +142,8 @@
         icon.classList.toggle('fa-moon', !dark);
         icon.classList.toggle('fa-sun', dark);
       }
-      themeBtn.classList.toggle('btn-outline-dark', !dark);
-      themeBtn.classList.toggle('btn-outline-light', dark);
+      themeBtn.classList.toggle('btn-theme-dark', dark);
+      themeBtn.classList.toggle('btn-theme-light', !dark);
     }
 
     // Cambia los dropdowns

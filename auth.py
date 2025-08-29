@@ -117,10 +117,11 @@ def registro():
             # Crear usuario
             token = secrets.token_urlsafe(32)
             usuario = Usuario(
-                nombre=nombre, email=email,
-                es_superadmin=True, restaurante_id=restaurante.id,
-                confirmado=False, activo=False, token_confirmacion=token
-            )
+            nombre=nombre, email=email,
+            es_superadmin=False,  # <-- Solo el registro inicial o desde admin puede ser superadmin
+            restaurante_id=restaurante.id,
+            confirmado=False, activo=False, token_confirmacion=token
+)
             usuario.set_password(password)
             db.session.add(usuario)
             db.session.commit()

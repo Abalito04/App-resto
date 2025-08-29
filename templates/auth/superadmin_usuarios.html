@@ -28,9 +28,8 @@
         <td>
           <form method="POST" action="{{ url_for('auth.superadmin_cambiar_rol', user_id=u.id) }}" class="d-flex gap-2">
             <select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
-              <option value="usuario" {{ 'selected' if u.rol=='usuario' else '' }}>usuario</option>
-              <option value="admin" {{ 'selected' if u.rol=='admin' else '' }}>admin</option>
-              <option value="superadmin" {{ 'selected' if u.rol=='superadmin' else '' }}>superadmin</option>
+              <option value="usuario" {% if not u.es_superadmin %}selected{% endif %}>Usuario</option>
+              <option value="superadmin" {% if u.es_superadmin %}selected{% endif %}>Superadmin</option>
             </select>
           </form>
         </td>

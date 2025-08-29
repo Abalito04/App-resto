@@ -22,19 +22,17 @@
         <tbody>
             {% for producto in productos %}
             <tr>
-                <td>
-                  <form method="POST" action="{{ url_for('editar_producto', producto_id=producto.id) }}" class="d-flex gap-2">
-                    <input type="text" class="form-control" name="nombre" value="{{ producto.nombre }}" required>
-                </td>
-                <td class="text-end">
-                    <input type="number" class="form-control" name="precio" value="{{ producto.precio }}" required step="0.01">
-                </td>
+                <td>{{ producto.nombre }}</td>
+                <td class="text-end">${{ producto.precio }}</td>
                 <td class="text-center">
-                    <button class="btn btn-warning btn-sm me-1">✏ Guardar</button>
-                  </form>
-                  <form method="POST" action="{{ url_for('borrar_producto', producto_id=producto.id) }}" style="display:inline;">
-                    <button class="btn btn-danger btn-sm">🗑 Borrar</button>
-                  </form>
+                    <form method="POST" action="{{ url_for('editar_producto', producto_id=producto.id) }}" class="d-inline-flex gap-1">
+                        <input type="hidden" name="nombre" value="{{ producto.nombre }}">
+                        <input type="hidden" name="precio" value="{{ producto.precio }}">
+                        <button class="btn btn-warning btn-sm me-1" title="Guardar cambios">✏ Guardar</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('borrar_producto', producto_id=producto.id) }}" style="display:inline;">
+                        <button class="btn btn-danger btn-sm" title="Borrar producto">🗑 Borrar</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}

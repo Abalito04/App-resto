@@ -320,7 +320,6 @@ def setup_inicial():
 @login_required
 def crear_pedido():
     restaurante_id = get_user_restaurante()
-    
     mesa = request.form.get("mesa")
     nombre_cliente = request.form.get("nombre_cliente")
     direccion_cliente = request.form.get("direccion_cliente")
@@ -342,37 +341,53 @@ def crear_pedido():
     if not items:
         return redirect(url_for("index_redirect"))
 
-    # Crear nuevo pedido
-    nuevo_pedido = Pedido(
-        mesa=mesa,
-        nombre_cliente=nombre_cliente,
-        direccion_cliente=direccion_cliente,
-        fecha=datetime.now(),
-        estado="Pendiente",
-        metodo_pago=metodo_pago,
-        tipo_consumo=tipo_consumo,
-        ticket_numero=ticket_numero,
-        titular=titular,
-        transferencia_info=transferencia_info,
-        deuda_nombre=deuda_nombre,
-        restaurante_id=restaurante_id,
-        usuario_id=current_user.id
-    )
-    db.session.add(nuevo_pedido)
-    db.session.commit()
-    
-    # Agregar items (solo productos del mismo restaurante)
+    # 1. Buscar pedido activo para esa mesa y restaurante
+    pedido = None
+    if tipo_consumo == "Local":
+        pedido = Pedido.query.filter_by(
+            mesa=mesa,
+            restaurante_id=restaurante_id,
+            estado="Pendiente"
+        ).first()
+    else:
+        # Para llevar: podrías usar nombre_cliente o algún otro criterio
+        pedido = None
+
+    if not pedido:
+        # 2. Si no existe, crear nuevo pedido
+        pedido = Pedido(
+            mesa=mesa,
+            nombre_cliente=nombre_cliente,
+            direccion_cliente=direccion_cliente,
+            fecha=datetime.now(),
+            estado="Pendiente",
+            metodo_pago=metodo_pago,
+            tipo_consumo=tipo_consumo,
+            ticket_numero=ticket_numero,
+            titular=titular,
+            transferencia_info=transferencia_info,
+            deuda_nombre=deuda_nombre,
+            restaurante_id=restaurante_id,
+            usuario_id=current_user.id
+        )
+        db.session.add(pedido)
+        db.session.commit()
+
+    # 3. Agregar productos al pedido existente (sumar ítems)
     for producto_id in items:
         producto = Producto.query.filter_by(id=int(producto_id), restaurante_id=restaurante_id).first()
         if producto:
-            item = Item(pedido_id=nuevo_pedido.id, producto_id=producto.id)
-            db.session.add(item)
+            # Si ya existe ese producto en el pedido, suma uno más
+            item = Item.query.filter_by(pedido_id=pedido.id, producto_id=producto.id).first()
+            if item:
+                item.cantidad += 1
+            else:
+                item = Item(pedido_id=pedido.id, producto_id=producto.id, cantidad=1)
+                db.session.add(item)
     db.session.commit()
 
-    imprimir_comanda(nuevo_pedido)
+    imprimir_comanda(pedido)
     return redirect(url_for("index_redirect"))
-
-# [Resto de las rutas permanecen iguales...]
 
 @app.route("/borrar/<int:pedido_id>", methods=["POST"])
 @login_required

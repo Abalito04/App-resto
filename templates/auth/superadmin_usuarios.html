@@ -44,11 +44,21 @@
         </td>
         <td>{{ u.restaurante.nombre if u.restaurante else '-' }}</td>
         <td>
-          <form method="POST" action="{{ url_for('auth.superadmin_resetpass', user_id=u.id) }}" class="d-flex gap-2">
-            <input class="form-control form-control-sm" name="nueva" placeholder="Nueva pass">
-            <button class="btn btn-sm btn-warning">Reset</button>
-          </form>
-                
+          <div class="d-flex gap-2">
+            <!-- Resetear contraseña -->
+            <form method="POST" action="{{ url_for('auth.superadmin_resetpass', user_id=u.id) }}">
+              <input class="form-control form-control-sm" name="nueva" placeholder="Nueva pass">
+              <button class="btn btn-sm btn-warning">Reset</button>
+            </form>
+
+            <!-- Eliminar usuario -->
+            <form method="POST" action="{{ url_for('auth.superadmin_eliminar_usuario', user_id=u.id) }}" 
+                  onsubmit="return confirm('¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.');">
+              <button class="btn btn-sm btn-danger">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
         </td>
       </tr>
       {% endfor %}

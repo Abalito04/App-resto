@@ -375,3 +375,17 @@ def configuracion():
 
     return render_template("auth/configuracion.html", config=config, es_superadmin=current_user.es_superadmin)
 
+@auth_bp.route('/admin/usuarios/eliminar/<int:user_id>', methods=['POST'])
+@login_required
+def eliminar_usuario(user_id):
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("index_redirect"))
+    usuario = Usuario.query.get_or_404(user_id)
+    if usuario.id == current_user.id:
+        flash("No puedes eliminar tu propio usuario.", "error")
+        return redirect(url_for("auth.admin_usuarios"))
+    db.session.delete(usuario)
+    db.session.commit()
+    flash(f"Usuario {usuario.nombre} eliminado.", "success")
+    return redirect(url_for("auth.admin_usuarios"))

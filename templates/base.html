@@ -10,59 +10,63 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <script src="https://kit.fontawesome.com/4c7c8e0e6e.js" crossorigin="anonymous"></script>
-    <style>
-      body.bg-dark {
-        background-color: #181818 !important;
-        color: #f8f9fa !important;
-      }
-      .navbar-custom-dark {
-        background-color: #23272b !important;
-        color: #fff !important;
-      }
-      .navbar-custom-light {
-        background-color: #f8f9fa !important;
-        color: #212529 !important;
-        border-bottom: 1px solid #dee2e6;
-      }
-      .navbar-custom-dark .navbar-nav .nav-link,
-      .navbar-custom-dark .navbar-brand,
-      .navbar-custom-dark .dropdown-toggle,
-      .navbar-custom-dark .btn-outline-light {
-        color: #fff !important;
-      }
-      .navbar-custom-light .navbar-nav .nav-link,
-      .navbar-custom-light .navbar-brand,
-      .navbar-custom-light .dropdown-toggle,
-      .navbar-custom-light .btn-outline-dark {
-        color: #212529 !important;
-      }
-      .dropdown-menu.bg-dark {
-        background-color: #23272b !important;
-      }
-      .dropdown-menu.bg-light {
-        background-color: #fff !important;
-      }
-      .dropdown-menu .dropdown-item {
-        color: inherit;
-      }
-      .btn-outline-light, .btn-outline-dark {
-        border-color: transparent;
-      }
-      #toggle-theme {
-        min-width: 40px;
-      }
-      /* Asegura que el botón de tema siempre tenga contraste */
-      .btn-theme-dark {
-        background: #23272b !important;
-        color: #fff !important;
-        border: 1px solid #fff !important;
-      }
-      .btn-theme-light {
-        background: #f8f9fa !important;
-        color: #212529 !important;
-        border: 1px solid #212529 !important;
-      }
-    </style>
+    <!-- Cambia solo el bloque <style> en tu base.html -->
+<style>
+  body.bg-dark {
+    background-color: #181818 !important;
+    color: #f8f9fa !important;
+  }
+  body.bg-light {
+    background-color: #ffe4ec !important; /* Rosa pastel claro */
+    color: #212529 !important;
+  }
+  .navbar-custom-dark {
+    background-color: #23272b !important;
+    color: #fff !important;
+  }
+  .navbar-custom-light {
+    background-color: #ffd6e0 !important; /* Un rosa pastel un poco más fuerte para la navbar */
+    color: #212529 !important;
+    border-bottom: 1px solid #f3b6c2;
+  }
+  .navbar-custom-dark .navbar-nav .nav-link,
+  .navbar-custom-dark .navbar-brand,
+  .navbar-custom-dark .dropdown-toggle,
+  .navbar-custom-dark .btn-outline-light {
+    color: #fff !important;
+  }
+  .navbar-custom-light .navbar-nav .nav-link,
+  .navbar-custom-light .navbar-brand,
+  .navbar-custom-light .dropdown-toggle,
+  .navbar-custom-light .btn-outline-dark {
+    color: #b23a48 !important; /* Un rosa oscuro para contraste */
+  }
+  .dropdown-menu.bg-dark {
+    background-color: #23272b !important;
+  }
+  .dropdown-menu.bg-light {
+    background-color: #fff0f6 !important; /* Rosa muy claro para el menú */
+  }
+  .dropdown-menu .dropdown-item {
+    color: inherit;
+  }
+  .btn-outline-light, .btn-outline-dark {
+    border-color: transparent;
+  }
+  #toggle-theme {
+    min-width: 40px;
+  }
+  .btn-theme-dark {
+    background: #23272b !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+  }
+  .btn-theme-light {
+    background: #ffd6e0 !important;
+    color: #b23a48 !important;
+    border: 1px solid #b23a48 !important;
+  }
+</style>
 </head>
 <body class="bg-light">
 <nav id="main-navbar" class="navbar navbar-expand-lg navbar-custom-dark">

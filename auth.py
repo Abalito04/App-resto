@@ -389,3 +389,8 @@ def eliminar_usuario(user_id):
     db.session.commit()
     flash(f"Usuario {usuario.nombre} eliminado.", "success")
     return redirect(url_for("auth.admin_usuarios"))
+
+@auth_bp.route('/soy_superadmin')
+@login_required
+def soy_superadmin():
+    return f"Usuario: {current_user.email} | es_superadmin: {current_user.es_superadmin}"

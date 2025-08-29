@@ -113,6 +113,11 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('index_redirect') }}">Mozo</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('cocina') }}">Cocina</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('historial') }}">Historial</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('auth.configuracion') }}">
+            <i class="fas fa-cog"></i> Configuración
+          </a>
+        </li>
         {% if current_user.es_superadmin %}
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.admin_usuarios') }}">
@@ -136,6 +141,7 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}">Mi Perfil</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.configuracion') }}">Configuración</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a></li>
           </ul>

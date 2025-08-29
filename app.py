@@ -109,8 +109,25 @@ def get_user_restaurante():
 
 def get_local_time(restaurante_id=None):
     """Obtiene la hora local del restaurante"""
-    # Usar la hora del servidor que ya está configurada con la zona horaria correcta
-    return datetime.now()
+    if not restaurante_id:
+        restaurante_id = get_user_restaurante()
+    
+    # Obtener la zona horaria del restaurante
+    zona_horaria = 'America/Argentina/Buenos_Aires'  # Default
+    if restaurante_id:
+        restaurante = Restaurante.query.get(restaurante_id)
+        if restaurante and restaurante.zona_horaria:
+            zona_horaria = restaurante.zona_horaria
+    
+    try:
+        # Convertir UTC a zona horaria local
+        tz = pytz.timezone(zona_horaria)
+        utc_now = datetime.now(pytz.UTC)
+        local_time = utc_now.astimezone(tz)
+        return local_time.replace(tzinfo=None)  # Retornar sin timezone para compatibilidad
+    except:
+        # Fallback a hora del servidor
+        return datetime.now()
 
 # =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
 def init_db():
@@ -209,11 +226,16 @@ def debug_time():
     import time
     from datetime import datetime
     
+    # Obtener hora local usando la función
+    hora_local = get_local_time()
+    
     return jsonify({
-        "hora_actual": datetime.now().isoformat(),
+        "hora_servidor_utc": datetime.now(pytz.UTC).isoformat(),
+        "hora_local_calculada": hora_local.isoformat(),
         "timestamp": time.time(),
         "zona_horaria_configurada": os.getenv('TZ', 'No configurada'),
-        "timezone_server": os.getenv('SERVER_TIMEZONE', 'No configurada')
+        "timezone_server": os.getenv('SERVER_TIMEZONE', 'No configurada'),
+        "diferencia_horas": (hora_local - datetime.now()).total_seconds() / 3600
     })
 
 @app.route("/make-superadmin/<email>")
@@ -498,7 +520,7 @@ def llegada_cocina(pedido_id):
     """Marca cuando un pedido llega a cocina"""
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
     if not pedido.hora_cocina:
-        pedido.hora_cocina = datetime.now()
+        pedido.hora_cocina = get_local_time()
         db.session.commit()
         flash("Pedido marcado como recibido en cocina", "success")
     return redirect(url_for("cocina"))
@@ -574,8 +596,8 @@ def cocina():
     for p in pedidos:
         tiempo = None
         if p.hora_cocina:
-            # Calcular tiempo desde que llegó a cocina
-            ahora = datetime.now()
+            # Calcular tiempo desde que llegó a cocina usando hora local
+            ahora = get_local_time(restaurante_id)
             delta = ahora - p.hora_cocina
             minutos = int(delta.total_seconds() // 60)
             segundos = int(delta.total_seconds() % 60)

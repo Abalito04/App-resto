@@ -10,6 +10,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <script src="https://kit.fontawesome.com/4c7c8e0e6e.js" crossorigin="anonymous"></script>
+<style>
+  body.bg-dark {
+    background-color: #181818 !important;
+    color: #f8f9fa !important;
+  }
+  .navbar-dark .navbar-nav .nav-link,
+  .navbar-dark .navbar-brand,
+  .navbar-dark .dropdown-toggle,
+  .navbar-dark .btn-outline-light {
+    color: #fff !important;
+  }
+  .navbar-light .navbar-nav .nav-link,
+  .navbar-light .navbar-brand,
+  .navbar-light .dropdown-toggle,
+  .navbar-light .btn-outline-dark {
+    color: #212529 !important;
+  }
+  .dropdown-menu {
+    background-color: inherit;
+  }
+  .dropdown-menu .dropdown-item {
+    color: inherit;
+  }
+  .btn-outline-light, .btn-outline-dark {
+    border-color: transparent;
+  }
+</style>
 </head>
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -70,21 +97,51 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // Tema oscuro/claro
-  const themeBtn = document.getElementById('toggle-theme');
-  if (themeBtn) {
-    themeBtn.onclick = function() {
-      document.body.classList.toggle('bg-dark');
-      document.body.classList.toggle('text-white');
-      document.querySelector('.navbar').classList.toggle('navbar-dark');
-      document.querySelector('.navbar').classList.toggle('navbar-light');
-      document.querySelector('.navbar').classList.toggle('bg-dark');
-      document.querySelector('.navbar').classList.toggle('bg-light');
-      // Cambia el icono
-      const icon = themeBtn.querySelector('i');
-      icon.classList.toggle('fa-moon');
-      icon.classList.toggle('fa-sun');
+  function setTheme(dark) {
+    document.body.classList.toggle('bg-dark', dark);
+    document.body.classList.toggle('text-white', dark);
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+      navbar.classList.toggle('navbar-dark', dark);
+      navbar.classList.toggle('navbar-light', !dark);
+      navbar.classList.toggle('bg-dark', dark);
+      navbar.classList.toggle('bg-light', !dark);
     }
+    // Cambia el icono del botón
+    const themeBtn = document.getElementById('toggle-theme');
+    if (themeBtn) {
+      const icon = themeBtn.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-moon', !dark);
+        icon.classList.toggle('fa-sun', dark);
+      }
+      // Cambia el color del botón para que siempre sea visible
+      themeBtn.classList.toggle('btn-outline-light', !dark);
+      themeBtn.classList.toggle('btn-outline-dark', dark);
+    }
+    // Cambia los dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+      menu.classList.toggle('bg-dark', dark);
+      menu.classList.toggle('bg-light', !dark);
+      menu.classList.toggle('text-white', dark);
+      menu.classList.toggle('text-dark', !dark);
+    });
+    // Guarda preferencia
+    localStorage.setItem('darkTheme', dark ? '1' : '0');
   }
+
+  // Inicializa el tema según preferencia guardada
+  document.addEventListener('DOMContentLoaded', function() {
+    const dark = localStorage.getItem('darkTheme') === '1';
+    setTheme(dark);
+    const themeBtn = document.getElementById('toggle-theme');
+    if (themeBtn) {
+      themeBtn.onclick = function() {
+        setTheme(!document.body.classList.contains('bg-dark'));
+      }
+    }
+  });
+
   // Notificaciones
   const notifBtn = document.getElementById("enable-notifications");
   if (notifBtn) {

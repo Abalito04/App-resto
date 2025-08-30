@@ -81,6 +81,10 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
             if not mail_username or not mail_password:
                 error_msg = "Variables de entorno SENDGRID_API_KEY o MAIL_USERNAME/MAIL_PASSWORD no configuradas"
                 print(f"❌ {error_msg}")
+                print(f"📧 Variables disponibles:")
+                print(f"   - SENDGRID_API_KEY: {bool(current_app.config.get('SENDGRID_API_KEY') or os.environ.get('SENDGRID_API_KEY'))}")
+                print(f"   - MAIL_USERNAME: {bool(mail_username)}")
+                print(f"   - MAIL_PASSWORD: {bool(mail_password)}")
                 raise ValueError(error_msg)
             
             print(f"📧 Usando Gmail como fallback: {mail_username}")
@@ -188,7 +192,7 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
                             "to": [{"email": "abalito95@gmail.com"}]
                         }
                     ],
-                    "from": {"email": "abalito95@gmail.com"},
+                    "from": {"email": "maty.095@hotmail.com"},
                     "subject": f"Solicitud de cambio de plan - {restaurante}",
                     "content": [
                         {

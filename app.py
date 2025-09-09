@@ -163,6 +163,14 @@ def load_user(user_id):
 def inject_user():
     # Función de traducción simplificada
     def translate_text(text):
+        # Usar sistema simple para traducciones del perfil
+        if text in ['Perfil de', 'Email:', 'Teléfono:', 'Restaurante:', 'Dirección:', 'Moneda:', 'No registrado', 'No registrada', 'Configuración', 'Salir']:
+            try:
+                import simple_translations
+                return simple_translations.get_translation(text, get_locale())
+            except:
+                return text
+        
         if use_simple_translations:
             try:
                 import simple_translations

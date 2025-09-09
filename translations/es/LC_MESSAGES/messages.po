@@ -1,0 +1,252 @@
+# Spanish translations for Resto App
+# Copyright (C) 2025 Resto App
+# This file is distributed under the same license as the Resto App project.
+# FIRST AUTHOR <email@example.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Resto App 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-01-08 21:00+0000\n"
+"PO-Revision-Date: 2025-01-08 21:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 4.0.0\n"
+
+# Navegación
+msgid "Mozo"
+msgstr "Mozo"
+
+msgid "Cocina"
+msgstr "Cocina"
+
+msgid "Historial"
+msgstr "Historial"
+
+msgid "Configuración"
+msgstr "Configuración"
+
+msgid "Planes"
+msgstr "Planes"
+
+msgid "Panel de Usuarios"
+msgstr "Panel de Usuarios"
+
+msgid "Admin Planes"
+msgstr "Admin Planes"
+
+msgid "Mi Perfil"
+msgstr "Mi Perfil"
+
+msgid "Cerrar Sesión"
+msgstr "Cerrar Sesión"
+
+msgid "Iniciar Sesión"
+msgstr "Iniciar Sesión"
+
+msgid "Registrarse"
+msgstr "Registrarse"
+
+# Dashboard principal
+msgid "Tomar pedido"
+msgstr "Tomar pedido"
+
+msgid "Tipo de consumo:"
+msgstr "Tipo de consumo:"
+
+msgid "En el local"
+msgstr "En el local"
+
+msgid "Para llevar"
+msgstr "Para llevar"
+
+msgid "Mesa:"
+msgstr "Mesa:"
+
+msgid "Nombre Cliente:"
+msgstr "Nombre Cliente:"
+
+msgid "Dirección:"
+msgstr "Dirección:"
+
+msgid "Método de pago:"
+msgstr "Método de pago:"
+
+msgid "Efectivo"
+msgstr "Efectivo"
+
+msgid "Transferencia"
+msgstr "Transferencia"
+
+msgid "Deuda"
+msgstr "Deuda"
+
+msgid "Tarjeta"
+msgstr "Tarjeta"
+
+msgid "N° de Ticket:"
+msgstr "N° de Ticket:"
+
+msgid "Titular:"
+msgstr "Titular:"
+
+msgid "Productos:"
+msgstr "Productos:"
+
+msgid "Seleccionar"
+msgstr "Seleccionar"
+
+msgid "Agregar pedido"
+msgstr "Agregar pedido"
+
+msgid "Pedidos activos"
+msgstr "Pedidos activos"
+
+msgid "No hay pedidos activos."
+msgstr "No hay pedidos activos."
+
+msgid "Editar"
+msgstr "Editar"
+
+msgid "Borrar"
+msgstr "Borrar"
+
+msgid "Entregado"
+msgstr "Entregado"
+
+msgid "Gestionar productos"
+msgstr "Gestionar productos"
+
+msgid "Nombre"
+msgstr "Nombre"
+
+msgid "Precio"
+msgstr "Precio"
+
+msgid "Agregar producto"
+msgstr "Agregar producto"
+
+msgid "Acciones"
+msgstr "Acciones"
+
+msgid "Guardar"
+msgstr "Guardar"
+
+# Cocina
+msgid "Cocina - Pedidos activos"
+msgstr "Cocina - Pedidos activos"
+
+msgid "Para llevar:"
+msgstr "Para llevar:"
+
+msgid "Fecha:"
+msgstr "Fecha:"
+
+msgid "Hora local"
+msgstr "Hora local"
+
+msgid "Tiempo en cocina:"
+msgstr "Tiempo en cocina:"
+
+msgid "Pendiente de recibir en cocina"
+msgstr "Pendiente de recibir en cocina"
+
+msgid "Recibir en cocina"
+msgstr "Recibir en cocina"
+
+msgid "No hay pedidos pendientes."
+msgstr "No hay pedidos pendientes."
+
+# Historial
+msgid "Historial de pedidos"
+msgstr "Historial de pedidos"
+
+msgid "Última semana"
+msgstr "Última semana"
+
+msgid "Último mes"
+msgstr "Último mes"
+
+msgid "Todos"
+msgstr "Todos"
+
+msgid "Consumo:"
+msgstr "Consumo:"
+
+msgid "No hay pedidos para este filtro."
+msgstr "No hay pedidos para este filtro."
+
+# Login
+msgid "Ingresar"
+msgstr "Ingresar"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Contraseña"
+msgstr "Contraseña"
+
+msgid "Entrar"
+msgstr "Entrar"
+
+msgid "¿No recibiste el email de confirmación?"
+msgstr "¿No recibiste el email de confirmación?"
+
+# Modal
+msgid "Detalles del pedido"
+msgstr "Detalles del pedido"
+
+msgid "Cerrar"
+msgstr "Cerrar"
+
+msgid "Cliente:"
+msgstr "Cliente:"
+
+msgid "Método de pago:"
+msgstr "Método de pago:"
+
+msgid "Ticket:"
+msgstr "Ticket:"
+
+msgid "Comprobante:"
+msgstr "Comprobante:"
+
+msgid "Deudor:"
+msgstr "Deudor:"
+
+# Errores y validaciones
+msgid "Debe ingresar el número de mesa"
+msgstr "Debe ingresar el número de mesa"
+
+msgid "Debes iniciar sesión para acceder."
+msgstr "Debes iniciar sesión para acceder."
+
+# Títulos y etiquetas
+msgid "Resto App"
+msgstr "Resto App"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Conectado"
+msgstr "Conectado"
+
+msgid "Sin conexión"
+msgstr "Sin conexión"
+
+msgid "Cambiar tema"
+msgstr "Cambiar tema"
+
+msgid "Cambiar idioma"
+msgstr "Cambiar idioma"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "English"
+msgstr "English"

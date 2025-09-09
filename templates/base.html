@@ -111,57 +111,71 @@
     <div class="collapse navbar-collapse" id="navbarMain">
       {% if current_user.is_authenticated %}
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('index_redirect') }}">Mozo</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('cocina') }}">Cocina</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('historial') }}">Historial</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index_redirect') }}">{{ _('Mozo') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('cocina') }}">{{ _('Cocina') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('historial') }}">{{ _('Historial') }}</a></li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.configuracion') }}">
-            <i class="fas fa-cog"></i> Configuración
+            <i class="fas fa-cog"></i> {{ _('Configuración') }}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.planes') }}">
-            <i class="fas fa-chart-line"></i> Planes
+            <i class="fas fa-chart-line"></i> {{ _('Planes') }}
           </a>
         </li>
         {% if current_user.es_superadmin %}
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.admin_usuarios') }}">
-            <i class="fas fa-users"></i> Panel de Usuarios
+            <i class="fas fa-users"></i> {{ _('Panel de Usuarios') }}
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.admin_planes') }}">
-            <i class="fas fa-chart-bar"></i> Admin Planes
+            <i class="fas fa-chart-bar"></i> {{ _('Admin Planes') }}
           </a>
         </li>
         {% endif %}
       </ul>
-      <span class="badge bg-info me-3">Plan {{ current_restaurante.plan|title }}</span>
+      <span class="badge bg-info me-3">{{ _('Plan') }} {{ current_restaurante.plan|title }}</span>
       <div class="d-flex align-items-center gap-2">
-        <span id="pwa-status" class="badge bg-secondary">Conectado</span>
+        <span id="pwa-status" class="badge bg-secondary">{{ _('Conectado') }}</span>
         <button id="enable-notifications" class="btn btn-outline-warning btn-sm" style="display:none;">
           <i class="fas fa-bell"></i>
         </button>
-        <button id="toggle-theme" class="btn btn-theme-dark btn-sm" title="Cambiar tema">
+        <button id="toggle-theme" class="btn btn-theme-dark btn-sm" title="{{ _('Cambiar tema') }}">
           <i class="fas fa-moon"></i>
         </button>
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" title="{{ _('Cambiar idioma') }}">
+            <i class="fas fa-globe"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for code, name in languages.items() %}
+            <li>
+              <a class="dropdown-item {% if get_locale() == code %}active{% endif %}" href="{{ url_for('set_language', language=code) }}">
+                {{ name }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
         <div class="dropdown">
           <button class="btn btn-outline-light dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
             <i class="fas fa-user"></i> {{ current_user.nombre }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}">Mi Perfil</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('auth.configuracion') }}">Configuración</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}">{{ _('Mi Perfil') }}</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.configuracion') }}">{{ _('Configuración') }}</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Cerrar Sesión</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">{{ _('Cerrar Sesión') }}</a></li>
           </ul>
         </div>
       </div>
       {% else %}
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">Iniciar Sesión</a></li>
-        <li class="nav-item"><a href="{{ url_for('auth.registro') }}" class="btn btn-light">Registrarse</a></li>
+        <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">{{ _('Iniciar Sesión') }}</a></li>
+        <li class="nav-item"><a href="{{ url_for('auth.registro') }}" class="btn btn-light">{{ _('Registrarse') }}</a></li>
       </ul>
       {% endif %}
     </div>
@@ -248,10 +262,10 @@ function setTheme(dark) {
   function updateConnectionStatus() {
     const statusElement = document.getElementById("pwa-status");
     if (navigator.onLine) {
-      statusElement.textContent = "Conectado";
+      statusElement.textContent = "{{ _('Conectado') }}";
       statusElement.className = "badge bg-success";
     } else {
-      statusElement.textContent = "Sin conexión";
+      statusElement.textContent = "{{ _('Sin conexión') }}";
       statusElement.className = "badge bg-warning";
     }
   }

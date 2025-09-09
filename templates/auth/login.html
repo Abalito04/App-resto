@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4" style="max-width:480px">
-  <h3>Ingresar</h3>
+  <h3>{{ _('Ingresar') }}</h3>
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for c,m in messages %}
       <div class="alert alert-{{ 'danger' if c=='error' else c }}">{{ m }}</div>
@@ -9,17 +9,17 @@
   {% endwith %}
   <form method="POST">
     <div class="mb-3">
-      <label>Email</label>
+      <label>{{ _('Email') }}</label>
       <input class="form-control" type="email" name="email" value="{{ pending_email or '' }}" required>
     </div>
     <div class="mb-3">
-      <label>Contraseña</label>
+      <label>{{ _('Contraseña') }}</label>
       <input class="form-control" type="password" name="password" required>
     </div>
-    <button class="btn btn-primary w-100" type="submit">Entrar</button>
+    <button class="btn btn-primary w-100" type="submit">{{ _('Entrar') }}</button>
   </form>
   <div class="text-center mt-3">
-    <a href="{{ url_for('auth.resend_confirm') }}">¿No recibiste el email de confirmación?</a>
+    <a href="{{ url_for('auth.resend_confirm') }}">{{ _('¿No recibiste el email de confirmación?') }}</a>
   </div>
 </div>
 {% endblock %}

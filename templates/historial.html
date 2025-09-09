@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2>📜 Historial de pedidos</h2>
+    <h2>📜 {{ _('Historial de pedidos') }}</h2>
 
     <!-- 🔘 Botones de filtro -->
     <div class="mb-3">
-        <a href="{{ url_for('historial', filtro='semana') }}" class="btn btn-primary {% if filtro == 'semana' %}active{% endif %}">Última semana</a>
-        <a href="{{ url_for('historial', filtro='mes') }}" class="btn btn-primary {% if filtro == 'mes' %}active{% endif %}">Último mes</a>
-        <a href="{{ url_for('historial', filtro='todos') }}" class="btn btn-secondary {% if filtro == 'todos' %}active{% endif %}">Todos</a>
+        <a href="{{ url_for('historial', filtro='semana') }}" class="btn btn-primary {% if filtro == 'semana' %}active{% endif %}">{{ _('Última semana') }}</a>
+        <a href="{{ url_for('historial', filtro='mes') }}" class="btn btn-primary {% if filtro == 'mes' %}active{% endif %}">{{ _('Último mes') }}</a>
+        <a href="{{ url_for('historial', filtro='todos') }}" class="btn btn-secondary {% if filtro == 'todos' %}active{% endif %}">{{ _('Todos') }}</a>
     </div>
 
     <div class="row">
@@ -26,13 +26,13 @@
             >
                 <strong>
                     {% if pedido.tipo_consumo == 'Local' %}
-                        Mesa {{ pedido.mesa }}
+                        {{ _('Mesa') }} {{ pedido.mesa }}
                     {% else %}
                         {{ pedido.nombre_cliente }}
                     {% endif %}
                 </strong> - {{ pedido.metodo_pago }}
-                <small class="d-block">Fecha: {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
-                <p class="mt-1 mb-1"><strong>Consumo:</strong> {{ pedido.tipo_consumo }}</p>
+                <small class="d-block">{{ _('Fecha:') }} {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                <p class="mt-1 mb-1"><strong>{{ _('Consumo:') }}</strong> {{ pedido.tipo_consumo }}</p>
 
                 <ul class="list-group list-group-flush mt-2 mb-2">
                     {% for item in pedido.items %}
@@ -45,7 +45,7 @@
             </div>
         </div>
     {% else %}
-        <p>No hay pedidos para este filtro.</p>
+        <p>{{ _('No hay pedidos para este filtro.') }}</p>
     {% endfor %}
     </div>
 </div>
@@ -55,8 +55,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="pedidoModalLabel">Detalles del pedido</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title" id="pedidoModalLabel">{{ _('Detalles del pedido') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Cerrar') }}"></button>
       </div>
       <div class="modal-body">
         <p id="modal-mesa"></p>
@@ -70,7 +70,7 @@
         <p id="modal-deuda"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cerrar') }}</button>
       </div>
     </div>
   </div>
@@ -96,14 +96,14 @@ document.querySelectorAll('.historial-card').forEach(card => {
         });
 
         // Mostrar solo si hay datos
-        document.getElementById('modal-mesa').textContent = mesa ? `Mesa: ${mesa}` : '';
-        document.getElementById('modal-nombre').textContent = nombre ? `Cliente: ${nombre}` : '';
-        document.getElementById('modal-direccion').textContent = direccion ? `Dirección: ${direccion}` : '';
-        document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `Método de pago: ${metodo_pago}` : '';
-        document.getElementById('modal-ticket').textContent = ticket ? `Ticket: ${ticket}` : '';
-        document.getElementById('modal-titular').textContent = titular ? `Titular: ${titular}` : '';
-        document.getElementById('modal-transferencia').textContent = transferencia ? `Comprobante: ${transferencia}` : '';
-        document.getElementById('modal-deuda').textContent = deuda ? `Deudor: ${deuda}` : '';
+        document.getElementById('modal-mesa').textContent = mesa ? `{{ _('Mesa:') }} ${mesa}` : '';
+        document.getElementById('modal-nombre').textContent = nombre ? `{{ _('Cliente:') }} ${nombre}` : '';
+        document.getElementById('modal-direccion').textContent = direccion ? `{{ _('Dirección:') }} ${direccion}` : '';
+        document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `{{ _('Método de pago:') }} ${metodo_pago}` : '';
+        document.getElementById('modal-ticket').textContent = ticket ? `{{ _('Ticket:') }} ${ticket}` : '';
+        document.getElementById('modal-titular').textContent = titular ? `{{ _('Titular:') }} ${titular}` : '';
+        document.getElementById('modal-transferencia').textContent = transferencia ? `{{ _('Comprobante:') }} ${transferencia}` : '';
+        document.getElementById('modal-deuda').textContent = deuda ? `{{ _('Deudor:') }} ${deuda}` : '';
 
         const modal = new bootstrap.Modal(document.getElementById('pedidoModal'));
         modal.show();

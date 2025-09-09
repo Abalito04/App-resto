@@ -3,52 +3,52 @@
 <div class="container mt-4">
 
     <!-- ======== GESTIÓN DE PEDIDOS ======== -->
-    <h2>📝 Tomar pedido</h2>
+    <h2>📝 {{ _('Tomar pedido') }}</h2>
     <form method="POST" action="{{ url_for('crear_pedido') }}">
         <div class="row g-2 mb-3">
             <div class="col-md-3">
-                <label>Tipo de consumo:</label>
+                <label>{{ _('Tipo de consumo:') }}</label>
                 <select name="tipo_consumo" id="tipo_consumo" class="form-select" required>
-                    <option value="Local">🍽️ En el local</option>
-                    <option value="Llevar">🥡 Para llevar</option>
+                    <option value="Local">🍽️ {{ _('En el local') }}</option>
+                    <option value="Llevar">🥡 {{ _('Para llevar') }}</option>
                 </select>
             </div>
             <div class="col-md-3" id="div_mesa">
-                <label>Mesa:</label>
+                <label>{{ _('Mesa:') }}</label>
                 <input type="text" name="mesa" id="mesa_input" class="form-control">
-                <small id="mesa_error" class="text-danger" style="display:none;">❌ Debe ingresar el número de mesa</small>
+                <small id="mesa_error" class="text-danger" style="display:none;">❌ {{ _('Debe ingresar el número de mesa') }}</small>
             </div>
             <div class="col-md-3" id="div_cliente" style="display:none;">
-                <label>Nombre Cliente:</label>
+                <label>{{ _('Nombre Cliente:') }}</label>
                 <input type="text" name="nombre_cliente" class="form-control">
             </div>
             <div class="col-md-3" id="div_direccion" style="display:none;">
-                <label>Dirección:</label>
+                <label>{{ _('Dirección:') }}</label>
                 <input type="text" name="direccion_cliente" class="form-control">
             </div>
         </div>
 
         <div class="row g-2 mb-3">
             <div class="col-md-3">
-                <label>Método de pago:</label>
+                <label>{{ _('Método de pago:') }}</label>
                 <select name="metodo_pago" id="metodo_pago" class="form-select" required>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Deuda">Deuda</option>
-                    <option value="Tarjeta">Tarjeta 💳</option>
+                    <option value="Efectivo">{{ _('Efectivo') }}</option>
+                    <option value="Transferencia">{{ _('Transferencia') }}</option>
+                    <option value="Deuda">{{ _('Deuda') }}</option>
+                    <option value="Tarjeta">{{ _('Tarjeta') }} 💳</option>
                 </select>
             </div>
             <div class="col-md-3" id="div_tarjeta" style="display:none;">
-                <label>N° de Ticket:</label>
+                <label>{{ _('N° de Ticket:') }}</label>
                 <input type="text" name="ticket_numero" class="form-control">
             </div>
             <div class="col-md-3" id="div_titular" style="display:none;">
-                <label>Titular:</label>
+                <label>{{ _('Titular:') }}</label>
                 <input type="text" name="titular" class="form-control">
             </div>
         </div>
 
-        <h4>Productos:</h4>
+        <h4>{{ _('Productos:') }}</h4>
         <div class="row">
             {% for producto in productos %}
             <div class="col-6 col-md-4 col-lg-3 mb-2">
@@ -57,19 +57,19 @@
                     <p>$ {{ producto.precio }}</p>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}" id="prod{{ producto.id }}">
-                        <label class="form-check-label" for="prod{{ producto.id }}">Seleccionar</label>
+                        <label class="form-check-label" for="prod{{ producto.id }}">{{ _('Seleccionar') }}</label>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <button type="submit" class="btn btn-primary mt-3">Agregar pedido</button>
+        <button type="submit" class="btn btn-primary mt-3">{{ _('Agregar pedido') }}</button>
     </form>
 
     <!-- ======== PEDIDOS ACTIVOS ======== -->
     <hr>
-    <h3>Pedidos activos</h3>
+    <h3>{{ _('Pedidos activos') }}</h3>
     <div class="row">
         {% for pedido in pedidos %}
         <div class="col-12 col-md-6 col-lg-4 mb-3">
@@ -109,35 +109,35 @@
                 <strong>Total: ${{ pedido.total }}</strong>
 
                 <div class="d-flex gap-2 mt-2">
-                    <a href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}" class="btn btn-warning btn-sm">✏ Editar</a>
+                    <a href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}" class="btn btn-warning btn-sm">✏ {{ _('Editar') }}</a>
                     <form method="POST" action="{{ url_for('borrar_pedido', pedido_id=pedido.id) }}">
-                        <button type="submit" class="btn btn-danger btn-sm">🗑 Borrar</button>
+                        <button type="submit" class="btn btn-danger btn-sm">🗑 {{ _('Borrar') }}</button>
                     </form>
                     <form method="POST" action="{{ url_for('entregado', pedido_id=pedido.id) }}">
-                        <button type="submit" class="btn btn-success btn-sm">✅ Entregado</button>
+                        <button type="submit" class="btn btn-success btn-sm">✅ {{ _('Entregado') }}</button>
                     </form>
                 </div>
             </div>
         </div>
         {% else %}
-            <p>No hay pedidos activos.</p>
+            <p>{{ _('No hay pedidos activos.') }}</p>
         {% endfor %}
     </div>
 
     <!-- ======== GESTIÓN DE PRODUCTOS ======== -->
     <hr>
-    <h3>Gestionar productos</h3>
+    <h3>{{ _('Gestionar productos') }}</h3>
 
     <!-- Agregar producto -->
     <form method="POST" action="{{ url_for('agregar_producto_index') }}" class="mb-3 row g-2">
         <div class="col-auto">
-            <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+            <input type="text" name="nombre" class="form-control" placeholder="{{ _('Nombre') }}" required>
         </div>
         <div class="col-auto">
-            <input type="number" step="0.01" name="precio" class="form-control" placeholder="Precio" required>
+            <input type="number" step="0.01" name="precio" class="form-control" placeholder="{{ _('Precio') }}" required>
         </div>
         <div class="col-auto">
-            <button type="submit" class="btn btn-success">Agregar producto</button>
+            <button type="submit" class="btn btn-success">{{ _('Agregar producto') }}</button>
         </div>
     </form>
 
@@ -145,9 +145,9 @@
     <table class="table table-sm table-striped">
         <thead>
             <tr>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Acciones</th>
+                <th>{{ _('Nombre') }}</th>
+                <th>{{ _('Precio') }}</th>
+                <th>{{ _('Acciones') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -157,12 +157,12 @@
                     <form method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}" class="d-flex gap-1">
                         <input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control">
                         <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control">
-                        <button type="submit" class="btn btn-warning btn-sm">Guardar</button>
+                        <button type="submit" class="btn btn-warning btn-sm">{{ _('Guardar') }}</button>
                     </form>
                 </td>
                 <td>
                     <form method="POST" action="{{ url_for('borrar_producto_index', producto_id=producto.id) }}">
-                        <button type="submit" class="btn btn-danger btn-sm">🗑 Borrar</button>
+                        <button type="submit" class="btn btn-danger btn-sm">🗑 {{ _('Borrar') }}</button>
                     </form>
                 </td>
             </tr>
@@ -177,8 +177,8 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="pedidoActivoModalLabel">Detalles del pedido</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <h5 class="modal-title" id="pedidoActivoModalLabel">{{ _('Detalles del pedido') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Cerrar') }}"></button>
       </div>
       <div class="modal-body">
         <p id="modal-mesa"></p>
@@ -192,7 +192,7 @@
         <p id="modal-deuda"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cerrar') }}</button>
       </div>
     </div>
   </div>
@@ -265,14 +265,14 @@
                 productosList.innerHTML += `<li class="list-group-item">${li.textContent}</li>`;
             });
 
-            document.getElementById('modal-mesa').textContent = mesa ? `Mesa: ${mesa}` : '';
-            document.getElementById('modal-nombre').textContent = nombre ? `Cliente: ${nombre}` : '';
-            document.getElementById('modal-direccion').textContent = direccion ? `Dirección: ${direccion}` : '';
-            document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `Método de pago: ${metodo_pago}` : '';
-            document.getElementById('modal-ticket').textContent = ticket ? `Ticket: ${ticket}` : '';
-            document.getElementById('modal-titular').textContent = titular ? `Titular: ${titular}` : '';
-            document.getElementById('modal-transferencia').textContent = transferencia ? `Comprobante: ${transferencia}` : '';
-            document.getElementById('modal-deuda').textContent = deuda ? `Deudor: ${deuda}` : '';
+            document.getElementById('modal-mesa').textContent = mesa ? `{{ _('Mesa:') }} ${mesa}` : '';
+            document.getElementById('modal-nombre').textContent = nombre ? `{{ _('Cliente:') }} ${nombre}` : '';
+            document.getElementById('modal-direccion').textContent = direccion ? `{{ _('Dirección:') }} ${direccion}` : '';
+            document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `{{ _('Método de pago:') }} ${metodo_pago}` : '';
+            document.getElementById('modal-ticket').textContent = ticket ? `{{ _('Ticket:') }} ${ticket}` : '';
+            document.getElementById('modal-titular').textContent = titular ? `{{ _('Titular:') }} ${titular}` : '';
+            document.getElementById('modal-transferencia').textContent = transferencia ? `{{ _('Comprobante:') }} ${transferencia}` : '';
+            document.getElementById('modal-deuda').textContent = deuda ? `{{ _('Deudor:') }} ${deuda}` : '';
 
             const modal = new bootstrap.Modal(document.getElementById('pedidoActivoModal'));
             modal.show();

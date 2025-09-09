@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2>🧑‍🍳 Cocina - Pedidos activos</h2>
+    <h2>🧑‍🍳 {{ _('Cocina - Pedidos activos') }}</h2>
     <div class="row">
     {% for item in lista_pedidos %}
         {% if item.pedido.estado != "Entregado" %}
@@ -9,17 +9,17 @@
             <div class="card shadow-sm p-2" data-hora="{{ item.pedido.hora_cocina.isoformat() if item.pedido.hora_cocina else "" }}">
                 <strong>
                 {% if item.pedido.tipo_consumo == "Local" %}
-                    Mesa {{ item.pedido.mesa }}
+                    {{ _('Mesa') }} {{ item.pedido.mesa }}
                 {% else %}
-                    Para llevar: {{ item.pedido.nombre_cliente }}
+                    {{ _('Para llevar:') }} {{ item.pedido.nombre_cliente }}
                 {% endif %}
                 </strong> - {{ item.pedido.metodo_pago }}
-                <small class="d-block">Fecha: {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }} (Hora local)</small>
+                <small class="d-block">{{ _('Fecha:') }} {{ item.pedido.fecha.strftime('%d/%m/%Y %H:%M') }} ({{ _('Hora local') }})</small>
 
                 {% if item.pedido.hora_cocina %}
-                    <small class="d-block text-danger">⏱ Tiempo en cocina: <span class="tiempo">0m 0s</span></small>
+                    <small class="d-block text-danger">⏱ {{ _('Tiempo en cocina:') }} <span class="tiempo">0m 0s</span></small>
                 {% else %}
-                    <small class="d-block text-warning">⏳ Pendiente de recibir en cocina</small>
+                    <small class="d-block text-warning">⏳ {{ _('Pendiente de recibir en cocina') }}</small>
                 {% endif %}
 
                 <ul class="list-group list-group-flush mt-2 mb-2">
@@ -39,18 +39,18 @@
                 <div class="d-flex gap-2 mt-2">
                     {% if not item.pedido.hora_cocina %}
                         <form method="POST" action="{{ url_for('llegada_cocina', pedido_id=item.pedido.id) }}">
-                            <button class="btn btn-primary btn-sm">📋 Recibir en cocina</button>
+                            <button class="btn btn-primary btn-sm">📋 {{ _('Recibir en cocina') }}</button>
                         </form>
                     {% endif %}
                     <form method="POST" action="{{ url_for('entregado', pedido_id=item.pedido.id) }}">
-                        <button class="btn btn-success btn-sm">✅ Entregado</button>
+                        <button class="btn btn-success btn-sm">✅ {{ _('Entregado') }}</button>
                     </form>
                 </div>
             </div>
         </div>
         {% endif %}
     {% else %}
-        <p>No hay pedidos pendientes.</p>
+        <p>{{ _('No hay pedidos pendientes.') }}</p>
     {% endfor %}
     </div>
 </div>

@@ -1,0 +1,252 @@
+# English translations for Resto App
+# Copyright (C) 2025 Resto App
+# This file is distributed under the same license as the Resto App project.
+# FIRST AUTHOR <email@example.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Resto App 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-01-08 21:00+0000\n"
+"PO-Revision-Date: 2025-01-08 21:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 4.0.0\n"
+
+# Navigation
+msgid "Mozo"
+msgstr "Waiter"
+
+msgid "Cocina"
+msgstr "Kitchen"
+
+msgid "Historial"
+msgstr "History"
+
+msgid "Configuración"
+msgstr "Settings"
+
+msgid "Planes"
+msgstr "Plans"
+
+msgid "Panel de Usuarios"
+msgstr "User Panel"
+
+msgid "Admin Planes"
+msgstr "Admin Plans"
+
+msgid "Mi Perfil"
+msgstr "My Profile"
+
+msgid "Cerrar Sesión"
+msgstr "Logout"
+
+msgid "Iniciar Sesión"
+msgstr "Login"
+
+msgid "Registrarse"
+msgstr "Register"
+
+# Main Dashboard
+msgid "Tomar pedido"
+msgstr "Take Order"
+
+msgid "Tipo de consumo:"
+msgstr "Consumption type:"
+
+msgid "En el local"
+msgstr "Dine in"
+
+msgid "Para llevar"
+msgstr "Take away"
+
+msgid "Mesa:"
+msgstr "Table:"
+
+msgid "Nombre Cliente:"
+msgstr "Customer Name:"
+
+msgid "Dirección:"
+msgstr "Address:"
+
+msgid "Método de pago:"
+msgstr "Payment method:"
+
+msgid "Efectivo"
+msgstr "Cash"
+
+msgid "Transferencia"
+msgstr "Transfer"
+
+msgid "Deuda"
+msgstr "Debt"
+
+msgid "Tarjeta"
+msgstr "Card"
+
+msgid "N° de Ticket:"
+msgstr "Ticket #:"
+
+msgid "Titular:"
+msgstr "Cardholder:"
+
+msgid "Productos:"
+msgstr "Products:"
+
+msgid "Seleccionar"
+msgstr "Select"
+
+msgid "Agregar pedido"
+msgstr "Add Order"
+
+msgid "Pedidos activos"
+msgstr "Active Orders"
+
+msgid "No hay pedidos activos."
+msgstr "No active orders."
+
+msgid "Editar"
+msgstr "Edit"
+
+msgid "Borrar"
+msgstr "Delete"
+
+msgid "Entregado"
+msgstr "Delivered"
+
+msgid "Gestionar productos"
+msgstr "Manage Products"
+
+msgid "Nombre"
+msgstr "Name"
+
+msgid "Precio"
+msgstr "Price"
+
+msgid "Agregar producto"
+msgstr "Add Product"
+
+msgid "Acciones"
+msgstr "Actions"
+
+msgid "Guardar"
+msgstr "Save"
+
+# Kitchen
+msgid "Cocina - Pedidos activos"
+msgstr "Kitchen - Active Orders"
+
+msgid "Para llevar:"
+msgstr "Take away:"
+
+msgid "Fecha:"
+msgstr "Date:"
+
+msgid "Hora local"
+msgstr "Local time"
+
+msgid "Tiempo en cocina:"
+msgstr "Time in kitchen:"
+
+msgid "Pendiente de recibir en cocina"
+msgstr "Pending kitchen reception"
+
+msgid "Recibir en cocina"
+msgstr "Receive in kitchen"
+
+msgid "No hay pedidos pendientes."
+msgstr "No pending orders."
+
+# History
+msgid "Historial de pedidos"
+msgstr "Order History"
+
+msgid "Última semana"
+msgstr "Last week"
+
+msgid "Último mes"
+msgstr "Last month"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "Consumo:"
+msgstr "Consumption:"
+
+msgid "No hay pedidos para este filtro."
+msgstr "No orders for this filter."
+
+# Login
+msgid "Ingresar"
+msgstr "Sign In"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Contraseña"
+msgstr "Password"
+
+msgid "Entrar"
+msgstr "Enter"
+
+msgid "¿No recibiste el email de confirmación?"
+msgstr "Didn't receive confirmation email?"
+
+# Modal
+msgid "Detalles del pedido"
+msgstr "Order Details"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "Cliente:"
+msgstr "Customer:"
+
+msgid "Método de pago:"
+msgstr "Payment method:"
+
+msgid "Ticket:"
+msgstr "Ticket:"
+
+msgid "Comprobante:"
+msgstr "Receipt:"
+
+msgid "Deudor:"
+msgstr "Debtor:"
+
+# Errors and validations
+msgid "Debe ingresar el número de mesa"
+msgstr "Must enter table number"
+
+msgid "Debes iniciar sesión para acceder."
+msgstr "You must log in to access."
+
+# Titles and labels
+msgid "Resto App"
+msgstr "Resto App"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Conectado"
+msgstr "Connected"
+
+msgid "Sin conexión"
+msgstr "Offline"
+
+msgid "Cambiar tema"
+msgstr "Change theme"
+
+msgid "Cambiar idioma"
+msgstr "Change language"
+
+msgid "Español"
+msgstr "Spanish"
+
+msgid "English"
+msgstr "English"

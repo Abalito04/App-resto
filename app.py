@@ -3,6 +3,7 @@ import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_login import LoginManager, login_required, current_user
+from flask_babel import Babel, gettext, ngettext, get_locale
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
@@ -32,6 +33,24 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
+
+# Configuración de Babel para internacionalización
+app.config['LANGUAGES'] = {
+    'es': 'Español',
+    'en': 'English'
+}
+app.config['BABEL_DEFAULT_LOCALE'] = 'es'
+app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Argentina/Buenos_Aires'
+
+babel = Babel(app)
+
+@babel.localeselector
+def get_locale():
+    # Primero verificar si hay un idioma en la sesión
+    if 'language' in session:
+        return session['language']
+    # Luego verificar el header Accept-Language del navegador
+    return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or app.config['BABEL_DEFAULT_LOCALE']
 
 # Configuración de base de datos
 database_url = os.getenv('CUSTOM_DATABASE_URL', '')
@@ -97,7 +116,9 @@ def load_user(user_id):
 def inject_user():
     return {
         'current_user': current_user,
-        'current_restaurante': current_user.restaurante if current_user.is_authenticated else None
+        'current_restaurante': current_user.restaurante if current_user.is_authenticated else None,
+        'get_locale': get_locale,
+        'languages': app.config['LANGUAGES']
     }
 
 # Helper function para filtrar por restaurante
@@ -687,6 +708,13 @@ def service_worker():
 @app.route("/login")
 def login_redirect():
     return redirect(url_for('auth.login'))
+
+# Ruta para cambiar idioma
+@app.route("/set_language/<language>")
+def set_language(language=None):
+    if language and language in app.config['LANGUAGES']:
+        session['language'] = language
+    return redirect(request.referrer or url_for('index_redirect'))
 
 
 if __name__ == "__main__":

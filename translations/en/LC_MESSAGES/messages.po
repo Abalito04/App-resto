@@ -302,3 +302,247 @@ msgstr "Restaurant deleted successfully"
 
 msgid "Error al eliminar restaurante"
 msgstr "Error deleting restaurant"
+
+# History
+msgid "Historial de pedidos"
+msgstr "Order History"
+
+msgid "Última semana"
+msgstr "Last Week"
+
+msgid "Último mes"
+msgstr "Last Month"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "Mesa"
+msgstr "Table"
+
+msgid "Fecha:"
+msgstr "Date:"
+
+msgid "Consumo:"
+msgstr "Consumption:"
+
+msgid "No hay pedidos para este filtro."
+msgstr "No orders for this filter."
+
+msgid "Detalles del pedido"
+msgstr "Order Details"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "Cliente:"
+msgstr "Client:"
+
+msgid "Dirección:"
+msgstr "Address:"
+
+msgid "Método de pago:"
+msgstr "Payment Method:"
+
+msgid "Ticket:"
+msgstr "Ticket:"
+
+msgid "Titular:"
+msgstr "Holder:"
+
+msgid "Comprobante:"
+msgstr "Receipt:"
+
+msgid "Deudor:"
+msgstr "Debtor:"
+
+# Plans
+msgid "Gestión de Planes"
+msgstr "Plan Management"
+
+msgid "Plan Actual:"
+msgstr "Current Plan:"
+
+msgid "Límite alcanzado"
+msgstr "Limit Reached"
+
+msgid "Disponible"
+msgstr "Available"
+
+msgid "Ver Usuarios"
+msgstr "View Users"
+
+msgid "Pedidos Hoy"
+msgstr "Orders Today"
+
+msgid "Plan Actual"
+msgstr "Current Plan"
+
+msgid "Cambiar a"
+msgstr "Change to"
+
+msgid "Solicitar Cambio"
+msgstr "Request Change"
+
+msgid "Información Importante"
+msgstr "Important Information"
+
+msgid "Ideal para probar el sistema. Limitado a 10 productos y 1 usuario."
+msgstr "Ideal for testing the system. Limited to 10 products and 1 user."
+
+msgid "Para restaurantes pequeños. 30 productos y 3 usuarios."
+msgstr "For small restaurants. 30 products and 3 users."
+
+msgid "Hasta 10 usuarios. Para restaurantes grandes."
+msgstr "Up to 10 users. For large restaurants."
+
+msgid "Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite."
+msgstr "Limits apply in real time. You won't be able to add more products/users if you reach the limit."
+
+msgid "Solo los superadmins pueden cambiar planes."
+msgstr "Only superadmins can change plans."
+
+# Configuration
+msgid "Configuración del Restaurante"
+msgstr "Restaurant Configuration"
+
+msgid "Datos del Restaurante"
+msgstr "Restaurant Data"
+
+msgid "Nombre del Restaurante:"
+msgstr "Restaurant Name:"
+
+msgid "Dirección:"
+msgstr "Address:"
+
+msgid "Teléfono:"
+msgstr "Phone:"
+
+msgid "Moneda:"
+msgstr "Currency:"
+
+msgid "Peso"
+msgstr "Peso"
+
+msgid "Dólar"
+msgstr "Dollar"
+
+msgid "Euro"
+msgstr "Euro"
+
+msgid "Configuración de Impresión"
+msgstr "Print Configuration"
+
+msgid "Habilitar impresión de comandas"
+msgstr "Enable order printing"
+
+msgid "Tipo de impresora:"
+msgstr "Printer type:"
+
+msgid "Red/Ethernet"
+msgstr "Network/Ethernet"
+
+msgid "Sin impresora"
+msgstr "No printer"
+
+msgid "IP de impresora (solo para red):"
+msgstr "Printer IP (network only):"
+
+msgid "Puerto (solo para red):"
+msgstr "Port (network only):"
+
+msgid "Configuración de Interfaz"
+msgstr "Interface Configuration"
+
+msgid "Tema:"
+msgstr "Theme:"
+
+msgid "Por defecto"
+msgstr "Default"
+
+msgid "Oscuro"
+msgstr "Dark"
+
+msgid "Mostrar precios en comandas"
+msgstr "Show prices on orders"
+
+msgid "Guardar Configuración"
+msgstr "Save Configuration"
+
+msgid "Información del Plan"
+msgstr "Plan Information"
+
+msgid "Plan actual:"
+msgstr "Current plan:"
+
+msgid "API Key:"
+msgstr "API Key:"
+
+msgid "Usa esta API Key para conectar sistemas externos"
+msgstr "Use this API Key to connect external systems"
+
+msgid "Pedidos Hoy"
+msgstr "Orders Today"
+
+msgid "Gestionar Plan"
+msgstr "Manage Plan"
+
+# Users
+msgid "Usuarios del Restaurante"
+msgstr "Restaurant Users"
+
+msgid "Restaurante:"
+msgstr "Restaurant:"
+
+msgid "Límite de usuarios:"
+msgstr "User limit:"
+
+msgid "Usuarios actuales:"
+msgstr "Current users:"
+
+msgid "Usuarios Registrados"
+msgstr "Registered Users"
+
+msgid "Volver a Planes"
+msgstr "Back to Plans"
+
+msgid "Nombre"
+msgstr "Name"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Roles"
+msgstr "Roles"
+
+msgid "Fecha de Registro"
+msgstr "Registration Date"
+
+msgid "Tú"
+msgstr "You"
+
+msgid "Superadmin"
+msgstr "Superadmin"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Usuario"
+msgstr "User"
+
+msgid "No hay usuarios registrados en este restaurante."
+msgstr "No users registered in this restaurant."
+
+msgid "Usuarios del mismo restaurante: Todos los usuarios listados pertenecen al mismo restaurante."
+msgstr "Users from the same restaurant: All listed users belong to the same restaurant."
+
+msgid "Límite del plan: Tu plan actual permite hasta"
+msgstr "Plan limit: Your current plan allows up to"
+
+msgid "usuarios ilimitados"
+msgstr "unlimited users"
+
+msgid "Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin)."
+msgstr "Users can have different roles (User, Admin, Superadmin)."
+
+msgid "Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración."
+msgstr "Add users: Only superadmins can create new users from the admin panel."

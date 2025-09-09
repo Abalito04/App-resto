@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="container mt-4">
-    <h2>👥 Usuarios del Restaurante</h2>
+    <h2>👥 {{ _('Usuarios del Restaurante') }}</h2>
     
     {% with messages = get_flashed_messages(with_categories=True) %}
         {% if messages %}
@@ -18,17 +18,17 @@
     <!-- Información del Plan -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4>📊 Información del Plan</h4>
+            <h4>📊 {{ _('Información del Plan') }}</h4>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Restaurante:</strong> {{ restaurante.nombre }}</p>
-                    <p><strong>Plan actual:</strong> <span class="badge bg-info">{{ restaurante.plan|title }}</span></p>
+                    <p><strong>{{ _('Restaurante:') }}</strong> {{ restaurante.nombre }}</p>
+                    <p><strong>{{ _('Plan actual:') }}</strong> <span class="badge bg-info">{{ restaurante.plan|title }}</span></p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Límite de usuarios:</strong> {{ limits.usuarios if limits.usuarios != -1 else 'Ilimitado' }}</p>
-                    <p><strong>Usuarios actuales:</strong> {{ usuarios|length }}</p>
+                    <p><strong>{{ _('Límite de usuarios:') }}</strong> {{ limits.usuarios if limits.usuarios != -1 else 'Ilimitado' }}</p>
+                    <p><strong>{{ _('Usuarios actuales:') }}</strong> {{ usuarios|length }}</p>
                 </div>
             </div>
         </div>
@@ -37,9 +37,9 @@
     <!-- Lista de Usuarios -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>👤 Usuarios Registrados</h4>
+            <h4>👤 {{ _('Usuarios Registrados') }}</h4>
             <a href="{{ url_for('auth.planes') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Volver a Planes
+                <i class="fas fa-arrow-left me-1"></i>{{ _('Volver a Planes') }}
             </a>
         </div>
         <div class="card-body">
@@ -48,10 +48,10 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Roles</th>
-                                <th>Fecha de Registro</th>
+                                <th>{{ _('Nombre') }}</th>
+                                <th>{{ _('Email') }}</th>
+                                <th>{{ _('Roles') }}</th>
+                                <th>{{ _('Fecha de Registro') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,17 +60,17 @@
                                 <td>
                                     <strong>{{ usuario.nombre }}</strong>
                                     {% if usuario.id == current_user.id %}
-                                        <span class="badge bg-primary">Tú</span>
+                                        <span class="badge bg-primary">{{ _('Tú') }}</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ usuario.email }}</td>
                                 <td>
                                     {% if usuario.es_superadmin %}
-                                        <span class="badge bg-danger">Superadmin</span>
+                                        <span class="badge bg-danger">{{ _('Superadmin') }}</span>
                                     {% elif usuario.es_admin %}
-                                        <span class="badge bg-warning">Admin</span>
+                                        <span class="badge bg-warning">{{ _('Admin') }}</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">Usuario</span>
+                                        <span class="badge bg-secondary">{{ _('Usuario') }}</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ usuario.fecha_creacion.strftime('%d/%m/%Y %H:%M') if usuario.fecha_creacion else 'N/A' }}</td>
@@ -82,7 +82,7 @@
             {% else %}
                 <div class="text-center py-4">
                     <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay usuarios registrados en este restaurante.</p>
+                    <p class="text-muted">{{ _('No hay usuarios registrados en este restaurante.') }}</p>
                 </div>
             {% endif %}
         </div>
@@ -91,14 +91,14 @@
     <!-- Información Adicional -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5>ℹ️ Información Importante</h5>
+            <h5>ℹ️ {{ _('Información Importante') }}</h5>
         </div>
         <div class="card-body">
             <ul>
-                <li><strong>Usuarios del mismo restaurante:</strong> Todos los usuarios listados pertenecen al mismo restaurante.</li>
-                <li><strong>Límite del plan:</strong> Tu plan actual permite hasta {{ limits.usuarios if limits.usuarios != -1 else 'usuarios ilimitados' }}.</li>
-                <li><strong>Roles:</strong> Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin).</li>
-                <li><strong>Agregar usuarios:</strong> Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.</li>
+                <li><strong>{{ _('Usuarios del mismo restaurante:') }}</strong> {{ _('Todos los usuarios listados pertenecen al mismo restaurante.') }}</li>
+                <li><strong>{{ _('Límite del plan:') }}</strong> {{ _('Tu plan actual permite hasta') }} {{ limits.usuarios if limits.usuarios != -1 else _('usuarios ilimitados') }}.</li>
+                <li><strong>{{ _('Roles:') }}</strong> {{ _('Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin).') }}</li>
+                <li><strong>{{ _('Agregar usuarios:') }}</strong> {{ _('Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.') }}</li>
             </ul>
         </div>
     </div>

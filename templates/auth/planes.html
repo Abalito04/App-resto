@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="container mt-4">
-    <h2>📊 Gestión de Planes</h2>
+    <h2>📊 {{ _('Gestión de Planes') }}</h2>
     
     {% with messages = get_flashed_messages(with_categories=True) %}
         {% if messages %}
@@ -18,7 +18,7 @@
     <!-- Plan Actual -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4>🎯 Plan Actual: {{ limits.nombre }}</h4>
+            <h4>🎯 {{ _('Plan Actual:') }} {{ limits.nombre }}</h4>
         </div>
         <div class="card-body">
             <p class="text-muted">{{ limits.descripcion }}</p>
@@ -27,12 +27,12 @@
                 <div class="col-md-4">
                     <div class="card bg-light">
                         <div class="card-body text-center">
-                            <h5>📦 Productos</h5>
+                            <h5>📦 {{ _('Productos') }}</h5>
                             <h3 class="text-primary">{{ usage.productos }}/{{ limits.productos if limits.productos != -1 else '∞' }}</h3>
                             {% if limits.productos != -1 and usage.productos >= limits.productos %}
-                                <span class="badge bg-danger">Límite alcanzado</span>
+                                <span class="badge bg-danger">{{ _('Límite alcanzado') }}</span>
                             {% else %}
-                                <span class="badge bg-success">Disponible</span>
+                                <span class="badge bg-success">{{ _('Disponible') }}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -40,16 +40,16 @@
                 <div class="col-md-4">
                     <div class="card bg-light">
                         <div class="card-body text-center">
-                            <h5>👥 Usuarios</h5>
+                            <h5>👥 {{ _('Usuarios') }}</h5>
                             <h3 class="text-primary">{{ usage.usuarios }}/{{ limits.usuarios if limits.usuarios != -1 else '∞' }}</h3>
                             {% if limits.usuarios != -1 and usage.usuarios >= limits.usuarios %}
-                                <span class="badge bg-danger">Límite alcanzado</span>
+                                <span class="badge bg-danger">{{ _('Límite alcanzado') }}</span>
                             {% else %}
-                                <span class="badge bg-success">Disponible</span>
+                                <span class="badge bg-success">{{ _('Disponible') }}</span>
                             {% endif %}
                             <br><br>
                             <a href="{{ url_for('auth.usuarios_restaurante') }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-eye me-1"></i>Ver Usuarios
+                                <i class="fas fa-eye me-1"></i>{{ _('Ver Usuarios') }}
                             </a>
                         </div>
                     </div>
@@ -57,12 +57,12 @@
                 <div class="col-md-4">
                     <div class="card bg-light">
                         <div class="card-body text-center">
-                            <h5>📋 Pedidos Hoy</h5>
+                            <h5>📋 {{ _('Pedidos Hoy') }}</h5>
                             <h3 class="text-primary">{{ usage.pedidos_hoy }}/{{ limits.pedidos_dia if limits.pedidos_dia != -1 else '∞' }}</h3>
                             {% if limits.pedidos_dia != -1 and usage.pedidos_hoy >= limits.pedidos_dia %}
-                                <span class="badge bg-danger">Límite alcanzado</span>
+                                <span class="badge bg-danger">{{ _('Límite alcanzado') }}</span>
                             {% else %}
-                                <span class="badge bg-success">Disponible</span>
+                                <span class="badge bg-success">{{ _('Disponible') }}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -83,23 +83,23 @@
                 <div class="card-body">
                     <p class="text-muted">{{ plan.descripcion }}</p>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success me-2"></i>Productos: {{ plan.productos }}</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Usuarios: {{ plan.usuarios }}</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Pedidos/día: {{ plan.pedidos_dia }}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{{ _('Productos') }}: {{ plan.productos }}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{{ _('Usuarios') }}: {{ plan.usuarios }}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{{ _('Pedidos/día') }}: {{ plan.pedidos_dia }}</li>
                     </ul>
                 </div>
                 <div class="card-footer text-center">
                     {% if restaurante.plan == plan_id %}
-                        <button class="btn btn-primary" disabled>Plan Actual</button>
+                        <button class="btn btn-primary" disabled>{{ _('Plan Actual') }}</button>
                     {% elif current_user.es_superadmin %}
                         <a href="{{ url_for('auth.cambiar_plan', plan=plan_id) }}" 
                            class="btn btn-outline-primary"
                            onclick="return confirm('¿Estás seguro de cambiar al plan {{ plan.nombre }}?')">
-                            Cambiar a {{ plan.nombre }}
+                            {{ _('Cambiar a') }} {{ plan.nombre }}
                         </a>
                     {% else %}
                         <a href="{{ url_for('auth.contacto_plan') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-envelope me-1"></i>Solicitar Cambio
+                            <i class="fas fa-envelope me-1"></i>{{ _('Solicitar Cambio') }}
                         </a>
                     {% endif %}
                 </div>
@@ -111,15 +111,15 @@
     <!-- Información Adicional -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5>ℹ️ Información Importante</h5>
+            <h5>ℹ️ {{ _('Información Importante') }}</h5>
         </div>
         <div class="card-body">
             <ul>
-                <li><strong>Free:</strong> Ideal para probar el sistema. Limitado a 10 productos y 1 usuario.</li>
-                <li><strong>Premium 1:</strong> Para restaurantes pequeños. 30 productos y 3 usuarios.</li>
-                <li><strong>Premium Full:</strong> Hasta 10 usuarios. Para restaurantes grandes.</li>
-                <li>Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite.</li>
-                <li>Solo los superadmins pueden cambiar planes.</li>
+                <li><strong>Free:</strong> {{ _('Ideal para probar el sistema. Limitado a 10 productos y 1 usuario.') }}</li>
+                <li><strong>Premium 1:</strong> {{ _('Para restaurantes pequeños. 30 productos y 3 usuarios.') }}</li>
+                <li><strong>Premium Full:</strong> {{ _('Hasta 10 usuarios. Para restaurantes grandes.') }}</li>
+                <li>{{ _('Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite.') }}</li>
+                <li>{{ _('Solo los superadmins pueden cambiar planes.') }}</li>
             </ul>
         </div>
     </div>

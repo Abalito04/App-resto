@@ -302,3 +302,247 @@ msgstr "Restaurante eliminado exitosamente"
 
 msgid "Error al eliminar restaurante"
 msgstr "Error al eliminar restaurante"
+
+# Historial
+msgid "Historial de pedidos"
+msgstr "Historial de pedidos"
+
+msgid "Última semana"
+msgstr "Última semana"
+
+msgid "Último mes"
+msgstr "Último mes"
+
+msgid "Todos"
+msgstr "Todos"
+
+msgid "Mesa"
+msgstr "Mesa"
+
+msgid "Fecha:"
+msgstr "Fecha:"
+
+msgid "Consumo:"
+msgstr "Consumo:"
+
+msgid "No hay pedidos para este filtro."
+msgstr "No hay pedidos para este filtro."
+
+msgid "Detalles del pedido"
+msgstr "Detalles del pedido"
+
+msgid "Cerrar"
+msgstr "Cerrar"
+
+msgid "Cliente:"
+msgstr "Cliente:"
+
+msgid "Dirección:"
+msgstr "Dirección:"
+
+msgid "Método de pago:"
+msgstr "Método de pago:"
+
+msgid "Ticket:"
+msgstr "Ticket:"
+
+msgid "Titular:"
+msgstr "Titular:"
+
+msgid "Comprobante:"
+msgstr "Comprobante:"
+
+msgid "Deudor:"
+msgstr "Deudor:"
+
+# Planes
+msgid "Gestión de Planes"
+msgstr "Gestión de Planes"
+
+msgid "Plan Actual:"
+msgstr "Plan Actual:"
+
+msgid "Límite alcanzado"
+msgstr "Límite alcanzado"
+
+msgid "Disponible"
+msgstr "Disponible"
+
+msgid "Ver Usuarios"
+msgstr "Ver Usuarios"
+
+msgid "Pedidos Hoy"
+msgstr "Pedidos Hoy"
+
+msgid "Plan Actual"
+msgstr "Plan Actual"
+
+msgid "Cambiar a"
+msgstr "Cambiar a"
+
+msgid "Solicitar Cambio"
+msgstr "Solicitar Cambio"
+
+msgid "Información Importante"
+msgstr "Información Importante"
+
+msgid "Ideal para probar el sistema. Limitado a 10 productos y 1 usuario."
+msgstr "Ideal para probar el sistema. Limitado a 10 productos y 1 usuario."
+
+msgid "Para restaurantes pequeños. 30 productos y 3 usuarios."
+msgstr "Para restaurantes pequeños. 30 productos y 3 usuarios."
+
+msgid "Hasta 10 usuarios. Para restaurantes grandes."
+msgstr "Hasta 10 usuarios. Para restaurantes grandes."
+
+msgid "Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite."
+msgstr "Los límites se aplican en tiempo real. No podrás agregar más productos/usuarios si alcanzas el límite."
+
+msgid "Solo los superadmins pueden cambiar planes."
+msgstr "Solo los superadmins pueden cambiar planes."
+
+# Configuración
+msgid "Configuración del Restaurante"
+msgstr "Configuración del Restaurante"
+
+msgid "Datos del Restaurante"
+msgstr "Datos del Restaurante"
+
+msgid "Nombre del Restaurante:"
+msgstr "Nombre del Restaurante:"
+
+msgid "Dirección:"
+msgstr "Dirección:"
+
+msgid "Teléfono:"
+msgstr "Teléfono:"
+
+msgid "Moneda:"
+msgstr "Moneda:"
+
+msgid "Peso"
+msgstr "Peso"
+
+msgid "Dólar"
+msgstr "Dólar"
+
+msgid "Euro"
+msgstr "Euro"
+
+msgid "Configuración de Impresión"
+msgstr "Configuración de Impresión"
+
+msgid "Habilitar impresión de comandas"
+msgstr "Habilitar impresión de comandas"
+
+msgid "Tipo de impresora:"
+msgstr "Tipo de impresora:"
+
+msgid "Red/Ethernet"
+msgstr "Red/Ethernet"
+
+msgid "Sin impresora"
+msgstr "Sin impresora"
+
+msgid "IP de impresora (solo para red):"
+msgstr "IP de impresora (solo para red):"
+
+msgid "Puerto (solo para red):"
+msgstr "Puerto (solo para red):"
+
+msgid "Configuración de Interfaz"
+msgstr "Configuración de Interfaz"
+
+msgid "Tema:"
+msgstr "Tema:"
+
+msgid "Por defecto"
+msgstr "Por defecto"
+
+msgid "Oscuro"
+msgstr "Oscuro"
+
+msgid "Mostrar precios en comandas"
+msgstr "Mostrar precios en comandas"
+
+msgid "Guardar Configuración"
+msgstr "Guardar Configuración"
+
+msgid "Información del Plan"
+msgstr "Información del Plan"
+
+msgid "Plan actual:"
+msgstr "Plan actual:"
+
+msgid "API Key:"
+msgstr "API Key:"
+
+msgid "Usa esta API Key para conectar sistemas externos"
+msgstr "Usa esta API Key para conectar sistemas externos"
+
+msgid "Pedidos Hoy"
+msgstr "Pedidos Hoy"
+
+msgid "Gestionar Plan"
+msgstr "Gestionar Plan"
+
+# Usuarios
+msgid "Usuarios del Restaurante"
+msgstr "Usuarios del Restaurante"
+
+msgid "Restaurante:"
+msgstr "Restaurante:"
+
+msgid "Límite de usuarios:"
+msgstr "Límite de usuarios:"
+
+msgid "Usuarios actuales:"
+msgstr "Usuarios actuales:"
+
+msgid "Usuarios Registrados"
+msgstr "Usuarios Registrados"
+
+msgid "Volver a Planes"
+msgstr "Volver a Planes"
+
+msgid "Nombre"
+msgstr "Nombre"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Roles"
+msgstr "Roles"
+
+msgid "Fecha de Registro"
+msgstr "Fecha de Registro"
+
+msgid "Tú"
+msgstr "Tú"
+
+msgid "Superadmin"
+msgstr "Superadmin"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Usuario"
+msgstr "Usuario"
+
+msgid "No hay usuarios registrados en este restaurante."
+msgstr "No hay usuarios registrados en este restaurante."
+
+msgid "Usuarios del mismo restaurante: Todos los usuarios listados pertenecen al mismo restaurante."
+msgstr "Usuarios del mismo restaurante: Todos los usuarios listados pertenecen al mismo restaurante."
+
+msgid "Límite del plan: Tu plan actual permite hasta"
+msgstr "Límite del plan: Tu plan actual permite hasta"
+
+msgid "usuarios ilimitados"
+msgstr "usuarios ilimitados"
+
+msgid "Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin)."
+msgstr "Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin)."
+
+msgid "Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración."
+msgstr "Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración."

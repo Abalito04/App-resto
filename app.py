@@ -163,6 +163,25 @@ def init_db():
 # Llamar a init_db al importar
 init_db()
 
+# Inicializar traducciones
+def init_translations():
+    """Inicializar traducciones si no están compiladas"""
+    try:
+        es_mo = 'translations/es/LC_MESSAGES/messages.mo'
+        en_mo = 'translations/en/LC_MESSAGES/messages.mo'
+        
+        if not os.path.exists(es_mo) or not os.path.exists(en_mo):
+            print("🔧 Compilando traducciones...")
+            # Importar el script de inicialización
+            import init_translations
+            init_translations.compile_translations()
+            print("✅ Traducciones inicializadas")
+    except Exception as e:
+        print(f"⚠️ Error inicializando traducciones: {e}")
+
+# Inicializar traducciones
+init_translations()
+
 # =================== RUTAS CON MANEJO DE ERRORES ===================
 
 

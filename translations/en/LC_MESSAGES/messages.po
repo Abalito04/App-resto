@@ -546,3 +546,34 @@ msgstr "Users can have different roles (User, Admin, Superadmin)."
 
 msgid "Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración."
 msgstr "Add users: Only superadmins can create new users from the admin panel."
+
+# User Profile
+msgid "Perfil de"
+msgstr "Profile of"
+
+msgid "Email:"
+msgstr "Email:"
+
+msgid "Teléfono:"
+msgstr "Phone:"
+
+msgid "Restaurante:"
+msgstr "Restaurant:"
+
+msgid "Dirección:"
+msgstr "Address:"
+
+msgid "Moneda:"
+msgstr "Currency:"
+
+msgid "No registrado"
+msgstr "Not registered"
+
+msgid "No registrada"
+msgstr "Not registered"
+
+msgid "Configuración"
+msgstr "Configuration"
+
+msgid "Salir"
+msgstr "Logout"

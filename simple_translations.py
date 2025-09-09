@@ -203,7 +203,19 @@ TRANSLATIONS = {
         'Límite del plan: Tu plan actual permite hasta': 'Límite del plan: Tu plan actual permite hasta',
         'usuarios ilimitados': 'usuarios ilimitados',
         'Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin).': 'Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin).',
-        'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.': 'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.'
+        'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.': 'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.',
+        
+        # Perfil de Usuario
+        'Perfil de': 'Perfil de',
+        'Email:': 'Email:',
+        'Teléfono:': 'Teléfono:',
+        'Restaurante:': 'Restaurante:',
+        'Dirección:': 'Dirección:',
+        'Moneda:': 'Moneda:',
+        'No registrado': 'No registrado',
+        'No registrada': 'No registrada',
+        'Configuración': 'Configuración',
+        'Salir': 'Salir'
     },
     'en': {
         # Navigation
@@ -402,7 +414,19 @@ TRANSLATIONS = {
         'Límite del plan: Tu plan actual permite hasta': 'Plan limit: Your current plan allows up to',
         'usuarios ilimitados': 'unlimited users',
         'Los usuarios pueden tener diferentes roles (Usuario, Admin, Superadmin).': 'Users can have different roles (User, Admin, Superadmin).',
-        'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.': 'Add users: Only superadmins can create new users from the admin panel.'
+        'Agregar usuarios: Solo los superadmins pueden crear nuevos usuarios desde el panel de administración.': 'Add users: Only superadmins can create new users from the admin panel.',
+        
+        # User Profile
+        'Perfil de': 'Profile of',
+        'Email:': 'Email:',
+        'Teléfono:': 'Phone:',
+        'Restaurante:': 'Restaurant:',
+        'Dirección:': 'Address:',
+        'Moneda:': 'Currency:',
+        'No registrado': 'Not registered',
+        'No registrada': 'Not registered',
+        'Configuración': 'Configuration',
+        'Salir': 'Logout'
     }
 }
 

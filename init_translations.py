@@ -15,20 +15,30 @@ def compile_translations():
         if not os.path.exists(es_mo) or not os.path.exists(en_mo):
             print("Compilando traducciones...")
             
-            # Importar y usar Babel para compilar
-            from babel.messages.frontend import compile_catalog
-            
-            # Compilar español
-            if os.path.exists('translations/es/LC_MESSAGES/messages.po'):
-                compile_catalog('translations/es/LC_MESSAGES/messages.po', 
-                              'translations/es/LC_MESSAGES/messages.mo')
-                print("✅ Traducciones en español compiladas")
-            
-            # Compilar inglés
-            if os.path.exists('translations/en/LC_MESSAGES/messages.po'):
-                compile_catalog('translations/en/LC_MESSAGES/messages.po', 
-                              'translations/en/LC_MESSAGES/messages.mo')
-                print("✅ Traducciones en inglés compiladas")
+            try:
+                # Intentar usar Babel para compilar
+                from babel.messages.frontend import compile_catalog
+                
+                # Compilar español
+                if os.path.exists('translations/es/LC_MESSAGES/messages.po'):
+                    compile_catalog('translations/es/LC_MESSAGES/messages.po', 
+                                  'translations/es/LC_MESSAGES/messages.mo')
+                    print("✅ Traducciones en español compiladas con Babel")
+                
+                # Compilar inglés
+                if os.path.exists('translations/en/LC_MESSAGES/messages.po'):
+                    compile_catalog('translations/en/LC_MESSAGES/messages.po', 
+                                  'translations/en/LC_MESSAGES/messages.mo')
+                    print("✅ Traducciones en inglés compiladas con Babel")
+                    
+            except ImportError:
+                print("⚠️ Babel no disponible, usando sistema de traducciones simple")
+                # Verificar que el sistema simple esté disponible
+                try:
+                    import simple_translations
+                    print("✅ Sistema de traducciones simple verificado")
+                except ImportError:
+                    print("⚠️ Sistema de traducciones simple no disponible")
         else:
             print("✅ Traducciones ya compiladas")
             

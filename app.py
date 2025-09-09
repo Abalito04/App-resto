@@ -29,6 +29,13 @@ except:
 
 load_dotenv()
 
+# Configuración específica para Railway
+try:
+    import railway_config
+    railway_config.setup_railway_config()
+except ImportError:
+    print("⚠️ railway_config no encontrado, continuando...")
+
 
 
 app = Flask(__name__)
@@ -42,15 +49,40 @@ app.config['LANGUAGES'] = {
 app.config['BABEL_DEFAULT_LOCALE'] = 'es'
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Argentina/Buenos_Aires'
 
-babel = Babel(app)
+# Inicializar Babel con manejo de errores
+try:
+    babel = Babel(app)
+    print("✅ Babel inicializado correctamente")
+    use_simple_translations = False
+except Exception as e:
+    print(f"⚠️ Error inicializando Babel: {e}")
+    print("🔄 Usando sistema de traducciones simple como fallback")
+    babel = None
+    use_simple_translations = True
+    
+    # Importar sistema de traducciones simple
+    try:
+        import simple_translations
+        print("✅ Sistema de traducciones simple cargado")
+    except ImportError as ie:
+        print(f"⚠️ Error cargando traducciones simples: {ie}")
+        use_simple_translations = False
 
-@babel.localeselector
-def get_locale():
-    # Primero verificar si hay un idioma en la sesión
-    if 'language' in session:
-        return session['language']
-    # Luego verificar el header Accept-Language del navegador
-    return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or app.config['BABEL_DEFAULT_LOCALE']
+# Configurar selector de idioma solo si Babel está disponible
+if babel:
+    @babel.localeselector
+    def get_locale():
+        # Primero verificar si hay un idioma en la sesión
+        if 'language' in session:
+            return session['language']
+        # Luego verificar el header Accept-Language del navegador
+        return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or app.config['BABEL_DEFAULT_LOCALE']
+else:
+    def get_locale():
+        # Función de fallback si Babel no está disponible
+        if 'language' in session:
+            return session['language']
+        return 'es'  # Idioma por defecto
 
 # Configuración de base de datos
 database_url = os.getenv('CUSTOM_DATABASE_URL', '')
@@ -114,11 +146,24 @@ def load_user(user_id):
 # Filtro de context processor para templates
 @app.context_processor
 def inject_user():
+    # Función de traducción que funciona con ambos sistemas
+    def translate_text(text):
+        if use_simple_translations and 'simple_translations' in globals():
+            return simple_translations.get_translation(text, get_locale())
+        else:
+            # Usar Babel si está disponible
+            try:
+                from flask_babel import gettext
+                return gettext(text)
+            except:
+                return text
+    
     return {
         'current_user': current_user,
         'current_restaurante': current_user.restaurante if current_user.is_authenticated else None,
         'get_locale': get_locale,
-        'languages': app.config['LANGUAGES']
+        'languages': app.config['LANGUAGES'],
+        '_': translate_text  # Función de traducción universal
     }
 
 # Helper function para filtrar por restaurante

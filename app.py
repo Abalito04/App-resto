@@ -12,7 +12,7 @@ import pytz
 
 # Importaciones opcionales con manejo de errores
 try:
-    from flask_babel import Babel, gettext, ngettext, get_locale
+    from flask_babel import Babel, gettext, ngettext
     BABEL_AVAILABLE = True
 except ImportError:
     BABEL_AVAILABLE = False
@@ -50,22 +50,38 @@ except Exception as e:
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
 
-# Configuración de Babel para internacionalización
+# Configuración de idiomas (siempre disponible)
 app.config['LANGUAGES'] = {
     'es': 'Español',
     'en': 'English'
 }
-app.config['BABEL_DEFAULT_LOCALE'] = 'es'
-app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Argentina/Buenos_Aires'
+
+# Configuración de Babel solo si está disponible
+if BABEL_AVAILABLE:
+    app.config['BABEL_DEFAULT_LOCALE'] = 'es'
+    app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Argentina/Buenos_Aires'
 
 # Inicializar Babel con manejo de errores
 babel = None
 use_simple_translations = False
 
+# Configurar selector de idioma primero
+def get_locale():
+    """Función para obtener el idioma actual"""
+    if 'language' in session:
+        return session['language']
+    return 'es'  # Idioma por defecto
+
 if BABEL_AVAILABLE:
     try:
         babel = Babel(app)
         print("✅ Babel inicializado correctamente")
+        
+        # Configurar selector de idioma solo si Babel se inicializó correctamente
+        @babel.localeselector
+        def babel_get_locale():
+            return get_locale()
+            
     except Exception as e:
         print(f"⚠️ Error inicializando Babel: {e}")
         babel = None
@@ -82,19 +98,6 @@ if not BABEL_AVAILABLE:
     except ImportError as ie:
         print(f"⚠️ Error cargando traducciones simples: {ie}")
         use_simple_translations = False
-
-# Configurar selector de idioma
-def get_locale():
-    """Función para obtener el idioma actual"""
-    if 'language' in session:
-        return session['language']
-    return 'es'  # Idioma por defecto
-
-# Configurar selector de idioma solo si Babel está disponible
-if babel:
-    @babel.localeselector
-    def babel_get_locale():
-        return get_locale()
 
 # Configuración de base de datos
 database_url = os.getenv('CUSTOM_DATABASE_URL', '')
@@ -162,17 +165,17 @@ def inject_user():
     def translate_text(text):
         if use_simple_translations:
             try:
+                import simple_translations
                 return simple_translations.get_translation(text, get_locale())
             except:
                 return text
         else:
             # Usar Babel si está disponible
-            try:
-                if BABEL_AVAILABLE:
-                    from flask_babel import gettext
+            if BABEL_AVAILABLE:
+                try:
                     return gettext(text)
-            except:
-                pass
+                except:
+                    return text
             return text
     
     return {

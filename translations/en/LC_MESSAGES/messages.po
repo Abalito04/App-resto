@@ -245,6 +245,9 @@ msgstr "Change theme"
 msgid "Cambiar idioma"
 msgstr "Change language"
 
+msgid "Idioma"
+msgstr "Language"
+
 msgid "Español"
 msgstr "Spanish"
 

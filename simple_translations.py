@@ -95,6 +95,7 @@ TRANSLATIONS = {
         'Sin conexión': 'Sin conexión',
         'Cambiar tema': 'Cambiar tema',
         'Cambiar idioma': 'Cambiar idioma',
+        'Idioma': 'Idioma',
         'Español': 'Español',
         'English': 'English'
     },
@@ -187,6 +188,7 @@ TRANSLATIONS = {
         'Sin conexión': 'Offline',
         'Cambiar tema': 'Change theme',
         'Cambiar idioma': 'Change language',
+        'Idioma': 'Language',
         'Español': 'Spanish',
         'English': 'English'
     }

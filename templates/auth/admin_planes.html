@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="container mt-4">
-    <h2>📊 Administración de Planes</h2>
+    <h2>📊 {{ _('Administración de Planes') }}</h2>
     
     {% with messages = get_flashed_messages(with_categories=True) %}
         {% if messages %}
@@ -18,7 +18,7 @@
     <!-- Planes Disponibles -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4>📋 Planes Disponibles</h4>
+            <h4>📋 {{ _('Planes Disponibles') }}</h4>
         </div>
         <div class="card-body">
             <div class="row">
@@ -32,9 +32,9 @@
                         <div class="card-body">
                             <p class="text-muted">{{ plan.descripcion }}</p>
                             <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i>Productos: {{ plan.productos }}</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Usuarios: {{ plan.usuarios }}</li>
-                                <li><i class="fas fa-check text-success me-2"></i>Pedidos/día: {{ plan.pedidos_dia }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>{{ _('Productos') }}: {{ plan.productos }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>{{ _('Usuarios') }}: {{ plan.usuarios }}</li>
+                                <li><i class="fas fa-check text-success me-2"></i>{{ _('Pedidos/día') }}: {{ plan.pedidos_dia }}</li>
                             </ul>
                         </div>
                     </div>
@@ -47,17 +47,17 @@
     <!-- Restaurantes y sus Planes -->
     <div class="card">
         <div class="card-header">
-            <h4>🏪 Restaurantes y Planes Actuales</h4>
+            <h4>🏪 {{ _('Restaurantes y Planes Actuales') }}</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Restaurante</th>
-                            <th>Plan Actual</th>
-                            <th>Uso</th>
-                            <th>Acciones</th>
+                            <th>{{ _('Restaurante') }}</th>
+                            <th>{{ _('Plan Actual') }}</th>
+                            <th>{{ _('Uso') }}</th>
+                            <th>{{ _('Acciones') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,7 +88,7 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                                        Cambiar Plan
+                                        {{ _('Cambiar Plan') }}
                                     </button>
                                     <ul class="dropdown-menu">
                                         {% for plan_id, plan in all_plans.items() %}
@@ -102,6 +102,10 @@
                                             {% endif %}
                                         {% endfor %}
                                     </ul>
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
+                                            onclick="eliminarRestaurante({{ info.restaurante.id }}, '{{ info.restaurante.nombre }}')">
+                                        {{ _('Eliminar Restaurante') }}
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -112,5 +116,25 @@
         </div>
     </div>
 </div>
+
+<script>
+function eliminarRestaurante(restauranteId, nombreRestaurante) {
+    if (confirm('{{ _("¿Estás seguro de que quieres eliminar este restaurante?") }}\n\n' + nombreRestaurante + '\n\n{{ _("Esta acción no se puede deshacer") }}')) {
+        // Crear formulario para enviar la solicitud de eliminación
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("auth.admin_eliminar_restaurante") }}';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'restaurante_id';
+        input.value = restauranteId;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 
 {% endblock %}

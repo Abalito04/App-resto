@@ -97,7 +97,25 @@ TRANSLATIONS = {
         'Cambiar idioma': 'Cambiar idioma',
         'Idioma': 'Idioma',
         'Español': 'Español',
-        'English': 'English'
+        'English': 'English',
+        
+        # Administración de Planes
+        'Administración de Planes': 'Administración de Planes',
+        'Planes Disponibles': 'Planes Disponibles',
+        'Restaurantes y Planes Actuales': 'Restaurantes y Planes Actuales',
+        'Restaurante': 'Restaurante',
+        'Plan Actual': 'Plan Actual',
+        'Uso': 'Uso',
+        'Acciones': 'Acciones',
+        'Cambiar Plan': 'Cambiar Plan',
+        'Productos': 'Productos',
+        'Usuarios': 'Usuarios',
+        'Pedidos/día': 'Pedidos/día',
+        'Eliminar Restaurante': 'Eliminar Restaurante',
+        '¿Estás seguro de que quieres eliminar este restaurante?': '¿Estás seguro de que quieres eliminar este restaurante?',
+        'Esta acción no se puede deshacer': 'Esta acción no se puede deshacer',
+        'Restaurante eliminado exitosamente': 'Restaurante eliminado exitosamente',
+        'Error al eliminar restaurante': 'Error al eliminar restaurante'
     },
     'en': {
         # Navigation
@@ -190,7 +208,25 @@ TRANSLATIONS = {
         'Cambiar idioma': 'Change language',
         'Idioma': 'Language',
         'Español': 'Spanish',
-        'English': 'English'
+        'English': 'English',
+        
+        # Plan Administration
+        'Administración de Planes': 'Plan Administration',
+        'Planes Disponibles': 'Available Plans',
+        'Restaurantes y Planes Actuales': 'Restaurants and Current Plans',
+        'Restaurante': 'Restaurant',
+        'Plan Actual': 'Current Plan',
+        'Uso': 'Usage',
+        'Acciones': 'Actions',
+        'Cambiar Plan': 'Change Plan',
+        'Productos': 'Products',
+        'Usuarios': 'Users',
+        'Pedidos/día': 'Orders/day',
+        'Eliminar Restaurante': 'Delete Restaurant',
+        '¿Estás seguro de que quieres eliminar este restaurante?': 'Are you sure you want to delete this restaurant?',
+        'Esta acción no se puede deshacer': 'This action cannot be undone',
+        'Restaurante eliminado exitosamente': 'Restaurant deleted successfully',
+        'Error al eliminar restaurante': 'Error deleting restaurant'
     }
 }
 

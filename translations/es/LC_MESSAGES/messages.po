@@ -253,3 +253,52 @@ msgstr "Español"
 
 msgid "English"
 msgstr "English"
+
+# Administración de Planes
+msgid "Administración de Planes"
+msgstr "Administración de Planes"
+
+msgid "Planes Disponibles"
+msgstr "Planes Disponibles"
+
+msgid "Restaurantes y Planes Actuales"
+msgstr "Restaurantes y Planes Actuales"
+
+msgid "Restaurante"
+msgstr "Restaurante"
+
+msgid "Plan Actual"
+msgstr "Plan Actual"
+
+msgid "Uso"
+msgstr "Uso"
+
+msgid "Acciones"
+msgstr "Acciones"
+
+msgid "Cambiar Plan"
+msgstr "Cambiar Plan"
+
+msgid "Productos"
+msgstr "Productos"
+
+msgid "Usuarios"
+msgstr "Usuarios"
+
+msgid "Pedidos/día"
+msgstr "Pedidos/día"
+
+msgid "Eliminar Restaurante"
+msgstr "Eliminar Restaurante"
+
+msgid "¿Estás seguro de que quieres eliminar este restaurante?"
+msgstr "¿Estás seguro de que quieres eliminar este restaurante?"
+
+msgid "Esta acción no se puede deshacer"
+msgstr "Esta acción no se puede deshacer"
+
+msgid "Restaurante eliminado exitosamente"
+msgstr "Restaurante eliminado exitosamente"
+
+msgid "Error al eliminar restaurante"
+msgstr "Error al eliminar restaurante"

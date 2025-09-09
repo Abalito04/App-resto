@@ -735,6 +735,47 @@ def admin_cambiar_plan_restaurante(restaurante_id, plan):
     
     return redirect(url_for('auth.admin_planes'))
 
+@auth_bp.route('/admin/eliminar_restaurante', methods=['POST'])
+@login_required
+def admin_eliminar_restaurante():
+    """Eliminar un restaurante desde el panel de admin"""
+    if not current_user.es_superadmin:
+        flash("Acceso denegado", "error")
+        return redirect(url_for("auth.admin_planes"))
+    
+    restaurante_id = request.form.get('restaurante_id')
+    if not restaurante_id:
+        flash('ID de restaurante no proporcionado', 'error')
+        return redirect(url_for('auth.admin_planes'))
+    
+    try:
+        restaurante = Restaurante.query.get_or_404(restaurante_id)
+        nombre_restaurante = restaurante.nombre
+        
+        # Eliminar todos los usuarios del restaurante
+        Usuario.query.filter_by(restaurante_id=restaurante_id).delete()
+        
+        # Eliminar todos los pedidos del restaurante
+        Pedido.query.filter_by(restaurante_id=restaurante_id).delete()
+        
+        # Eliminar todos los productos del restaurante
+        Producto.query.filter_by(restaurante_id=restaurante_id).delete()
+        
+        # Eliminar la configuración del restaurante
+        ConfiguracionRestaurante.query.filter_by(restaurante_id=restaurante_id).delete()
+        
+        # Finalmente eliminar el restaurante
+        db.session.delete(restaurante)
+        db.session.commit()
+        
+        flash(f'Restaurante {nombre_restaurante} eliminado exitosamente', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar restaurante: {str(e)}', 'error')
+    
+    return redirect(url_for('auth.admin_planes'))
+
 @auth_bp.route('/soy_superadmin')
 @login_required
 def soy_superadmin():

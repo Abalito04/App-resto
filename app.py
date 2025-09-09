@@ -1,15 +1,22 @@
-# app.py - Versión SaaS con autenticación - CORREGIDA
+# app.py - Versión SaaS con autenticación - OPTIMIZADA
 import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_login import LoginManager, login_required, current_user
-from flask_babel import Babel, gettext, ngettext, get_locale
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from sqlalchemy import text
 from collections import Counter
 import pytz
+
+# Importaciones opcionales con manejo de errores
+try:
+    from flask_babel import Babel, gettext, ngettext, get_locale
+    BABEL_AVAILABLE = True
+except ImportError:
+    BABEL_AVAILABLE = False
+    print("⚠️ Flask-Babel no disponible, usando sistema simple")
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)
@@ -35,6 +42,8 @@ try:
     railway_config.setup_railway_config()
 except ImportError:
     print("⚠️ railway_config no encontrado, continuando...")
+except Exception as e:
+    print(f"⚠️ Error en railway_config: {e}")
 
 
 
@@ -50,14 +59,20 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'es'
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Argentina/Buenos_Aires'
 
 # Inicializar Babel con manejo de errores
-try:
-    babel = Babel(app)
-    print("✅ Babel inicializado correctamente")
-    use_simple_translations = False
-except Exception as e:
-    print(f"⚠️ Error inicializando Babel: {e}")
+babel = None
+use_simple_translations = False
+
+if BABEL_AVAILABLE:
+    try:
+        babel = Babel(app)
+        print("✅ Babel inicializado correctamente")
+    except Exception as e:
+        print(f"⚠️ Error inicializando Babel: {e}")
+        babel = None
+        BABEL_AVAILABLE = False
+
+if not BABEL_AVAILABLE:
     print("🔄 Usando sistema de traducciones simple como fallback")
-    babel = None
     use_simple_translations = True
     
     # Importar sistema de traducciones simple
@@ -68,21 +83,18 @@ except Exception as e:
         print(f"⚠️ Error cargando traducciones simples: {ie}")
         use_simple_translations = False
 
+# Configurar selector de idioma
+def get_locale():
+    """Función para obtener el idioma actual"""
+    if 'language' in session:
+        return session['language']
+    return 'es'  # Idioma por defecto
+
 # Configurar selector de idioma solo si Babel está disponible
 if babel:
     @babel.localeselector
-    def get_locale():
-        # Primero verificar si hay un idioma en la sesión
-        if 'language' in session:
-            return session['language']
-        # Luego verificar el header Accept-Language del navegador
-        return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or app.config['BABEL_DEFAULT_LOCALE']
-else:
-    def get_locale():
-        # Función de fallback si Babel no está disponible
-        if 'language' in session:
-            return session['language']
-        return 'es'  # Idioma por defecto
+    def babel_get_locale():
+        return get_locale()
 
 # Configuración de base de datos
 database_url = os.getenv('CUSTOM_DATABASE_URL', '')
@@ -146,24 +158,29 @@ def load_user(user_id):
 # Filtro de context processor para templates
 @app.context_processor
 def inject_user():
-    # Función de traducción que funciona con ambos sistemas
+    # Función de traducción simplificada
     def translate_text(text):
-        if use_simple_translations and 'simple_translations' in globals():
-            return simple_translations.get_translation(text, get_locale())
+        if use_simple_translations:
+            try:
+                return simple_translations.get_translation(text, get_locale())
+            except:
+                return text
         else:
             # Usar Babel si está disponible
             try:
-                from flask_babel import gettext
-                return gettext(text)
+                if BABEL_AVAILABLE:
+                    from flask_babel import gettext
+                    return gettext(text)
             except:
-                return text
+                pass
+            return text
     
     return {
         'current_user': current_user,
         'current_restaurante': current_user.restaurante if current_user.is_authenticated else None,
         'get_locale': get_locale,
         'languages': app.config['LANGUAGES'],
-        '_': translate_text  # Función de traducción universal
+        '_': translate_text
     }
 
 # Helper function para filtrar por restaurante
@@ -208,19 +225,24 @@ def init_db():
 # Llamar a init_db al importar
 init_db()
 
-# Inicializar traducciones
+# Inicializar traducciones de forma segura
 def init_translations():
     """Inicializar traducciones si no están compiladas"""
     try:
-        es_mo = 'translations/es/LC_MESSAGES/messages.mo'
-        en_mo = 'translations/en/LC_MESSAGES/messages.mo'
-        
-        if not os.path.exists(es_mo) or not os.path.exists(en_mo):
-            print("🔧 Compilando traducciones...")
-            # Importar el script de inicialización
-            import init_translations
-            init_translations.compile_translations()
-            print("✅ Traducciones inicializadas")
+        if BABEL_AVAILABLE:
+            es_mo = 'translations/es/LC_MESSAGES/messages.mo'
+            en_mo = 'translations/en/LC_MESSAGES/messages.mo'
+            
+            if not os.path.exists(es_mo) or not os.path.exists(en_mo):
+                print("🔧 Compilando traducciones...")
+                try:
+                    import init_translations
+                    init_translations.compile_translations()
+                    print("✅ Traducciones inicializadas")
+                except Exception as ie:
+                    print(f"⚠️ Error compilando traducciones: {ie}")
+        else:
+            print("✅ Usando sistema de traducciones simple")
     except Exception as e:
         print(f"⚠️ Error inicializando traducciones: {e}")
 

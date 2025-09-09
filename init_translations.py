@@ -23,22 +23,18 @@ def compile_translations():
                 if os.path.exists('translations/es/LC_MESSAGES/messages.po'):
                     compile_catalog('translations/es/LC_MESSAGES/messages.po', 
                                   'translations/es/LC_MESSAGES/messages.mo')
-                    print("✅ Traducciones en español compiladas con Babel")
+                    print("✅ Traducciones en español compiladas")
                 
                 # Compilar inglés
                 if os.path.exists('translations/en/LC_MESSAGES/messages.po'):
                     compile_catalog('translations/en/LC_MESSAGES/messages.po', 
                                   'translations/en/LC_MESSAGES/messages.mo')
-                    print("✅ Traducciones en inglés compiladas con Babel")
+                    print("✅ Traducciones en inglés compiladas")
                     
             except ImportError:
-                print("⚠️ Babel no disponible, usando sistema de traducciones simple")
-                # Verificar que el sistema simple esté disponible
-                try:
-                    import simple_translations
-                    print("✅ Sistema de traducciones simple verificado")
-                except ImportError:
-                    print("⚠️ Sistema de traducciones simple no disponible")
+                print("⚠️ Babel no disponible, usando sistema simple")
+            except Exception as e:
+                print(f"⚠️ Error compilando con Babel: {e}")
         else:
             print("✅ Traducciones ya compiladas")
             

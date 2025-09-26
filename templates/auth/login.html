@@ -67,7 +67,7 @@
         // Verificar que todos los parámetros requeridos estén presentes
         console.log('=== DIAGNÓSTICO EMAILJS ===');
         console.log('Credenciales:');
-        console.log('- Service ID: service_yj1mcpr');
+        console.log('- Service ID: service_vbzkn64');
         console.log('- Template ID: template_mg7eult');
         console.log('- Public Key: 79cmvTkckyQwZrWM7');
         console.log('');
@@ -84,7 +84,7 @@
         console.log('Enviando email con parámetros:', templateParams);
 
         // Enviar email usando EmailJS
-        emailjs.send('service_yj1mcpr', 'template_mg7eult', templateParams)
+        emailjs.send('service_vbzkn64', 'template_mg7eult', templateParams)
           .then(function(response) {
             console.log('✅ Email enviado exitosamente:', response.status, response.text);
             showEmailSentMessage();
@@ -104,7 +104,7 @@
               confirm_url: data.confirm_url
             };
             
-            emailjs.send('service_yj1mcpr', 'template_mg7eult', minimalParams)
+            emailjs.send('service_vbzkn64', 'template_mg7eult', minimalParams)
               .then(function(response) {
                 console.log('✅ Email enviado con parámetros mínimos:', response.status, response.text);
                 showEmailSentMessage();

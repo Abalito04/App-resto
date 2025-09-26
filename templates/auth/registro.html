@@ -23,21 +23,28 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label>Nombre Completo:</label>
-                                <input type="text" name="nombre" class="form-control" required>
+                                <input type="text" name="nombre" id="nombre" class="form-control" required>
+                                <small class="text-muted">Solo letras y espacios</small>
+                                <div class="invalid-feedback" id="nombre-error"></div>
                             </div>
                             <div class="col-md-6">
                                 <label>Email:</label>
-                                <input type="email" name="email" class="form-control" required>
+                                <input type="email" name="email" id="email" class="form-control" required>
+                                <small class="text-muted">Formato: usuario@dominio.com</small>
+                                <div class="invalid-feedback" id="email-error"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Contraseña (min. 6 caracteres):</label>
-                                <input type="password" name="password" class="form-control" required>
+                                <label>Contraseña:</label>
+                                <input type="password" name="password" id="password" class="form-control" required>
+                                <small class="text-muted">Mínimo 8 caracteres, letras y números</small>
+                                <div class="invalid-feedback" id="password-error"></div>
                             </div>
                             <div class="col-md-6">
                                 <label>Confirmar Contraseña:</label>
-                                <input type="password" name="confirmar_password" class="form-control" required>
+                                <input type="password" name="confirmar_password" id="confirmar_password" class="form-control" required>
+                                <div class="invalid-feedback" id="confirmar_password-error"></div>
                             </div>
                         </div>
 
@@ -53,7 +60,9 @@
                             </div>
                             <div class="col-md-4">
                                 <label>Teléfono:</label>
-                                <input type="text" name="telefono" class="form-control">
+                                <input type="text" name="telefono" id="telefono" class="form-control">
+                                <small class="text-muted">Solo números, espacios, guiones y paréntesis</small>
+                                <div class="invalid-feedback" id="telefono-error"></div>
                             </div>
                         </div>
 
@@ -67,4 +76,139 @@
         </div>
     </div>
 </div>
+
+<script>
+// Funciones de validación
+function validarNombre(nombre) {
+    const pattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    return pattern.test(nombre.trim()) && nombre.trim().length > 0;
+}
+
+function validarEmail(email) {
+    const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return pattern.test(email);
+}
+
+function validarPassword(password) {
+    if (password.length < 8) return false;
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    return hasLetter && hasNumber;
+}
+
+function validarTelefono(telefono) {
+    if (!telefono) return true; // Opcional
+    const pattern = /^[0-9\s\-\(\)\+]+$/;
+    return pattern.test(telefono.trim());
+}
+
+// Función para mostrar errores
+function mostrarError(campoId, mensaje) {
+    const campo = document.getElementById(campoId);
+    const errorDiv = document.getElementById(campoId + '-error');
+    
+    campo.classList.add('is-invalid');
+    errorDiv.textContent = mensaje;
+}
+
+// Función para limpiar errores
+function limpiarError(campoId) {
+    const campo = document.getElementById(campoId);
+    const errorDiv = document.getElementById(campoId + '-error');
+    
+    campo.classList.remove('is-invalid');
+    errorDiv.textContent = '';
+}
+
+// Validación en tiempo real
+document.getElementById('nombre').addEventListener('input', function() {
+    if (this.value && !validarNombre(this.value)) {
+        mostrarError('nombre', 'Solo se permiten letras y espacios');
+    } else {
+        limpiarError('nombre');
+    }
+});
+
+document.getElementById('email').addEventListener('input', function() {
+    if (this.value && !validarEmail(this.value)) {
+        mostrarError('email', 'Formato de email inválido');
+    } else {
+        limpiarError('email');
+    }
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    if (this.value && !validarPassword(this.value)) {
+        mostrarError('password', 'Mínimo 8 caracteres con letras y números');
+    } else {
+        limpiarError('password');
+    }
+});
+
+document.getElementById('confirmar_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    if (this.value && this.value !== password) {
+        mostrarError('confirmar_password', 'Las contraseñas no coinciden');
+    } else {
+        limpiarError('confirmar_password');
+    }
+});
+
+document.getElementById('telefono').addEventListener('input', function() {
+    if (this.value && !validarTelefono(this.value)) {
+        mostrarError('telefono', 'Solo números, espacios, guiones y paréntesis');
+    } else {
+        limpiarError('telefono');
+    }
+});
+
+// Validación al enviar el formulario
+document.querySelector('form').addEventListener('submit', function(e) {
+    let esValido = true;
+    
+    // Validar nombre
+    const nombre = document.getElementById('nombre').value;
+    if (!validarNombre(nombre)) {
+        mostrarError('nombre', 'El nombre solo puede contener letras y espacios');
+        esValido = false;
+    }
+    
+    // Validar email
+    const email = document.getElementById('email').value;
+    if (!validarEmail(email)) {
+        mostrarError('email', 'Formato de email inválido');
+        esValido = false;
+    }
+    
+    // Validar contraseña
+    const password = document.getElementById('password').value;
+    if (!validarPassword(password)) {
+        mostrarError('password', 'La contraseña debe tener al menos 8 caracteres y contener letras y números');
+        esValido = false;
+    }
+    
+    // Validar confirmación de contraseña
+    const confirmarPassword = document.getElementById('confirmar_password').value;
+    if (password !== confirmarPassword) {
+        mostrarError('confirmar_password', 'Las contraseñas no coinciden');
+        esValido = false;
+    }
+    
+    // Validar teléfono
+    const telefono = document.getElementById('telefono').value;
+    if (telefono && !validarTelefono(telefono)) {
+        mostrarError('telefono', 'El teléfono solo puede contener números, espacios, guiones y paréntesis');
+        esValido = false;
+    }
+    
+    if (!esValido) {
+        e.preventDefault();
+        // Scroll al primer error
+        const primerError = document.querySelector('.is-invalid');
+        if (primerError) {
+            primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+});
+</script>
 {% endblock %}

@@ -210,6 +210,31 @@ def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mens
 def validar_email(email):
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
 
+def validar_nombre(nombre):
+    """Validar que el nombre solo contenga letras y espacios"""
+    if not nombre or not nombre.strip():
+        return False
+    # Solo letras, espacios, acentos y ñ
+    pattern = r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$'
+    return re.match(pattern, nombre.strip()) is not None
+
+def validar_password(password):
+    """Validar contraseña: mínimo 8 caracteres, letras y números"""
+    if not password or len(password) < 8:
+        return False
+    # Debe contener al menos una letra y un número
+    has_letter = re.search(r'[a-zA-Z]', password)
+    has_number = re.search(r'[0-9]', password)
+    return has_letter is not None and has_number is not None
+
+def validar_telefono(telefono):
+    """Validar que el teléfono solo contenga números"""
+    if not telefono:
+        return True  # Teléfono es opcional
+    # Solo números, espacios, guiones y paréntesis
+    pattern = r'^[0-9\s\-\(\)\+]+$'
+    return re.match(pattern, telefono.strip()) is not None
+
 
 def crear_slug(nombre):
     """Crea un slug URL-friendly desde el nombre del restaurante"""
@@ -273,11 +298,29 @@ def registro():
             password = request.form.get('password', '')
             confirmar_password = request.form.get('confirmar_password', '')
             nombre_restaurante = request.form.get('nombre_restaurante', '').strip()
+            telefono = request.form.get('telefono', '').strip()
             
             print(f"Datos recibidos: nombre={nombre}, email={email}, restaurante={nombre_restaurante}")
 
+            # Validaciones
+            if not validar_nombre(nombre):
+                flash('El nombre solo puede contener letras y espacios', 'error')
+                return render_template('auth/registro.html')
+
             if not validar_email(email):
                 flash('Email inválido', 'error')
+                return render_template('auth/registro.html')
+
+            if not validar_password(password):
+                flash('La contraseña debe tener al menos 8 caracteres y contener letras y números', 'error')
+                return render_template('auth/registro.html')
+
+            if password != confirmar_password:
+                flash('Las contraseñas no coinciden', 'error')
+                return render_template('auth/registro.html')
+
+            if not validar_telefono(telefono):
+                flash('El teléfono solo puede contener números, espacios, guiones y paréntesis', 'error')
                 return render_template('auth/registro.html')
 
             if Usuario.query.filter_by(email=email).first():

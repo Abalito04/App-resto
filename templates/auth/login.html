@@ -22,4 +22,75 @@
     <a href="{{ url_for('auth.resend_confirm') }}">{{ _('¿No recibiste el email de confirmación?') }}</a>
   </div>
 </div>
+
+<!-- EmailJS para envío de emails de confirmación -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+  // Inicializar EmailJS
+  (function() {
+    emailjs.init("79cmvTkckyQwZrWM7"); // Reemplazar con tu clave pública de EmailJS
+  })();
+
+  // Función para enviar email de confirmación
+  function sendConfirmationEmail(email, token) {
+    // Obtener datos del email desde el servidor
+    fetch(`/api/email_data/${token}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.error('Error obteniendo datos del email:', data.error);
+          return;
+        }
+
+        // Configurar template de EmailJS
+        const templateParams = {
+          to_email: data.email,
+          to_name: data.nombre,
+          confirm_url: data.confirm_url,
+          restaurante: data.restaurante,
+          from_name: 'Sistema de Restaurantes'
+        };
+
+        // Enviar email usando EmailJS
+        emailjs.send('service_yj1mcpr', 'template_mg7eult', templateParams)
+          .then(function(response) {
+            console.log('Email enviado exitosamente:', response.status, response.text);
+            showEmailSentMessage();
+          }, function(error) {
+            console.error('Error enviando email:', error);
+            showEmailError();
+          });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showEmailError();
+      });
+  }
+
+  // Mostrar mensaje de email enviado
+  function showEmailSentMessage() {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success mt-3';
+    alertDiv.innerHTML = '✅ Email de confirmación enviado exitosamente. Revisa tu correo.';
+    document.querySelector('.container').appendChild(alertDiv);
+  }
+
+  // Mostrar mensaje de error
+  function showEmailError() {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-warning mt-3';
+    alertDiv.innerHTML = '⚠️ No se pudo enviar el email automáticamente. Usa el enlace de reenvío.';
+    document.querySelector('.container').appendChild(alertDiv);
+  }
+
+  // Verificar si hay un token en la URL (después del registro)
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  const email = urlParams.get('email');
+  
+  if (token && email) {
+    // Enviar email automáticamente después del registro
+    sendConfirmationEmail(email, token);
+  }
+</script>
 {% endblock %}

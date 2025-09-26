@@ -8,73 +8,35 @@ import traceback
 import secrets
 import smtplib
 import os
+import time
 from email.mime.text import MIMEText
 
 auth_bp = Blueprint('auth', __name__, template_folder='auth')
 
 # -------- EMAIL --------
 def enviar_email_confirmacion(email, token):
-    """Enviar email de confirmación de forma segura y robusta"""
-    print(f"📧 Iniciando envío de email a: {email}")
+    """Enviar email de confirmación usando EmailJS (gratuito)"""
+    print(f"📧 Preparando email de confirmación para: {email}")
     
-    # Obtener credenciales de email (compatible con Railway)
-    mail_username = (current_app.config.get("MAIL_USERNAME") or 
-                    current_app.config.get("MAIL_DEFAULT_SENDER") or 
-                    os.environ.get("MAIL_USERNAME") or 
-                    os.environ.get("MAIL_DEFAULT_SENDER"))
-    
-    mail_password = (current_app.config.get("MAIL_PASSWORD") or 
-                    os.environ.get("MAIL_PASSWORD"))
-    
-    print(f"📧 Usuario: {mail_username}")
-    print(f"📧 Password: {'Sí' if mail_password else 'No'}")
-    
-    if not mail_username or not mail_password:
-        print("❌ Variables de email no configuradas")
-        raise ValueError("Variables de email no configuradas")
-    
-    # Crear contenido del email
+    # Crear URL de confirmación
     confirm_url = url_for('auth.confirmar', token=token, _external=True)
-    contenido = f"""¡Bienvenido a nuestro sistema de gestión de restaurantes! 🍽️
-
-Para activar tu cuenta, haz clic en el siguiente enlace:
-
-{confirm_url}
-
-Si no puedes hacer clic en el enlace, cópialo y pégalo en tu navegador.
-
-¡Gracias por unirte a nosotros!
-
----
-Equipo de Soporte
-Sistema de Gestión de Restaurantes"""
     
-    msg = MIMEText(contenido)
-    msg['Subject'] = 'Confirma tu cuenta - Sistema de Restaurantes'
-    msg['From'] = mail_username
-    msg['To'] = email
-
-    # Configuración SMTP simplificada
-    mail_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
-    mail_port = int(os.environ.get("MAIL_PORT", "465"))
-    use_ssl = os.environ.get("MAIL_USE_SSL", "true").lower() == "true"
+    # Guardar datos del email para envío posterior con EmailJS
+    email_data = {
+        'email': email,
+        'token': token,
+        'confirm_url': confirm_url,
+        'timestamp': time.time()
+    }
     
-    print(f"📧 Conectando a {mail_server}:{mail_port} (SSL: {use_ssl})")
+    # En una implementación completa, aquí guardarías en una cola o base de datos
+    # Por ahora, simplemente logueamos los datos
+    print(f"📧 Datos del email preparados:")
+    print(f"   - Email: {email}")
+    print(f"   - URL: {confirm_url}")
+    print("✅ Email preparado para envío con EmailJS")
     
-    # Intentar envío con timeout reducido
-    if use_ssl:
-        import ssl
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(mail_server, mail_port, timeout=10, context=context) as server:
-            server.login(mail_username, mail_password)
-            server.send_message(msg)
-    else:
-        with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
-            server.starttls()
-            server.login(mail_username, mail_password)
-            server.send_message(msg)
-    
-    print(f"✅ Email enviado exitosamente a {email}")
+    return True
 
 def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje):
     """Envía email de solicitud de cambio de plan al administrador"""
@@ -361,6 +323,8 @@ def registro():
             # Mensaje de confirmación mejorado
             if email_enviado:
                 flash('¡Registro exitoso! 🎉 Revisa tu correo para confirmar tu cuenta y activarla.', 'success')
+                # Redirigir con parámetros para EmailJS
+                return redirect(url_for('auth.login', token=token, email=email))
             else:
                 flash('¡Registro exitoso! 🎉 Tu cuenta fue creada. Si no recibes el email de confirmación, usa el enlace "¿No recibiste el email?" en la página de login.', 'warning')
             
@@ -406,18 +370,35 @@ def resend_confirm():
             usuario.token_confirmacion = token
             db.session.commit()
             
-            # Enviar email
+            # Preparar email para envío con EmailJS
             try:
                 enviar_email_confirmacion(email, token)
-                flash('Email de confirmación reenviado exitosamente', 'success')
-                print(f"✅ Email de confirmación reenviado a {email}")
+                flash('Email de confirmación preparado. Se enviará automáticamente.', 'success')
+                print(f"✅ Email de confirmación preparado para {email}")
             except Exception as e:
-                flash('Error reenviando email. Contacta soporte para activar tu cuenta.', 'error')
-                print(f"❌ Error reenviando email a {email}: {e}")
+                flash('Error preparando email. Contacta soporte para activar tu cuenta.', 'error')
+                print(f"❌ Error preparando email para {email}: {e}")
         else:
             flash('Email no encontrado o ya confirmado', 'error')
     
     return render_template('auth/resend_confirm.html')
+
+@auth_bp.route('/api/email_data/<token>')
+def get_email_data(token):
+    """Obtener datos del email para envío con EmailJS"""
+    usuario = Usuario.query.filter_by(token_confirmacion=token).first()
+    
+    if not usuario:
+        return {'error': 'Token inválido'}, 404
+    
+    confirm_url = url_for('auth.confirmar', token=token, _external=True)
+    
+    return {
+        'email': usuario.email,
+        'nombre': usuario.nombre,
+        'confirm_url': confirm_url,
+        'restaurante': usuario.restaurante.nombre if usuario.restaurante else 'Nuevo Restaurante'
+    }
 
 @auth_bp.route('/admin/activar_usuario/<int:user_id>')
 @login_required

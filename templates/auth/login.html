@@ -52,25 +52,66 @@
           return;
         }
 
-        // Configurar template de EmailJS
+        // Configurar template de EmailJS - versión corregida
         const templateParams = {
           to_email: data.email,
-          to_name: data.nombre,
+          to_name: data.nombre || 'Usuario',
           confirm_url: data.confirm_url,
-          restaurante: data.restaurante,
-          from_name: 'Sistema de Restaurantes'
+          restaurante: data.restaurante || 'Nuevo Restaurante',
+          from_name: 'Sistema de Restaurantes',
+          // Parámetros adicionales que EmailJS podría requerir
+          reply_to: data.email,
+          user_email: data.email
         };
+        
+        // Verificar que todos los parámetros requeridos estén presentes
+        console.log('=== DIAGNÓSTICO EMAILJS ===');
+        console.log('Credenciales:');
+        console.log('- Service ID: service_yj1mcpr');
+        console.log('- Template ID: template_mg7eult');
+        console.log('- Public Key: 79cmvTkckyQwZrWM7');
+        console.log('');
+        console.log('Parámetros enviados:');
+        console.log('- to_email:', templateParams.to_email);
+        console.log('- to_name:', templateParams.to_name);
+        console.log('- confirm_url:', templateParams.confirm_url);
+        console.log('- restaurante:', templateParams.restaurante);
+        console.log('- from_name:', templateParams.from_name);
+        console.log('- reply_to:', templateParams.reply_to);
+        console.log('- user_email:', templateParams.user_email);
+        console.log('');
 
         console.log('Enviando email con parámetros:', templateParams);
 
         // Enviar email usando EmailJS
         emailjs.send('service_yj1mcpr', 'template_mg7eult', templateParams)
           .then(function(response) {
-            console.log('Email enviado exitosamente:', response.status, response.text);
+            console.log('✅ Email enviado exitosamente:', response.status, response.text);
             showEmailSentMessage();
           }, function(error) {
-            console.error('Error enviando email:', error);
-            showEmailError();
+            console.error('❌ Error enviando email:', error);
+            console.error('Detalles del error:', {
+              status: error.status,
+              text: error.text,
+              message: error.message
+            });
+            
+            // Intentar con parámetros mínimos como fallback
+            console.log('🔄 Intentando con parámetros mínimos...');
+            const minimalParams = {
+              to_email: data.email,
+              to_name: 'Usuario',
+              confirm_url: data.confirm_url
+            };
+            
+            emailjs.send('service_yj1mcpr', 'template_mg7eult', minimalParams)
+              .then(function(response) {
+                console.log('✅ Email enviado con parámetros mínimos:', response.status, response.text);
+                showEmailSentMessage();
+              }, function(error2) {
+                console.error('❌ Error también con parámetros mínimos:', error2);
+                showEmailError();
+              });
           });
       })
       .catch(error => {

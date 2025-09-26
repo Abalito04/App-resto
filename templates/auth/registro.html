@@ -29,9 +29,17 @@
                             </div>
                             <div class="col-md-6">
                                 <label>Email:</label>
-                                <input type="email" name="email" id="email" class="form-control" required>
+                                <div class="input-group">
+                                    <input type="email" name="email" id="email" class="form-control" required>
+                                    <span class="input-group-text" id="email-status" style="display: none;">
+                                        <i class="fas fa-check text-success" id="email-success-icon" style="display: none;"></i>
+                                        <i class="fas fa-times text-danger" id="email-error-icon" style="display: none;"></i>
+                                        <i class="fas fa-spinner fa-spin text-primary" id="email-loading-icon" style="display: none;"></i>
+                                    </span>
+                                </div>
                                 <small class="text-muted">Formato: usuario@dominio.com</small>
                                 <div class="invalid-feedback" id="email-error"></div>
+                                <div class="valid-feedback" id="email-success"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -118,6 +126,11 @@ function limpiarError(campoId) {
     
     campo.classList.remove('is-invalid');
     errorDiv.textContent = '';
+    
+    // Si es el campo de email, también limpiar el estado visual
+    if (campoId === 'email') {
+        ocultarEmailStatus();
+    }
 }
 
 // Validación en tiempo real
@@ -129,13 +142,125 @@ document.getElementById('nombre').addEventListener('input', function() {
     }
 });
 
+// Variable para controlar el timeout de verificación de email
+let emailTimeout;
+
 document.getElementById('email').addEventListener('input', function() {
-    if (this.value && !validarEmail(this.value)) {
+    const email = this.value;
+    
+    // Limpiar timeout anterior
+    if (emailTimeout) {
+        clearTimeout(emailTimeout);
+    }
+    
+    // Validación básica de formato
+    if (email && !validarEmail(email)) {
         mostrarError('email', 'Formato de email inválido');
+        return;
+    }
+    
+    // Si el email tiene formato válido, verificar disponibilidad después de 1 segundo
+    if (email && validarEmail(email)) {
+        emailTimeout = setTimeout(() => {
+            verificarEmailDisponible(email);
+        }, 1000);
     } else {
         limpiarError('email');
     }
 });
+
+// Función para verificar si el email está disponible
+function verificarEmailDisponible(email) {
+    // Mostrar indicador de carga
+    mostrarEmailLoading();
+    
+    fetch('/auth/verificar_email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.disponible) {
+            mostrarEmailDisponible();
+        } else {
+            mostrarEmailNoDisponible(data.mensaje);
+        }
+    })
+    .catch(error => {
+        console.error('Error verificando email:', error);
+        ocultarEmailStatus();
+        // No mostrar error al usuario si falla la verificación
+        // La validación del backend se encargará de esto
+    });
+}
+
+// Funciones para mostrar estados del email
+function mostrarEmailLoading() {
+    const status = document.getElementById('email-status');
+    const loadingIcon = document.getElementById('email-loading-icon');
+    const successIcon = document.getElementById('email-success-icon');
+    const errorIcon = document.getElementById('email-error-icon');
+    
+    status.style.display = 'block';
+    loadingIcon.style.display = 'inline';
+    successIcon.style.display = 'none';
+    errorIcon.style.display = 'none';
+}
+
+function mostrarEmailDisponible() {
+    const status = document.getElementById('email-status');
+    const loadingIcon = document.getElementById('email-loading-icon');
+    const successIcon = document.getElementById('email-success-icon');
+    const errorIcon = document.getElementById('email-error-icon');
+    const emailField = document.getElementById('email');
+    const successDiv = document.getElementById('email-success');
+    
+    status.style.display = 'block';
+    loadingIcon.style.display = 'none';
+    successIcon.style.display = 'inline';
+    errorIcon.style.display = 'none';
+    
+    emailField.classList.remove('is-invalid');
+    emailField.classList.add('is-valid');
+    successDiv.textContent = 'Email disponible';
+    successDiv.style.display = 'block';
+}
+
+function mostrarEmailNoDisponible(mensaje) {
+    const status = document.getElementById('email-status');
+    const loadingIcon = document.getElementById('email-loading-icon');
+    const successIcon = document.getElementById('email-success-icon');
+    const errorIcon = document.getElementById('email-error-icon');
+    const emailField = document.getElementById('email');
+    const errorDiv = document.getElementById('email-error');
+    const successDiv = document.getElementById('email-success');
+    
+    status.style.display = 'block';
+    loadingIcon.style.display = 'none';
+    successIcon.style.display = 'none';
+    errorIcon.style.display = 'inline';
+    
+    emailField.classList.remove('is-valid');
+    emailField.classList.add('is-invalid');
+    errorDiv.textContent = mensaje;
+    errorDiv.style.display = 'block';
+    successDiv.style.display = 'none';
+}
+
+function ocultarEmailStatus() {
+    const status = document.getElementById('email-status');
+    const emailField = document.getElementById('email');
+    const errorDiv = document.getElementById('email-error');
+    const successDiv = document.getElementById('email-success');
+    
+    status.style.display = 'none';
+    emailField.classList.remove('is-valid', 'is-invalid');
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+}
 
 document.getElementById('password').addEventListener('input', function() {
     if (this.value && !validarPassword(this.value)) {

@@ -324,7 +324,7 @@ def registro():
                 return render_template('auth/registro.html')
 
             if Usuario.query.filter_by(email=email).first():
-                flash('Email ya registrado', 'error')
+                flash('Este email ya está registrado. Usa otro email o inicia sesión si ya tienes una cuenta.', 'error')
                 return render_template('auth/registro.html')
 
             print("Creando restaurante...")
@@ -442,6 +442,37 @@ def get_email_data(token):
         'confirm_url': confirm_url,
         'restaurante': usuario.restaurante.nombre if usuario.restaurante else 'Nuevo Restaurante'
     }
+
+@auth_bp.route('/verificar_email', methods=['POST'])
+def verificar_email():
+    """Verificar si un email ya está registrado"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return {'disponible': False, 'mensaje': 'Email requerido'}, 400
+        
+        if not validar_email(email):
+            return {'disponible': False, 'mensaje': 'Formato de email inválido'}, 400
+        
+        # Verificar si el email ya existe
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        
+        if usuario_existente:
+            return {
+                'disponible': False, 
+                'mensaje': 'Este email ya está registrado. Usa otro email o inicia sesión.'
+            }
+        else:
+            return {
+                'disponible': True, 
+                'mensaje': 'Email disponible'
+            }
+            
+    except Exception as e:
+        print(f"Error verificando email: {e}")
+        return {'disponible': False, 'mensaje': 'Error verificando email'}, 500
 
 @auth_bp.route('/admin/activar_usuario/<int:user_id>')
 @login_required

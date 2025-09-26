@@ -33,12 +33,22 @@
 
   // Función para enviar email de confirmación
   function sendConfirmationEmail(email, token) {
+    console.log('Iniciando envío de email para:', email, 'con token:', token);
+    
     // Obtener datos del email desde el servidor
-    fetch(`/api/email_data/${token}`)
-      .then(response => response.json())
+    fetch(`/auth/email_data/${token}`)
+      .then(response => {
+        console.log('Respuesta del servidor:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        console.log('Datos recibidos:', data);
         if (data.error) {
           console.error('Error obteniendo datos del email:', data.error);
+          showEmailError();
           return;
         }
 
@@ -51,6 +61,8 @@
           from_name: 'Sistema de Restaurantes'
         };
 
+        console.log('Enviando email con parámetros:', templateParams);
+
         // Enviar email usando EmailJS
         emailjs.send('service_yj1mcpr', 'template_mg7eult', templateParams)
           .then(function(response) {
@@ -62,7 +74,7 @@
           });
       })
       .catch(error => {
-        console.error('Error:', error);
+        console.error('Error en la petición:', error);
         showEmailError();
       });
   }

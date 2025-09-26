@@ -383,7 +383,7 @@ def resend_confirm():
     
     return render_template('auth/resend_confirm.html')
 
-@auth_bp.route('/api/email_data/<token>')
+@auth_bp.route('/email_data/<token>')
 def get_email_data(token):
     """Obtener datos del email para envío con EmailJS"""
     usuario = Usuario.query.filter_by(token_confirmacion=token).first()

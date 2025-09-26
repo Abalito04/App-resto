@@ -277,12 +277,14 @@ function setTheme(dark) {
   // Estado conexión
   function updateConnectionStatus() {
     const statusElement = document.getElementById("pwa-status");
-    if (navigator.onLine) {
-      statusElement.textContent = "{{ _('Conectado') }}";
-      statusElement.className = "badge bg-success";
-    } else {
-      statusElement.textContent = "{{ _('Sin conexión') }}";
-      statusElement.className = "badge bg-warning";
+    if (statusElement) {
+      if (navigator.onLine) {
+        statusElement.textContent = "{{ _('Conectado') }}";
+        statusElement.className = "badge bg-success";
+      } else {
+        statusElement.textContent = "{{ _('Sin conexión') }}";
+        statusElement.className = "badge bg-warning";
+      }
     }
   }
   window.addEventListener("online", updateConnectionStatus);

@@ -15,57 +15,120 @@ auth_bp = Blueprint('auth', __name__, template_folder='auth')
 # -------- EMAIL --------
 def enviar_email_confirmacion(email, token):
     try:
-        # Obtener credenciales de email
-        mail_username = current_app.config.get("MAIL_USERNAME") or os.environ.get("MAIL_USERNAME")
-        mail_password = current_app.config.get("MAIL_PASSWORD") or os.environ.get("MAIL_PASSWORD")
+        # Obtener credenciales de email (compatible con Railway)
+        mail_username = (current_app.config.get("MAIL_USERNAME") or 
+                        current_app.config.get("MAIL_DEFAULT_SENDER") or 
+                        os.environ.get("MAIL_USERNAME") or 
+                        os.environ.get("MAIL_DEFAULT_SENDER"))
+        
+        mail_password = (current_app.config.get("MAIL_PASSWORD") or 
+                        os.environ.get("MAIL_PASSWORD"))
+        
+        mail_server = (current_app.config.get("MAIL_SERVER") or 
+                      os.environ.get("MAIL_SERVER") or 
+                      "smtp.gmail.com")
+        
+        mail_port = (current_app.config.get("MAIL_PORT") or 
+                    os.environ.get("MAIL_PORT") or 
+                    "465")
+        
+        use_ssl = (current_app.config.get("MAIL_USE_SSL") or 
+                  os.environ.get("MAIL_USE_SSL") or 
+                  "true").lower() == "true"
+        
+        print(f"📧 Intentando enviar email de confirmación a: {email}")
+        print(f"📧 Usuario configurado: {mail_username}")
+        print(f"📧 Password configurado: {'Sí' if mail_password else 'No'}")
+        print(f"📧 Servidor: {mail_server}:{mail_port}")
+        print(f"📧 Usar SSL: {use_ssl}")
         
         if not mail_username or not mail_password:
             print("❌ Variables de email no configuradas para confirmación")
-            return
+            print("❌ Configura MAIL_USERNAME/MAIL_DEFAULT_SENDER y MAIL_PASSWORD en Railway")
+            raise ValueError("Variables de email no configuradas")
         
-        msg = MIMEText(f"Confirma tu cuenta ingresando a: {url_for('auth.confirmar', token=token, _external=True)}")
-        msg['Subject'] = 'Confirma tu cuenta'
+        # Crear contenido del email más atractivo
+        confirm_url = url_for('auth.confirmar', token=token, _external=True)
+        contenido = f"""
+        ¡Bienvenido a nuestro sistema de gestión de restaurantes! 🍽️
+        
+        Para activar tu cuenta, haz clic en el siguiente enlace:
+        
+        {confirm_url}
+        
+        Si no puedes hacer clic en el enlace, cópialo y pégalo en tu navegador.
+        
+        Este enlace expirará en 24 horas por seguridad.
+        
+        ¡Gracias por unirte a nosotros!
+        
+        ---
+        Equipo de Soporte
+        Sistema de Gestión de Restaurantes
+        """
+        
+        msg = MIMEText(contenido)
+        msg['Subject'] = 'Confirma tu cuenta - Sistema de Restaurantes'
         msg['From'] = mail_username
         msg['To'] = email
 
-        # Intentar diferentes configuraciones SMTP para Railway
-        smtp_configs = [
-            ("smtp.gmail.com", 587),  # Gmail con TLS
-            ("smtp.gmail.com", 465),  # Gmail con SSL
-        ]
-        
+        # Usar configuración específica de Railway
         email_sent = False
-        for smtp_server, port in smtp_configs:
+        try:
+            print(f"📧 Intentando conectar a {mail_server}:{mail_port}")
+            
+            if use_ssl:
+                # Usar SSL (puerto 465)
+                import ssl
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL(mail_server, int(mail_port), timeout=30, context=context) as server:
+                    server.login(mail_username, mail_password)
+                    server.send_message(msg)
+                    email_sent = True
+                    print(f"✅ Email enviado exitosamente usando SSL")
+            else:
+                # Usar TLS (puerto 587)
+                with smtplib.SMTP(mail_server, int(mail_port), timeout=30) as server:
+                    server.starttls()
+                    server.login(mail_username, mail_password)
+                    server.send_message(msg)
+                    email_sent = True
+                    print(f"✅ Email enviado exitosamente usando TLS")
+                    
+        except Exception as e:
+            print(f"❌ Error con {mail_server}:{mail_port}: {e}")
+            # Fallback: intentar con configuración alternativa
             try:
-                if port == 465:
-                    # Usar SSL en lugar de TLS
-                    import ssl
-                    context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL(smtp_server, port, timeout=30, context=context) as server:
-                        server.login(mail_username, mail_password)
-                        server.send_message(msg)
-                        email_sent = True
-                        break
-                else:
-                    # Usar TLS
-                    with smtplib.SMTP(smtp_server, port, timeout=30) as server:
+                print("📧 Intentando configuración alternativa...")
+                if use_ssl:
+                    # Intentar con TLS como fallback
+                    with smtplib.SMTP(mail_server, 587, timeout=30) as server:
                         server.starttls()
                         server.login(mail_username, mail_password)
                         server.send_message(msg)
                         email_sent = True
-                        break
-                        
-            except Exception as e:
-                print(f"❌ Error con {smtp_server}:{port}: {e}")
-                continue
+                        print(f"✅ Email enviado exitosamente usando TLS (fallback)")
+                else:
+                    # Intentar con SSL como fallback
+                    import ssl
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(mail_server, 465, timeout=30, context=context) as server:
+                        server.login(mail_username, mail_password)
+                        server.send_message(msg)
+                        email_sent = True
+                        print(f"✅ Email enviado exitosamente usando SSL (fallback)")
+            except Exception as e2:
+                print(f"❌ Error en configuración alternativa: {e2}")
         
         if email_sent:
-            print(f"✅ Email de confirmación enviado a {email}")
+            print(f"✅ Email de confirmación enviado exitosamente a {email}")
         else:
             print(f"❌ No se pudo enviar email de confirmación a {email}")
+            raise Exception("No se pudo enviar el email con ninguna configuración SMTP")
             
     except Exception as e:
         print(f"❌ Error enviando email de confirmación: {e}")
+        raise e
 
 def enviar_email_contacto_plan(nombre, email, restaurante, plan_solicitado, mensaje):
     """Envía email de solicitud de cambio de plan al administrador"""
@@ -339,13 +402,19 @@ def registro():
 
             print("Enviando email...")
             # Enviar email de confirmación
+            email_enviado = False
             try:
                 enviar_email_confirmacion(email, token)
-                flash('Registro exitoso. Revisa tu correo para confirmar tu cuenta.', 'success')
+                email_enviado = True
                 print("Email enviado exitosamente")
             except Exception as e:
                 print(f"Error enviando email: {e}")
-                flash('Registro exitoso pero error enviando email. Contacta soporte.', 'warning')
+            
+            # Mensaje de confirmación mejorado
+            if email_enviado:
+                flash('¡Registro exitoso! 🎉 Revisa tu correo para confirmar tu cuenta y activarla.', 'success')
+            else:
+                flash('¡Registro exitoso! 🎉 Tu cuenta fue creada pero no se pudo enviar el email de confirmación. Contacta soporte para activar tu cuenta.', 'warning')
             
             print("=== REGISTRO COMPLETADO ===")
             return redirect(url_for('auth.login'))
@@ -389,9 +458,14 @@ def resend_confirm():
             usuario.token_confirmacion = token
             db.session.commit()
             
-            # Enviar email (simulado por ahora)
-            print(f"Email de confirmación enviado a {email} con token: {token}")
-            flash('Email de confirmación reenviado', 'success')
+            # Enviar email
+            try:
+                enviar_email_confirmacion(email, token)
+                flash('Email de confirmación reenviado exitosamente', 'success')
+                print(f"✅ Email de confirmación reenviado a {email}")
+            except Exception as e:
+                flash('Error reenviando email. Contacta soporte para activar tu cuenta.', 'error')
+                print(f"❌ Error reenviando email a {email}: {e}")
         else:
             flash('Email no encontrado o ya confirmado', 'error')
     

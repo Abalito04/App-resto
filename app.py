@@ -108,7 +108,7 @@ if not database_url:
 if database_url and 'railway.internal' in database_url:
     print("⚠️ Railway está usando URL interna, forzando URL pública...")
     # Usar la URL pública directamente
-    database_url = "postgresql://postgres:hISwhPDoevhhPocdYdIIOlawevrfPgcN@yamabiko.proxy.rlwy.net:35702/railway"
+    database_url = os.getenv('DATABASE_URL_PUBLIC', '') or os.getenv('DATABASE_URL', '')
 
 if database_url:
     if database_url.startswith('postgres://'):
@@ -266,27 +266,17 @@ init_translations()
 
 @app.route("/")
 def index_redirect():
-    """Redirige al setup si no hay usuarios, sino al dashboard"""
-    try:
-        if not current_user.is_authenticated:
-            # Verificar si hay usuarios en el sistema
-            try:
-                usuario_existe = Usuario.query.first()
-                if not usuario_existe:
-                    return redirect(url_for('setup_inicial'))
-            except Exception as e:
-                print(f"Error verificando usuarios: {e}")
+    """Redirige al login si no está logueado, al dashboard si sí"""
+    if not current_user.is_authenticated:
+        try:
+            usuario_existe = Usuario.query.first()
+            if not usuario_existe:
                 return redirect(url_for('setup_inicial'))
-            
-            # Si hay usuarios pero no está logueado, ir a login
-            return redirect(url_for('auth.login'))
-        
-        # Si está logueado, mostrar la app normal
-        return index_logueado()
-    
-    except Exception as e:
-        print(f"Error en index_redirect: {e}")
-        return redirect(url_for('setup_inicial'))
+        except Exception as e:
+            print(f"Error verificando usuarios: {e}")
+            # Si hay error de DB, va al login de todas formas
+        return redirect(url_for('auth.login'))
+    return index_logueado()
 
 @app.route("/clear-session")
 def clear_session():

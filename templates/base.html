@@ -50,10 +50,19 @@
       .table-striped > tbody > tr:nth-of-type(even) {
         background-color: #fff !important;
       }
+      .navbar-verde {
+        background-color:  #6ba292 !important;
+      }
+      .navbar-verde .navbar-nav .nav-link,
+      .navbar-verde .navbar-brand,
+      .navbar-verde .dropdown-toggle,
+      .navbar-verde .btn-outline-light {
+        color: #fff !important;
+}
     </style>
 </head>
 <body>
-<nav id="main-navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav id="main-navbar" class="navbar navbar-expand-lg navbar-verde">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="{{ url_for('index_redirect') }}">
       {% if current_restaurante %}{{ current_restaurante.nombre }}{% else %}Resto App{% endif %}

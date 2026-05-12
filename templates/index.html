@@ -142,7 +142,7 @@
     </form>
 
     <!-- Lista de productos -->
-    <table class="table table-sm table-striped">
+    <table class="table table-sm table-striped align-middle">
         <thead>
             <tr>
                 <th>{{ _('Nombre') }}</th>
@@ -153,13 +153,17 @@
         <tbody>
             {% for producto in productos %}
             <tr>
+                <form method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}">
                 <td>
-                    <form method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}" class="d-flex gap-1">
-                        <input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control">
-                        <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control">
-                        <button type="submit" class="btn btn-warning btn-sm">{{ _('Guardar') }}</button>
-                    </form>
+                    <input type="text" name="nombre" value="{{ producto.nombre }}" class="form-control form-control-sm">
                 </td>
+                <td>
+                    <input type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control form-control-sm">
+                </td>
+                <td class="d-flex gap-1">
+                    <button type="submit" class="btn btn-warning btn-sm">{{ _('Guardar') }}</button>
+                </td>
+                </form>
                 <td>
                     <form method="POST" action="{{ url_for('borrar_producto_index', producto_id=producto.id) }}">
                         <button type="submit" class="btn btn-danger btn-sm">🗑 {{ _('Borrar') }}</button>
@@ -199,7 +203,6 @@
 </div>
 
 <script>
-    // Mostrar u ocultar campos según tipo de consumo
     const tipoSelect = document.getElementById('tipo_consumo');
     const divMesa = document.getElementById('div_mesa');
     const divCliente = document.getElementById('div_cliente');
@@ -217,7 +220,6 @@
         }
     });
 
-    // Mostrar u ocultar campos de tarjeta
     const metodoPago = document.getElementById('metodo_pago');
     const divTicket = document.getElementById('div_tarjeta');
     const divTitular = document.getElementById('div_titular');
@@ -232,7 +234,6 @@
         }
     });
 
-    // Validación de mesa en front-end
     const formPedido = document.querySelector('form[action="{{ url_for("crear_pedido") }}"]');
     const mesaInput = document.getElementById('mesa_input');
     const mesaError = document.getElementById('mesa_error');
@@ -247,7 +248,6 @@
         }
     });
 
-    // Modal de pedidos activos
     document.querySelectorAll('.pedido-activo-card').forEach(card => {
         card.addEventListener('click', function() {
             const mesa = card.getAttribute('data-mesa');

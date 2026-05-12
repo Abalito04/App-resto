@@ -773,6 +773,24 @@ def api_public_pedidos(api_key):
         "pedidos": pedidos_data,
         "restaurante": restaurante.nombre
     })
+    
+@app.route("/api/public/config/<api_key>")
+def api_public_config(api_key):
+    """Devuelve la configuración de impresora para el cliente local"""
+    restaurante = Restaurante.query.filter_by(api_key=api_key, activo=True).first()
+    if not restaurante:
+        return jsonify({"error": "API Key inválida"}), 401
+
+    config = restaurante.configuracion
+    if not config:
+        return jsonify({"error": "Sin configuración"}), 404
+
+    return jsonify({
+        "habilitada": config.impresora_habilitada,
+        "tipo": config.impresora_tipo,
+        "ip": config.impresora_ip,
+        "puerto": config.impresora_puerto or 9100
+    })
 
 @app.route("/api/test")
 def api_test():

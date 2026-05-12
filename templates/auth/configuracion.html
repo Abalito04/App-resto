@@ -91,30 +91,6 @@
                     </div>
                 </div>
 
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h4>🎨 {{ _('Configuración de Interfaz') }}</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Tema:') }}</label>
-                            <select name="tema" class="form-select">
-                                <option value="default" {% if config and config.tema == 'default' %}selected{% endif %}>{{ _('Por defecto') }}</option>
-                                <option value="dark" {% if config and config.tema == 'dark' %}selected{% endif %}>{{ _('Oscuro') }}</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="mostrar_precios" class="form-check-input" 
-                                   id="mostrar_precios" {% if config and config.mostrar_precios %}checked{% endif %}>
-                            <label class="form-check-label" for="mostrar_precios">
-                                {{ _('Mostrar precios en comandas') }}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="mt-4">
             <button type="submit" class="btn btn-primary btn-lg">

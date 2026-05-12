@@ -129,9 +129,13 @@
         <div class="card-body">
             <h5>📊 {{ _('Información del Plan') }}</h5>
             <p><strong>{{ _('Plan actual:') }}</strong> <span class="badge bg-info">{{ current_user.restaurante.plan|title }}</span></p>
-            <p><strong>{{ _('API Key:') }}</strong> <code class="bg-dark text-light p-2 rounded">{{ current_user.restaurante.api_key }}</code></p>
+            <p><strong>{{ _('API Key:') }}</strong> <code class="bg-dark text-light p-2 rounded">{{ current_user.restaurante.api_key }}</      code></p>
             <small class="text-muted">{{ _('Usa esta API Key para conectar sistemas externos') }}</small>
-            
+            <br>
+            <small class="text-warning">
+              ⚠️ <strong>No compartas esta clave.</strong> Cualquiera que la tenga puede leer los pedidos de tu restaurante.
+            </small>
+        
             <hr>
             <div class="row">
                 <div class="col-md-4">

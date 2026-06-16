@@ -31,8 +31,15 @@ body {
     linear-gradient(180deg, rgba(251, 252, 248, .78) 0%, rgba(247, 248, 244, .84) 42%, rgba(238, 244, 236, .86) 100%),
     url("/static/hero-food-bg.png") center / cover fixed no-repeat;
   color: var(--ink);
+  display: flex;
+  flex-direction: column;
   font-family: "Inter", Arial, sans-serif;
   letter-spacing: 0;
+}
+
+#main-content {
+  flex: 1 0 auto;
+  width: 100%;
 }
 
 a {
@@ -49,6 +56,8 @@ a:hover {
   border-bottom: 1px solid rgba(255, 255, 255, .12);
   box-shadow: 0 12px 24px rgba(14, 35, 28, .16);
   backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1000;
 }
 
 .navbar-verde .navbar-brand {
@@ -80,6 +89,7 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  z-index: 1100;
 }
 
 .dropdown-item {
@@ -97,6 +107,7 @@ a:hover {
   gap: .8rem;
   justify-content: space-between;
   padding: 1rem clamp(1rem, 5vw, 4rem);
+  flex-shrink: 0;
 }
 
 .site-footer span {

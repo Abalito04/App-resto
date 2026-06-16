@@ -1,136 +1,149 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="container mt-4">
-    <h2>⚙️ {{ _('Configuración del Restaurante') }}</h2>
-
-    {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <!-- Cualquier usuario puede modificar la configuración -->
-    
-    <form method="POST">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>📋 {{ _('Datos del Restaurante') }}</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Nombre del Restaurante:') }}</label>
-                            <input type="text" name="nombre_restaurante" class="form-control" 
-                                   value="{{ current_user.restaurante.nombre or '' }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Dirección:') }}</label>
-                            <input type="text" name="direccion" class="form-control" 
-                                   value="{{ current_user.restaurante.direccion or '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Teléfono:') }}</label>
-                            <input type="text" name="telefono" class="form-control" 
-                                   value="{{ current_user.restaurante.telefono or '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Moneda:') }}</label>
-                            <select name="moneda" class="form-select">
-                                <option value="$" {% if current_user.restaurante.moneda == '$' %}selected{% endif %}>$ ({{ _('Peso') }})</option>
-                                <option value="USD" {% if current_user.restaurante.moneda == 'USD' %}selected{% endif %}>USD ({{ _('Dólar') }})</option>
-                                <option value="€" {% if current_user.restaurante.moneda == '€' %}selected{% endif %}>€ ({{ _('Euro') }})</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>🖨️ {{ _('Configuración de Impresión') }}</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="impresora_habilitada" class="form-check-input" 
-                                   id="impresora_habilitada" 
-                                   {% if config and config.impresora_habilitada %}checked{% endif %}>
-                            <label class="form-check-label" for="impresora_habilitada">
-                                {{ _('Habilitar impresión de comandas') }}
-                            </label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Tipo de impresora:') }}</label>
-                            <select name="impresora_tipo" class="form-select">
-                                <option value="USB" {% if config and config.impresora_tipo == 'USB' %}selected{% endif %}>USB</option>
-                                <option value="NETWORK" {% if config and config.impresora_tipo == 'NETWORK' %}selected{% endif %}>{{ _('Red/Ethernet') }}</option>
-                                <option value="NONE" {% if config and config.impresora_tipo == 'NONE' %}selected{% endif %}>{{ _('Sin impresora') }}</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('IP de impresora (solo para red):') }}</label>
-                            <input type="text" name="impresora_ip" class="form-control" 
-                                   value="{{ config.impresora_ip if config else '' }}" 
-                                   placeholder="192.168.1.100">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">{{ _('Puerto (solo para red):') }}</label>
-                            <input type="number" name="impresora_puerto" class="form-control" 
-                                   value="{{ config.impresora_puerto if config else 9100 }}">
-                        </div>
-                    </div>
-                </div>
-
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-save me-2"></i>{{ _('Guardar Configuración') }}
-            </button>
-        </div>
-    </form>
-
-    <hr class="my-4">
-    
-    <div class="card bg-light">
-        <div class="card-body">
-            <h5>📊 {{ _('Información del Plan') }}</h5>
-            <p><strong>{{ _('Plan actual:') }}</strong> <span class="badge bg-info">{{ current_user.restaurante.plan|title }}</span></p>
-            <p><strong>{{ _('API Key:') }}</strong><code class="bg-secondary text-light p-2 rounded">{{ current_user.restaurante.api_key }}</code></p>
-            <small class="text-muted">{{ _('Usa esta API Key para conectar sistemas externos') }}</small>
-            <br>
-            <small class="text-warning">
-              ⚠️ <strong>No compartas esta clave.</strong> Cualquiera que la tenga puede leer los pedidos de tu restaurante.
-            </small>
-        
-            <hr>
-            <div class="row">
-                <div class="col-md-4">
-                    <h6>📦 {{ _('Productos') }}</h6>
-                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().productos }}/{{ current_user.restaurante.get_plan_limits().productos if current_user.restaurante.get_plan_limits().productos != -1 else '∞' }}</p>
-                </div>
-                <div class="col-md-4">
-                    <h6>👥 {{ _('Usuarios') }}</h6>
-                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().usuarios }}/{{ current_user.restaurante.get_plan_limits().usuarios if current_user.restaurante.get_plan_limits().usuarios != -1 else '∞' }}</p>
-                </div>
-                <div class="col-md-4">
-                    <h6>📋 {{ _('Pedidos Hoy') }}</h6>
-                    <p class="mb-1">{{ current_user.restaurante.get_usage_stats().pedidos_hoy }}/{{ current_user.restaurante.get_plan_limits().pedidos_dia if current_user.restaurante.get_plan_limits().pedidos_dia != -1 else '∞' }}</p>
-                </div>
-            </div>
-            <a href="{{ url_for('auth.planes') }}" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-chart-line me-1"></i>{{ _('Gestionar Plan') }}
-            </a>
-        </div>
+<div class="app-dashboard settings-page">
+  <header class="page-heading">
+    <div>
+      <span class="section-label">Ajustes</span>
+      <h1>{{ _('Configuracion del restaurante') }}</h1>
+      <p>Datos del local, moneda, impresion de comandas y acceso para integraciones.</p>
     </div>
+    <div class="page-stats">
+      <span>{{ _('Plan') }}</span>
+      <strong>{{ current_user.restaurante.plan|title }}</strong>
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      <div class="settings-alerts">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else ('warning' if category == 'warning' else ('info' if category == 'info' else 'success')) }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" class="settings-grid">
+    <section class="surface settings-card">
+      <div class="section-heading">
+        <h2>{{ _('Datos del restaurante') }}</h2>
+        <p>Informacion visible en comandas, reportes y cuenta.</p>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">{{ _('Nombre del restaurante') }}</label>
+          <input type="text" name="nombre_restaurante" class="form-control" value="{{ current_user.restaurante.nombre or '' }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">{{ _('Telefono') }}</label>
+          <input type="text" name="telefono" class="form-control" value="{{ current_user.restaurante.telefono or '' }}">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">{{ _('Direccion') }}</label>
+          <input type="text" name="direccion" class="form-control" value="{{ current_user.restaurante.direccion or '' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">{{ _('Moneda') }}</label>
+          <select name="moneda" class="form-select">
+            <option value="$" {% if current_user.restaurante.moneda == '$' %}selected{% endif %}>$ (Peso)</option>
+            <option value="USD" {% if current_user.restaurante.moneda == 'USD' %}selected{% endif %}>USD (Dolar)</option>
+            <option value="EUR" {% if current_user.restaurante.moneda == 'EUR' %}selected{% endif %}>EUR (Euro)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface settings-card">
+      <div class="section-heading">
+        <h2>{{ _('Impresion de comandas') }}</h2>
+        <p>Red/Ethernet puede imprimir directo por IP. USB necesita un cliente local junto a la impresora.</p>
+      </div>
+
+      <div class="printer-status">
+        <span class="status-chip">{{ _('Estado') }}</span>
+        <strong>
+          {% if config and config.impresora_habilitada and config.impresora_tipo != 'NONE' %}
+            {{ _('Activa') }}
+          {% else %}
+            {{ _('Desactivada') }}
+          {% endif %}
+        </strong>
+      </div>
+
+      <div class="form-check form-switch settings-switch">
+        <input type="checkbox" name="impresora_habilitada" class="form-check-input" id="impresora_habilitada" {% if config and config.impresora_habilitada %}checked{% endif %}>
+        <label class="form-check-label" for="impresora_habilitada">{{ _('Habilitar impresion automatica al crear pedidos') }}</label>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">{{ _('Tipo') }}</label>
+          <select name="impresora_tipo" id="impresora_tipo" class="form-select">
+            <option value="NONE" {% if config and config.impresora_tipo == 'NONE' %}selected{% endif %}>{{ _('Sin impresora') }}</option>
+            <option value="NETWORK" {% if config and config.impresora_tipo == 'NETWORK' %}selected{% endif %}>{{ _('Red/Ethernet') }}</option>
+            <option value="USB" {% if config and config.impresora_tipo == 'USB' %}selected{% endif %}>USB</option>
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">{{ _('IP de impresora de red') }}</label>
+          <input type="text" name="impresora_ip" class="form-control" value="{{ config.impresora_ip if config else '' }}" placeholder="192.168.1.100">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ _('Puerto') }}</label>
+          <input type="number" name="impresora_puerto" class="form-control" value="{{ config.impresora_puerto if config else 9100 }}" placeholder="9100">
+        </div>
+      </div>
+
+      <div class="printer-note">
+        <strong>{{ _('Como probar sin impresora') }}</strong>
+        <p>Usa el boton de prueba para validar que la configuracion esta completa. Cuando tengas una impresora de red, la prueba real sera crear un pedido y revisar que salga la comanda.</p>
+      </div>
+
+      <div class="settings-actions">
+        <button type="submit" name="accion" value="guardar" class="btn btn-primary">
+          <i class="fas fa-save"></i> {{ _('Guardar configuracion') }}
+        </button>
+        <button type="submit" name="accion" value="probar_impresora" class="btn btn-outline-dark">
+          <i class="fas fa-vial"></i> {{ _('Probar configuracion') }}
+        </button>
+      </div>
+    </section>
+  </form>
+
+  <section class="surface settings-card">
+    <div class="section-heading">
+      <h2>{{ _('Plan e integraciones') }}</h2>
+      <p>Uso actual del plan y clave para conectar sistemas externos.</p>
+    </div>
+
+    <div class="plan-grid">
+      <div>
+        <span>{{ _('Productos') }}</span>
+        <strong>{{ current_user.restaurante.get_usage_stats().productos }}/{{ current_user.restaurante.get_plan_limits().productos if current_user.restaurante.get_plan_limits().productos != -1 else '∞' }}</strong>
+      </div>
+      <div>
+        <span>{{ _('Usuarios') }}</span>
+        <strong>{{ current_user.restaurante.get_usage_stats().usuarios }}/{{ current_user.restaurante.get_plan_limits().usuarios if current_user.restaurante.get_plan_limits().usuarios != -1 else '∞' }}</strong>
+      </div>
+      <div>
+        <span>{{ _('Pedidos hoy') }}</span>
+        <strong>{{ current_user.restaurante.get_usage_stats().pedidos_hoy }}/{{ current_user.restaurante.get_plan_limits().pedidos_dia if current_user.restaurante.get_plan_limits().pedidos_dia != -1 else '∞' }}</strong>
+      </div>
+    </div>
+
+    <div class="api-key-box">
+      <label class="form-label">{{ _('API Key') }}</label>
+      <code>{{ current_user.restaurante.api_key }}</code>
+      <small>No compartas esta clave. Permite leer pedidos y configuracion publica del restaurante.</small>
+    </div>
+
+    <a href="{{ url_for('auth.planes') }}" class="btn btn-outline-dark">
+      <i class="fas fa-chart-line"></i> {{ _('Gestionar plan') }}
+    </a>
+  </section>
 </div>
 {% endblock %}

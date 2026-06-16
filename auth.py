@@ -736,6 +736,21 @@ def configuracion():
             current_user.restaurante.telefono = request.form.get('telefono', '')
             current_user.restaurante.moneda = request.form.get('moneda', '$')
 
+            if request.form.get('accion') == 'probar_impresora':
+                db.session.commit()
+                if not config.impresora_habilitada or config.impresora_tipo == 'NONE':
+                    flash('Prueba OK: la impresion esta desactivada. No se enviaran comandas a ninguna impresora.', 'info')
+                elif config.impresora_tipo == 'NETWORK':
+                    if config.impresora_ip:
+                        flash(f'Prueba OK: configuracion de red lista para intentar imprimir en {config.impresora_ip}:{config.impresora_puerto or 9100}. Sin impresora fisica no se puede confirmar el papel.', 'success')
+                    else:
+                        flash('Falta la IP de la impresora de red.', 'error')
+                elif config.impresora_tipo == 'USB':
+                    flash('Configuracion guardada: USB requiere un cliente local en la PC donde esta conectada la impresora. El servidor web no puede imprimir por USB directamente.', 'warning')
+                else:
+                    flash('Tipo de impresora no reconocido.', 'error')
+                return redirect(url_for('auth.configuracion'))
+
             db.session.commit()
             flash('Configuración actualizada', 'success')
         except Exception as e:

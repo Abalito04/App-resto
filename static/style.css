@@ -781,6 +781,129 @@ label {
   padding: .5rem 0;
 }
 
+/* Settings */
+.settings-page {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, .9fr) minmax(360px, 1.1fr);
+}
+
+.settings-card {
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.settings-alerts {
+  display: grid;
+  gap: .65rem;
+}
+
+.settings-alerts .alert {
+  border-radius: var(--radius);
+  margin: 0;
+}
+
+.printer-status {
+  align-items: center;
+  background: rgba(233, 243, 238, .78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: .8rem;
+}
+
+.printer-status strong {
+  color: var(--primary);
+}
+
+.settings-switch {
+  background: #fbfcf8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  padding: .85rem .85rem .85rem 3rem;
+}
+
+.settings-switch .form-check-input {
+  margin-top: .15rem;
+}
+
+.printer-note {
+  background: rgba(241, 197, 106, .18);
+  border: 1px solid rgba(214, 155, 45, .32);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  padding: .9rem;
+}
+
+.printer-note strong {
+  color: #6b4a0e;
+  display: block;
+  margin-bottom: .25rem;
+}
+
+.printer-note p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1rem;
+}
+
+.plan-grid {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.plan-grid > div {
+  background: #fbfcf8;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: .2rem;
+  padding: .9rem;
+}
+
+.plan-grid span,
+.api-key-box small {
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.plan-grid strong {
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+.api-key-box {
+  display: grid;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+
+.api-key-box code {
+  background: rgba(22, 63, 53, .94);
+  border-radius: var(--radius);
+  color: #fff;
+  display: block;
+  overflow-x: auto;
+  padding: .8rem;
+  white-space: nowrap;
+}
+
 .list-group-item {
   background: transparent;
 }
@@ -789,6 +912,7 @@ label {
   .landing-hero,
   .product-showcase,
   .order-layout,
+  .settings-grid,
   .auth-shell {
     grid-template-columns: 1fr;
   }
@@ -866,6 +990,14 @@ label {
 
   .category-tabs {
     justify-content: flex-start;
+  }
+
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-actions .btn {
+    width: 100%;
   }
 
   .card-actions .btn {

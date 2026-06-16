@@ -1,6 +1,7 @@
 # app.py - Versión SaaS con autenticación - OPTIMIZADA
 import os
 import logging
+import socket
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_login import LoginManager, login_required, current_user
 from datetime import datetime, timedelta
@@ -373,6 +374,71 @@ def imprimir_comanda(pedido):
         print(f"TOTAL: {pedido.restaurante.moneda}{pedido.total}")
         print(f"Método de pago: {pedido.metodo_pago}")
         print("===================")
+        return True
+    except Exception as e:
+        print("Error imprimiendo comanda:", e)
+        return False
+
+def formatear_comanda(pedido):
+    lineas = [
+        "=== COMANDA ===",
+        f"Restaurante: {pedido.restaurante.nombre}",
+    ]
+
+    if pedido.tipo_consumo == "Local":
+        lineas.append(f"Mesa: {pedido.mesa}")
+    else:
+        lineas.append(f"Para llevar: {pedido.nombre_cliente}")
+
+    lineas.extend([
+        f"Fecha: {pedido.fecha.strftime('%d/%m/%Y %H:%M:%S')}",
+        "-------------------",
+    ])
+
+    for item in pedido.items:
+        cantidad = f"{item.cantidad}x " if item.cantidad > 1 else ""
+        subtotal = item.producto.precio * item.cantidad
+        lineas.append(f"{cantidad}{item.producto.nombre} - {pedido.restaurante.moneda}{subtotal}")
+
+    lineas.extend([
+        "-------------------",
+        f"TOTAL: {pedido.restaurante.moneda}{pedido.total}",
+        f"Metodo de pago: {pedido.metodo_pago}",
+        "===================",
+        "",
+    ])
+    return "\n".join(lineas)
+
+def enviar_comanda_red(texto, ip, puerto):
+    if not ip:
+        raise ValueError("Falta la IP de la impresora de red")
+
+    with socket.create_connection((ip, int(puerto or 9100)), timeout=4) as printer:
+        printer.sendall(texto.encode("cp850", errors="replace"))
+        printer.sendall(b"\n\n\n\x1dV\x00")
+
+def imprimir_comanda(pedido):
+    """Imprime una comanda si hay impresora configurada."""
+    try:
+        config = pedido.restaurante.configuracion
+
+        if not config or not config.impresora_habilitada or config.impresora_tipo == "NONE":
+            print(f"Impresion deshabilitada para {pedido.restaurante.nombre}")
+            return False
+
+        texto = formatear_comanda(pedido)
+
+        if config.impresora_tipo == "NETWORK":
+            enviar_comanda_red(texto, config.impresora_ip, config.impresora_puerto)
+            print(f"Comanda enviada a impresora de red {config.impresora_ip}:{config.impresora_puerto or 9100}")
+            return True
+
+        if config.impresora_tipo == "USB":
+            print("Impresora USB configurada. La impresion USB requiere un cliente local conectado a la API publica.")
+            print(texto)
+            return False
+
+        print(texto)
         return True
     except Exception as e:
         print("Error imprimiendo comanda:", e)

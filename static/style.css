@@ -28,7 +28,7 @@ body {
   margin: 0;
   background:
     radial-gradient(circle at 8% 0%, rgba(216, 79, 50, .10), transparent 28rem),
-    linear-gradient(180deg, rgba(251, 252, 248, .91) 0%, rgba(247, 248, 244, .94) 42%, rgba(238, 244, 236, .94) 100%),
+    linear-gradient(180deg, rgba(251, 252, 248, .78) 0%, rgba(247, 248, 244, .84) 42%, rgba(238, 244, 236, .86) 100%),
     url("/static/hero-food-bg.png") center / cover fixed no-repeat;
   color: var(--ink);
   font-family: "Inter", Arial, sans-serif;
@@ -745,7 +745,7 @@ label {
 @media (max-width: 767px) {
   body {
     background:
-      linear-gradient(180deg, rgba(247, 248, 244, .96), rgba(238, 244, 236, .97)),
+      linear-gradient(180deg, rgba(247, 248, 244, .84), rgba(238, 244, 236, .88)),
       url("/static/hero-food-bg.png") center / cover fixed no-repeat;
   }
 

@@ -104,8 +104,6 @@
             </ul>
           </div>
         </li>
-        <li class="nav-item"><a href="{{ url_for('bases_condiciones') }}" class="nav-link">{{ _('Bases y condiciones') }}</a></li>
-        <li class="nav-item"><a href="{{ url_for('politicas_privacidad') }}" class="nav-link">{{ _('Privacidad') }}</a></li>
         <li class="nav-item"><a href="{{ url_for('auth.login') }}" class="btn btn-outline-light me-2">{{ _('Iniciar Sesión') }}</a></li>
         <li class="nav-item"><a href="{{ url_for('auth.registro') }}" class="btn btn-light">{{ _('Registrarse') }}</a></li>
       </ul>
@@ -116,6 +114,13 @@
 <main id="main-content" class="{% block main_class %}container my-4{% endblock %}">
   {% block content %}{% endblock %}
 </main>
+<footer class="site-footer">
+  <span>Resto App</span>
+  <nav>
+    <a href="{{ url_for('bases_condiciones') }}">{{ _('Bases y condiciones') }}</a>
+    <a href="{{ url_for('politicas_privacidad') }}">{{ _('Politicas de privacidad') }}</a>
+  </nav>
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // Notificaciones

@@ -39,8 +39,51 @@
     <h2>Un sistema para el ritmo real del servicio</h2>
     <p>Desde el primer pedido hasta el historial, todo queda organizado en vistas simples para mozos, cocina y administracion.</p>
   </div>
-  <div class="landing-preview" aria-label="Vista previa del panel Resto App">
-    <img src="{{ url_for('static', filename='landing-preview.png') }}" alt="Vista previa de Resto App">
+  <div class="landing-product-preview" aria-label="Vista previa fiel del panel Resto App">
+    <div class="preview-topbar">
+      <strong>Resto App</strong>
+      <span>Pedido</span>
+      <span>Cocina</span>
+      <span>Historial</span>
+      <span>Deudas</span>
+    </div>
+    <div class="preview-grid">
+      <section class="preview-panel preview-order">
+        <h3>Tomar pedido</h3>
+        <div class="preview-field">Mesa <strong>7</strong></div>
+        <div class="preview-field">Metodo de pago <strong>Transferencia</strong></div>
+        <div class="preview-field">Comprobante <strong>TR-1025</strong></div>
+        <div class="preview-products">
+          <span>Pizza Muzzarella <b>$2500</b></span>
+          <span>Hamburguesa Completa <b>$3200</b></span>
+          <span>Coca-Cola 500ml <b>$1200</b></span>
+        </div>
+        <button type="button">Agregar pedido</button>
+      </section>
+      <section class="preview-panel preview-active">
+        <h3>Pedidos activos</h3>
+        <div class="preview-ticket">
+          <strong>Mesa 7</strong>
+          <span>Transferencia</span>
+          <b>$6900</b>
+        </div>
+        <div class="preview-ticket">
+          <strong>Para llevar</strong>
+          <span>Efectivo</span>
+          <b>$4400</b>
+        </div>
+      </section>
+      <section class="preview-panel preview-debts">
+        <h3>Deudas</h3>
+        <div><span>Juan Perez</span><strong>$8200</strong></div>
+        <div><span>Maria Lopez</span><strong>$3500</strong></div>
+      </section>
+      <section class="preview-panel preview-products-table">
+        <h3>Productos</h3>
+        <div><span>Pizza Muzzarella</span><small>Comida</small><strong>$2500</strong></div>
+        <div><span>Coca-Cola 500ml</span><small>Bebidas</small><strong>$1200</strong></div>
+      </section>
+    </div>
   </div>
 </section>
 

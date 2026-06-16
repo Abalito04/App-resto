@@ -6,7 +6,7 @@ from flask_login import LoginManager, login_required, current_user
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from collections import Counter
 import pytz
 
@@ -139,6 +139,16 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante
 from auth import auth_bp, crear_slug
 
+PRODUCTO_CATEGORIAS = [
+    ("productos", "Productos"),
+    ("bebidas", "Bebidas"),
+    ("comida", "Comida"),
+    ("postre", "Postre"),
+    ("promociones", "Promociones"),
+]
+
+PRODUCTO_CATEGORIA_KEYS = {key for key, _ in PRODUCTO_CATEGORIAS}
+
 # Inicializar extensiones
 db.init_app(app)
 login_manager = LoginManager()
@@ -229,9 +239,22 @@ def init_db():
     try:
         with app.app_context():
             db.create_all()
+            ensure_producto_columns()
             print("Base de datos inicializada correctamente")
     except Exception as e:
         print(f"Error inicializando base de datos: {e}")
+
+def ensure_producto_columns():
+    inspector = inspect(db.engine)
+    if not inspector.has_table("producto"):
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("producto")}
+    if "categoria" not in columns:
+        db.session.execute(text(
+            "ALTER TABLE producto ADD COLUMN categoria VARCHAR(30) NOT NULL DEFAULT 'comida'"
+        ))
+        db.session.commit()
 
 # Llamar a init_db al importar
 init_db()
@@ -291,11 +314,17 @@ def index_logueado():
     """Dashboard principal - la función index original"""
     try:
         restaurante_id = get_user_restaurante()
-        productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
+        productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True)\
+                                  .order_by(Producto.categoria.asc(), Producto.nombre.asc()).all()
         pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
                              .filter(Pedido.estado != "Entregado")\
                              .order_by(Pedido.fecha.desc()).all()
-        return render_template("index.html", productos=productos, pedidos=pedidos)
+        return render_template(
+            "index.html",
+            productos=productos,
+            pedidos=pedidos,
+            categorias=PRODUCTO_CATEGORIAS
+        )
     except Exception as e:
         flash(f'Error cargando dashboard: {str(e)}', 'error')
         return redirect(url_for('setup_inicial'))
@@ -418,10 +447,10 @@ def setup_inicial():
             
             # Productos de ejemplo
             productos_ejemplo = [
-                Producto(nombre="Pizza Muzzarella", precio=2500, restaurante_id=restaurante.id),
-                Producto(nombre="Hamburguesa Completa", precio=3200, restaurante_id=restaurante.id),
-                Producto(nombre="Coca-Cola 500ml", precio=1200, restaurante_id=restaurante.id),
-                Producto(nombre="Empanada de Carne", precio=800, restaurante_id=restaurante.id),
+                Producto(nombre="Pizza Muzzarella", precio=2500, categoria="comida", restaurante_id=restaurante.id),
+                Producto(nombre="Hamburguesa Completa", precio=3200, categoria="comida", restaurante_id=restaurante.id),
+                Producto(nombre="Coca-Cola 500ml", precio=1200, categoria="bebidas", restaurante_id=restaurante.id),
+                Producto(nombre="Flan casero", precio=1500, categoria="postre", restaurante_id=restaurante.id),
             ]
             db.session.add_all(productos_ejemplo)
             
@@ -627,8 +656,9 @@ def historial():
 @login_required
 def productos():
     restaurante_id = get_user_restaurante()
-    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
-    return render_template("productos.html", productos=productos)
+    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True)\
+                              .order_by(Producto.categoria.asc(), Producto.nombre.asc()).all()
+    return render_template("productos.html", productos=productos, categorias=PRODUCTO_CATEGORIAS)
 
 @app.route("/agregar_producto_index", methods=["POST"])
 @login_required
@@ -644,7 +674,15 @@ def agregar_producto_index():
         
         nombre = request.form["nombre"]
         precio = float(request.form["precio"])
-        producto = Producto(nombre=nombre, precio=precio, restaurante_id=get_user_restaurante())
+        categoria = request.form.get("categoria", "comida")
+        if categoria not in PRODUCTO_CATEGORIA_KEYS:
+            categoria = "comida"
+        producto = Producto(
+            nombre=nombre,
+            precio=precio,
+            categoria=categoria,
+            restaurante_id=get_user_restaurante()
+        )
         db.session.add(producto)
         db.session.commit()
         
@@ -665,6 +703,8 @@ def editar_producto_index(producto_id):
     producto = Producto.query.filter_by(id=producto_id, restaurante_id=get_user_restaurante()).first_or_404()
     producto.nombre = request.form["nombre"]
     producto.precio = float(request.form["precio"])
+    categoria = request.form.get("categoria", "comida")
+    producto.categoria = categoria if categoria in PRODUCTO_CATEGORIA_KEYS else "comida"
     db.session.commit()
     return redirect(url_for("productos"))
 

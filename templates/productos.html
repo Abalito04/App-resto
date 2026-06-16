@@ -22,6 +22,11 @@
     <form method="POST" action="{{ url_for('agregar_producto_index') }}" class="quick-add product-page-add">
       <input type="text" name="nombre" class="form-control" placeholder="{{ _('Nombre del producto') }}" required>
       <input type="number" step="0.01" name="precio" class="form-control" placeholder="{{ _('Precio') }}" required>
+      <select name="categoria" class="form-select" required>
+        {% for key, label in categorias %}
+        <option value="{{ key }}" {% if key == 'comida' %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
       <button type="submit" class="btn btn-success">
         <i class="fas fa-plus"></i> {{ _('Agregar') }}
       </button>
@@ -34,24 +39,45 @@
       <p>Edita nombre o precio y guarda cada fila por separado.</p>
     </div>
 
+    <div class="product-tools">
+      <label class="search-field" for="product-search">
+        <i class="fas fa-search"></i>
+        <input type="search" id="product-search" class="form-control" placeholder="{{ _('Buscar producto') }}">
+      </label>
+      <div class="category-tabs" role="group" aria-label="{{ _('Filtrar por categoria') }}">
+        <button type="button" class="category-tab active" data-category="todos">{{ _('Todos') }}</button>
+        {% for key, label in categorias %}
+        <button type="button" class="category-tab" data-category="{{ key }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
     <div class="table-responsive">
       <table class="table table-sm align-middle product-table">
         <thead>
           <tr>
             <th>{{ _('Nombre') }}</th>
             <th>{{ _('Precio') }}</th>
+            <th>{{ _('Categoria') }}</th>
             <th>{{ _('Acciones') }}</th>
           </tr>
         </thead>
         <tbody>
           {% for producto in productos %}
-          <tr>
+          <tr class="product-row" data-name="{{ producto.nombre|lower }}" data-category="{{ producto.categoria }}">
             <td>
               <form id="edit-product-{{ producto.id }}" method="POST" action="{{ url_for('editar_producto_index', producto_id=producto.id) }}"></form>
               <input form="edit-product-{{ producto.id }}" type="text" name="nombre" value="{{ producto.nombre }}" class="form-control form-control-sm">
             </td>
             <td>
               <input form="edit-product-{{ producto.id }}" type="number" step="0.01" name="precio" value="{{ producto.precio }}" class="form-control form-control-sm">
+            </td>
+            <td>
+              <select form="edit-product-{{ producto.id }}" name="categoria" class="form-select form-select-sm">
+                {% for key, label in categorias %}
+                <option value="{{ key }}" {% if producto.categoria == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
             </td>
             <td class="product-actions">
               <div>
@@ -67,15 +93,53 @@
             </td>
           </tr>
           {% else %}
-          <tr>
-            <td colspan="3">
+          <tr class="product-empty-row">
+            <td colspan="4">
               <p class="empty-state">{{ _('Aun no hay productos cargados.') }}</p>
             </td>
           </tr>
           {% endfor %}
+          <tr id="product-no-results" class="d-none">
+            <td colspan="4">
+              <p class="empty-state">{{ _('No hay productos que coincidan con el filtro.') }}</p>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   </section>
 </div>
+
+<script>
+  const searchInput = document.getElementById('product-search');
+  const categoryTabs = document.querySelectorAll('.category-tab');
+  const productRows = document.querySelectorAll('.product-row');
+  const noResultsRow = document.getElementById('product-no-results');
+  let activeCategory = 'todos';
+
+  function applyProductFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    productRows.forEach(row => {
+      const matchesText = row.dataset.name.includes(query);
+      const matchesCategory = activeCategory === 'todos' || row.dataset.category === activeCategory;
+      const shouldShow = matchesText && matchesCategory;
+      row.classList.toggle('d-none', !shouldShow);
+      if (shouldShow) visibleCount += 1;
+    });
+
+    noResultsRow.classList.toggle('d-none', visibleCount !== 0 || productRows.length === 0);
+  }
+
+  searchInput.addEventListener('input', applyProductFilters);
+  categoryTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      categoryTabs.forEach(item => item.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.category;
+      applyProductFilters();
+    });
+  });
+</script>
 {% endblock %}

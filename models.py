@@ -124,6 +124,7 @@ class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
+    categoria = db.Column(db.String(30), nullable=False, default="comida")
     activo = db.Column(db.Boolean, default=True)
     
     # Multitenancy: cada producto pertenece a un restaurante

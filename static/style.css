@@ -551,6 +551,25 @@ label {
   grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
 }
 
+.product-category-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.product-category-group {
+  display: grid;
+  gap: .65rem;
+}
+
+.product-category-group h3 {
+  color: var(--primary);
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
 .product-tile {
   align-items: center;
   background: #fbfcf8;
@@ -675,8 +694,59 @@ label {
 .quick-add {
   display: grid;
   gap: .75rem;
-  grid-template-columns: minmax(160px, 1fr) minmax(120px, 180px) auto;
+  grid-template-columns: minmax(160px, 1fr) minmax(120px, 180px) minmax(140px, 180px) auto;
   margin-bottom: 1rem;
+}
+
+.product-tools {
+  align-items: center;
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  margin-bottom: 1rem;
+}
+
+.search-field {
+  align-items: center;
+  display: flex;
+  margin: 0;
+  position: relative;
+}
+
+.search-field i {
+  color: var(--muted);
+  left: .85rem;
+  pointer-events: none;
+  position: absolute;
+}
+
+.search-field .form-control {
+  padding-left: 2.45rem;
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  justify-content: flex-end;
+}
+
+.category-tab {
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 800;
+  min-height: 36px;
+  padding: .4rem .8rem;
+}
+
+.category-tab:hover,
+.category-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 .product-table {
@@ -788,6 +858,14 @@ label {
 
   .quick-add {
     grid-template-columns: 1fr;
+  }
+
+  .product-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .category-tabs {
+    justify-content: flex-start;
   }
 
   .card-actions .btn {

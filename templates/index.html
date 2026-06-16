@@ -65,18 +65,29 @@
         <h2>{{ _('Productos:') }}</h2>
         <p>Selecciona los items para cargar el pedido.</p>
       </div>
-      <div class="product-grid">
-        {% for producto in productos %}
-        <label class="product-tile" for="prod{{ producto.id }}">
-          <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}" id="prod{{ producto.id }}">
-          <span>
-            <strong>{{ producto.nombre }}</strong>
-            <small>$ {{ producto.precio }}</small>
-          </span>
-        </label>
-        {% else %}
-        <p class="empty-state">Aun no hay productos cargados.</p>
+      <div class="product-category-list">
+        {% for key, label in categorias %}
+          {% set productos_categoria = productos|selectattr('categoria', 'equalto', key)|list %}
+          {% if productos_categoria %}
+          <div class="product-category-group">
+            <h3>{{ label }}</h3>
+            <div class="product-grid">
+              {% for producto in productos_categoria %}
+              <label class="product-tile" for="prod{{ producto.id }}">
+                <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}" id="prod{{ producto.id }}">
+                <span>
+                  <strong>{{ producto.nombre }}</strong>
+                  <small>$ {{ producto.precio }}</small>
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
         {% endfor %}
+        {% if not productos %}
+        <p class="empty-state">Aun no hay productos cargados.</p>
+        {% endif %}
       </div>
       <button type="submit" class="btn btn-primary btn-lg order-submit">
         <i class="fas fa-plus"></i> {{ _('Agregar pedido') }}

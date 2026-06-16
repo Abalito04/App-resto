@@ -7,6 +7,9 @@
       <h1>{{ _('Ingresar') }}</h1>
       <p>Accede al panel de pedidos de tu restaurante.</p>
     </div>
+    <a href="{{ url_for('index_redirect') }}" class="btn btn-outline-dark btn-sm mb-3">
+      <i class="fas fa-arrow-left"></i> {{ _('Volver a inicio') }}
+    </a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for c,m in messages %}
@@ -28,6 +31,10 @@
 
     <div class="text-center mt-3">
       <a href="{{ url_for('auth.resend_confirm') }}">{{ _('No recibiste el email de confirmacion?') }}</a>
+    </div>
+    <div class="legal-links">
+      <a href="{{ url_for('bases_condiciones') }}">{{ _('Bases y condiciones') }}</a>
+      <a href="{{ url_for('politicas_privacidad') }}">{{ _('Politicas de privacidad') }}</a>
     </div>
   </section>
 

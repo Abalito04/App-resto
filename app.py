@@ -385,6 +385,14 @@ def clear_session():
     flash('Sesión limpiada', 'info')
     return redirect(url_for('setup_inicial'))
 
+@app.route("/bases-condiciones")
+def bases_condiciones():
+    return render_template("legal/bases_condiciones.html")
+
+@app.route("/politicas-privacidad")
+def politicas_privacidad():
+    return render_template("legal/politicas_privacidad.html")
+
 @app.route("/dashboard")
 @login_required
 def index_logueado():

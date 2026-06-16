@@ -526,6 +526,45 @@ label {
   color: #f1c56a;
 }
 
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.legal-links a {
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+.legal-page {
+  margin: 2rem auto;
+  max-width: 880px;
+  padding: clamp(1.2rem, 3vw, 2rem);
+}
+
+.legal-content {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.legal-content h2 {
+  color: var(--primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.legal-content p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
 /* Dashboard */
 .app-dashboard {
   display: grid;

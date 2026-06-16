@@ -675,7 +675,7 @@ def superadmin_resetpass(user_id):
 def logout():
     logout_user()
     session.clear()
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('index_redirect'))
 
 
 @auth_bp.route('/perfil')

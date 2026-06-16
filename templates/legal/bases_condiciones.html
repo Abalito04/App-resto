@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="surface legal-page">
+  <div class="section-heading">
+    <span class="section-label">Legal</span>
+    <h1>Bases y condiciones</h1>
+    <p>Ultima actualizacion: 16/06/2026</p>
+  </div>
+
+  <div class="legal-content">
+    <h2>Uso del servicio</h2>
+    <p>Resto App es una herramienta de gestion para restaurantes que permite administrar pedidos, productos, historial, deudas e informacion operativa del local.</p>
+
+    <h2>Cuenta y acceso</h2>
+    <p>El usuario es responsable de mantener la confidencialidad de sus credenciales y de la informacion cargada en su restaurante.</p>
+
+    <h2>Informacion cargada</h2>
+    <p>Los datos de pedidos, clientes, productos y deudas son ingresados por cada restaurante. El sistema los utiliza para prestar las funcionalidades solicitadas.</p>
+
+    <h2>Disponibilidad</h2>
+    <p>Se busca mantener el servicio disponible, aunque pueden existir interrupciones por mantenimiento, actualizaciones, errores tecnicos o servicios externos.</p>
+
+    <h2>Responsabilidad</h2>
+    <p>El restaurante es responsable por el uso comercial, administrativo y contable de la informacion exportada o generada desde la aplicacion.</p>
+
+    <h2>Cambios</h2>
+    <p>Estas bases pueden actualizarse para reflejar mejoras del producto, cambios operativos o requisitos legales.</p>
+  </div>
+
+  <a href="{{ url_for('index_redirect') }}" class="btn btn-primary">
+    <i class="fas fa-arrow-left"></i> Volver a inicio
+  </a>
+</section>
+{% endblock %}

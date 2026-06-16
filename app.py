@@ -623,6 +623,13 @@ def historial():
     )
 
 # =================== PRODUCTOS ===================
+@app.route("/productos")
+@login_required
+def productos():
+    restaurante_id = get_user_restaurante()
+    productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
+    return render_template("productos.html", productos=productos)
+
 @app.route("/agregar_producto_index", methods=["POST"])
 @login_required
 def agregar_producto_index():
@@ -633,7 +640,7 @@ def agregar_producto_index():
         
         if not can_add:
             flash(f'No puedes agregar más productos. Límite del plan alcanzado. Contacta al administrador para cambiar de plan.', 'error')
-            return redirect(url_for("index_redirect"))
+            return redirect(url_for("productos"))
         
         nombre = request.form["nombre"]
         precio = float(request.form["precio"])
@@ -650,7 +657,7 @@ def agregar_producto_index():
         db.session.rollback()
         flash(f'Error agregando producto: {str(e)}', 'error')
     
-    return redirect(url_for("index_redirect"))
+    return redirect(url_for("productos"))
 
 @app.route("/editar_producto_index/<int:producto_id>", methods=["POST"])
 @login_required
@@ -659,7 +666,7 @@ def editar_producto_index(producto_id):
     producto.nombre = request.form["nombre"]
     producto.precio = float(request.form["precio"])
     db.session.commit()
-    return redirect(url_for("index_redirect"))
+    return redirect(url_for("productos"))
 
 @app.route("/borrar_producto_index/<int:producto_id>", methods=["POST"])
 @login_required
@@ -668,7 +675,7 @@ def borrar_producto_index(producto_id):
     Item.query.filter_by(producto_id=producto.id).delete()
     db.session.delete(producto)
     db.session.commit()
-    return redirect(url_for("index_redirect"))
+    return redirect(url_for("productos"))
 
 # =================== COCINA ===================
 @app.route("/cocina")

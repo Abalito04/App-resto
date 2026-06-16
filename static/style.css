@@ -28,7 +28,8 @@ body {
   margin: 0;
   background:
     radial-gradient(circle at 8% 0%, rgba(216, 79, 50, .10), transparent 28rem),
-    linear-gradient(180deg, #fbfcf8 0%, var(--bg) 42%, #eef4ec 100%);
+    linear-gradient(180deg, rgba(251, 252, 248, .91) 0%, rgba(247, 248, 244, .94) 42%, rgba(238, 244, 236, .94) 100%),
+    url("/static/hero-food-bg.png") center / cover fixed no-repeat;
   color: var(--ink);
   font-family: "Inter", Arial, sans-serif;
   letter-spacing: 0;
@@ -181,10 +182,11 @@ label {
 .surface,
 .card,
 .modal-content {
-  background: var(--surface);
+  background: rgba(255, 255, 255, .94);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
 .card {
@@ -238,7 +240,7 @@ label {
 
 .page-stats {
   align-items: center;
-  background: #fff;
+  background: rgba(255, 255, 255, .92);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   display: flex;
@@ -478,7 +480,7 @@ label {
 }
 
 .auth-card {
-  background: #fff;
+  background: rgba(255, 255, 255, .95);
 }
 
 .auth-card h1 {
@@ -594,7 +596,7 @@ label {
 }
 
 .order-card {
-  background: #fff;
+  background: rgba(255, 255, 255, .94);
   border: 1px solid var(--line);
   border-left: 4px solid var(--accent);
   border-radius: var(--radius);
@@ -742,7 +744,9 @@ label {
 
 @media (max-width: 767px) {
   body {
-    background: var(--bg);
+    background:
+      linear-gradient(180deg, rgba(247, 248, 244, .96), rgba(238, 244, 236, .97)),
+      url("/static/hero-food-bg.png") center / cover fixed no-repeat;
   }
 
   #main-content.container {

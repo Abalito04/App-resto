@@ -1,85 +1,134 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h2>✏ Editar Pedido</h2>
+<div class="app-dashboard">
+  <header class="page-heading">
+    <div>
+      <span class="section-label">Pedido</span>
+      <h1>{{ _('Editar pedido') }}</h1>
+    </div>
+    <div class="page-stats">
+      <span>{{ _('Total actual') }}</span>
+      <strong>$ {{ pedido.total }}</strong>
+    </div>
+  </header>
 
-    <form method="POST" action="{{ url_for('editar_pedido', pedido_id=pedido.id) }}">
-        <!-- Tipo de consumo -->
-        <div class="mb-2">
-            <label>Tipo de consumo:</label>
-            <select name="tipo_consumo" class="form-select" required id="tipo_consumo">
-                <option value="Local" {% if pedido.tipo_consumo == "Local" %}selected{% endif %}>🍽️ En el local</option>
-                <option value="Llevar" {% if pedido.tipo_consumo == "Llevar" %}selected{% endif %}>🥡 Para llevar</option>
-            </select>
-        </div>
+  <form method="POST" action="{{ url_for('editar_pedido', pedido_id=pedido.id) }}" class="surface settings-card">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">{{ _('Tipo de consumo') }}</label>
+        <select name="tipo_consumo" class="form-select" required id="tipo_consumo">
+          <option value="Local" {% if pedido.tipo_consumo == "Local" %}selected{% endif %}>{{ _('En el local') }}</option>
+          <option value="Llevar" {% if pedido.tipo_consumo == "Llevar" %}selected{% endif %}>{{ _('Para llevar') }}</option>
+        </select>
+      </div>
+      <div class="col-md-4" id="mesa_div">
+        <label class="form-label">{{ _('Mesa') }}</label>
+        <input type="text" name="mesa" class="form-control" value="{{ pedido.mesa or '' }}">
+      </div>
+      <div class="col-md-4" id="cliente_div" style="display:none;">
+        <label class="form-label">{{ _('Nombre del cliente') }}</label>
+        <input type="text" name="nombre_cliente" class="form-control" value="{{ pedido.nombre_cliente or '' }}">
+      </div>
+      <div class="col-md-4" id="direccion_div" style="display:none;">
+        <label class="form-label">{{ _('Direccion') }}</label>
+        <input type="text" name="direccion_cliente" class="form-control" value="{{ pedido.direccion_cliente or '' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">{{ _('Metodo de pago') }}</label>
+        <select class="form-select" name="metodo_pago" id="metodo_pago" required>
+          <option value="Efectivo" {% if pedido.metodo_pago == "Efectivo" %}selected{% endif %}>{{ _('Efectivo') }}</option>
+          <option value="Transferencia" {% if pedido.metodo_pago == "Transferencia" %}selected{% endif %}>{{ _('Transferencia') }}</option>
+          <option value="Deuda" {% if pedido.metodo_pago == "Deuda" %}selected{% endif %}>{{ _('Deuda') }}</option>
+          <option value="Tarjeta" {% if pedido.metodo_pago == "Tarjeta" %}selected{% endif %}>{{ _('Tarjeta') }}</option>
+        </select>
+      </div>
+      <div class="col-md-4 payment-extra" id="div_tarjeta" style="display:none;">
+        <label class="form-label">{{ _('N de Ticket') }}</label>
+        <input type="text" name="ticket_numero" class="form-control" value="{{ pedido.ticket_numero or '' }}">
+      </div>
+      <div class="col-md-4 payment-extra" id="div_titular" style="display:none;">
+        <label class="form-label">{{ _('Titular') }}</label>
+        <input type="text" name="titular" class="form-control" value="{{ pedido.titular or '' }}">
+      </div>
+      <div class="col-md-4 payment-extra" id="div_transferencia_nombre" style="display:none;">
+        <label class="form-label">{{ _('Nombre y apellido') }}</label>
+        <input type="text" name="transferencia_nombre" id="transferencia_nombre" class="form-control" value="{{ pedido.transferencia_nombre or '' }}">
+      </div>
+      <div class="col-md-4 payment-extra" id="div_transferencia_info" style="display:none;">
+        <label class="form-label">{{ _('Nro de comprobante') }}</label>
+        <input type="text" name="transferencia_info" id="transferencia_info" class="form-control" value="{{ pedido.transferencia_info or '' }}">
+      </div>
+      <div class="col-md-4 payment-extra" id="div_deuda_nombre" style="display:none;">
+        <label class="form-label">{{ _('Nombre y apellido') }}</label>
+        <input type="text" name="deuda_nombre" id="deuda_nombre" class="form-control" value="{{ pedido.deuda_nombre or '' }}" list="deudores-list">
+        <datalist id="deudores-list">
+          {% for deuda in deudas_activas %}
+          <option value="{{ deuda.nombre }}">Saldo: $ {{ "%.2f"|format(deuda.saldo) }}</option>
+          {% endfor %}
+        </datalist>
+      </div>
+    </div>
 
-        <!-- Mesa -->
-        <div class="mb-2" id="mesa_div">
-            <label>Mesa:</label>
-            <input type="text" name="mesa" class="form-control" value="{{ pedido.mesa }}">
-        </div>
+    <div class="section-heading mt-4">
+      <h2>{{ _('Productos') }}</h2>
+      <p>Actualiza los productos incluidos en el pedido.</p>
+    </div>
 
-        <!-- Cliente para llevar -->
-        <div class="mb-2" id="cliente_div" style="display:none;">
-            <label>Nombre del cliente:</label>
-            <input type="text" name="nombre_cliente" class="form-control" value="{{ pedido.nombre_cliente }}">
-            <label>Dirección:</label>
-            <input type="text" name="direccion_cliente" class="form-control" value="{{ pedido.direccion_cliente }}">
-        </div>
+    <div class="product-grid">
+      {% for producto in productos %}
+      <label class="product-tile" for="prod{{ producto.id }}">
+        <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}" id="prod{{ producto.id }}"
+          {% for item in pedido.items %}
+            {% if item.producto.id == producto.id %}checked{% endif %}
+          {% endfor %}>
+        <span>
+          <strong>{{ producto.nombre }}</strong>
+          <small>$ {{ producto.precio }}</small>
+        </span>
+      </label>
+      {% endfor %}
+    </div>
 
-        <!-- Productos -->
-        <h4>Productos:</h4>
-        <div class="row">
-        {% for producto in productos %}
-            <div class="col-6 col-md-4 col-lg-3 mb-2">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body p-2">
-                        <h6>{{ producto.nombre }}</h6>
-                        <p>$ {{ producto.precio }}</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="producto" value="{{ producto.id }}"
-                            {% for item in pedido.items %}
-                                {% if item.producto.id == producto.id %}checked{% endif %}
-                            {% endfor %}>
-                            <label class="form-check-label">Seleccionar</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-
-        <!-- Método de pago -->
-        <div class="mb-2">
-            <label>Método de pago:</label>
-            <select class="form-select" name="metodo_pago" required>
-                <option value="Efectivo" {% if pedido.metodo_pago == "Efectivo" %}selected{% endif %}>Efectivo</option>
-                <option value="Tarjeta" {% if pedido.metodo_pago == "Tarjeta" %}selected{% endif %}>Tarjeta</option>
-                <option value="QR" {% if pedido.metodo_pago == "QR" %}selected{% endif %}>QR</option>
-            </select>
-        </div>
-
-        <strong>Total actual: ${{ pedido.total }}</strong>
-
-        <br><br>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
+    <div class="settings-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ _('Guardar cambios') }}
+      </button>
+      <a href="{{ url_for('index_redirect') }}" class="btn btn-outline-dark">{{ _('Cancelar') }}</a>
+    </div>
+  </form>
 </div>
 
 <script>
 function toggleTipoConsumo() {
-    const tipo = document.getElementById('tipo_consumo').value;
-    if(tipo === "Llevar"){
-        document.getElementById('mesa_div').style.display = 'none';
-        document.getElementById('cliente_div').style.display = 'block';
-    } else {
-        document.getElementById('mesa_div').style.display = 'block';
-        document.getElementById('cliente_div').style.display = 'none';
-    }
+  const tipo = document.getElementById('tipo_consumo').value;
+  const isLlevar = tipo === 'Llevar';
+  document.getElementById('mesa_div').style.display = isLlevar ? 'none' : 'block';
+  document.getElementById('cliente_div').style.display = isLlevar ? 'block' : 'none';
+  document.getElementById('direccion_div').style.display = isLlevar ? 'block' : 'none';
+}
+
+const metodoPago = document.getElementById('metodo_pago');
+const transferenciaNombreInput = document.getElementById('transferencia_nombre');
+const transferenciaInfoInput = document.getElementById('transferencia_info');
+const deudaNombreInput = document.getElementById('deuda_nombre');
+
+function togglePagoFields() {
+  const isTarjeta = metodoPago.value === 'Tarjeta';
+  const isTransferencia = metodoPago.value === 'Transferencia';
+  const isDeuda = metodoPago.value === 'Deuda';
+  document.getElementById('div_tarjeta').style.display = isTarjeta ? 'block' : 'none';
+  document.getElementById('div_titular').style.display = isTarjeta ? 'block' : 'none';
+  document.getElementById('div_transferencia_nombre').style.display = isTransferencia ? 'block' : 'none';
+  document.getElementById('div_transferencia_info').style.display = isTransferencia ? 'block' : 'none';
+  document.getElementById('div_deuda_nombre').style.display = isDeuda ? 'block' : 'none';
+  transferenciaNombreInput.required = isTransferencia;
+  transferenciaInfoInput.required = isTransferencia;
+  deudaNombreInput.required = isDeuda;
 }
 
 document.getElementById('tipo_consumo').addEventListener('change', toggleTipoConsumo);
-window.onload = toggleTipoConsumo;
+metodoPago.addEventListener('change', togglePagoFields);
+toggleTipoConsumo();
+togglePagoFields();
 </script>
 {% endblock %}

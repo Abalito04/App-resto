@@ -1,56 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <h2>📜 {{ _('Historial de pedidos') }}</h2>
-
-    <!-- 🔘 Botones de filtro -->
-    <div class="mb-3">
-        <a href="{{ url_for('historial', filtro='semana') }}" class="btn btn-primary {% if filtro == 'semana' %}active{% endif %}">{{ _('Última semana') }}</a>
-        <a href="{{ url_for('historial', filtro='mes') }}" class="btn btn-primary {% if filtro == 'mes' %}active{% endif %}">{{ _('Último mes') }}</a>
-        <a href="{{ url_for('historial', filtro='todos') }}" class="btn btn-secondary {% if filtro == 'todos' %}active{% endif %}">{{ _('Todos') }}</a>
+<div class="app-dashboard history-page">
+  <header class="page-heading">
+    <div>
+      <span class="section-label">Historial</span>
+      <h1>{{ _('Historial de pedidos') }}</h1>
+      <p>Consulta pedidos entregados y exporta la informacion para planillas.</p>
     </div>
+    <div class="page-stats">
+      <span>{{ _('Pedidos') }}</span>
+      <strong>{{ pedidos|length }}</strong>
+    </div>
+  </header>
 
-    <div class="row">
+  <section class="surface history-toolbar">
+    <div class="history-actions">
+      <a href="{{ url_for('historial', filtro='semana') }}" class="btn btn-primary {% if filtro == 'semana' %}active{% endif %}">{{ _('Ultima semana') }}</a>
+      <a href="{{ url_for('historial', filtro='mes') }}" class="btn btn-primary {% if filtro == 'mes' %}active{% endif %}">{{ _('Ultimo mes') }}</a>
+      <a href="{{ url_for('historial', filtro='todos') }}" class="btn btn-secondary {% if filtro == 'todos' %}active{% endif %}">{{ _('Todos') }}</a>
+      <a href="{{ url_for('exportar_historial_csv', filtro=filtro) }}" class="btn btn-outline-dark">
+        <i class="fas fa-file-csv"></i> CSV
+      </a>
+      <a href="{{ url_for('exportar_historial_excel', filtro=filtro) }}" class="btn btn-outline-dark">
+        <i class="fas fa-file-excel"></i> Excel
+      </a>
+    </div>
+  </section>
+
+  <section class="surface active-orders">
+    <div class="row g-3">
     {% for pedido in pedidos %}
-        <div class="col-12 col-md-6 col-lg-4 mb-3">
-            <div class="card shadow-sm p-2 h-100 historial-card"
-                 data-mesa="{{ pedido.mesa or '' }}"
-                 data-nombre="{{ pedido.nombre_cliente or '' }}"
-                 data-direccion="{{ pedido.direccion_cliente or '' }}"
-                 data-metodo_pago="{{ pedido.metodo_pago }}"
-                 data-fecha="{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}"
-                 data-ticket="{{ pedido.ticket_numero or '' }}"
-                 data-titular="{{ pedido.titular or '' }}"
-                 data-transferencia="{{ pedido.transferencia_info or '' }}"
-                 data-deuda="{{ pedido.deuda_nombre or '' }}"
-            >
-                <strong>
-                    {% if pedido.tipo_consumo == 'Local' %}
-                        {{ _('Mesa') }} {{ pedido.mesa }}
-                    {% else %}
-                        {{ pedido.nombre_cliente }}
-                    {% endif %}
-                </strong> - {{ pedido.metodo_pago }}
-                <small class="d-block">{{ _('Fecha:') }} {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
-                <p class="mt-1 mb-1"><strong>{{ _('Consumo:') }}</strong> {{ pedido.tipo_consumo }}</p>
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="order-card historial-card"
+             data-mesa="{{ pedido.mesa or '' }}"
+             data-nombre="{{ pedido.nombre_cliente or '' }}"
+             data-direccion="{{ pedido.direccion_cliente or '' }}"
+             data-metodo_pago="{{ pedido.metodo_pago }}"
+             data-fecha="{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}"
+             data-ticket="{{ pedido.ticket_numero or '' }}"
+             data-titular="{{ pedido.titular or '' }}"
+             data-transferencia_nombre="{{ pedido.transferencia_nombre or '' }}"
+             data-transferencia="{{ pedido.transferencia_info or '' }}"
+             data-deuda="{{ pedido.deuda_nombre or '' }}">
+          <div class="order-card-head">
+            <strong>
+              {% if pedido.tipo_consumo == 'Local' %}
+                {{ _('Mesa') }} {{ pedido.mesa }}
+              {% else %}
+                {{ pedido.nombre_cliente or pedido.deuda_nombre or pedido.transferencia_nombre }}
+              {% endif %}
+            </strong>
+            <span class="status-chip">{{ pedido.metodo_pago }}</span>
+          </div>
+          <small class="history-date">{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
 
-                <ul class="list-group list-group-flush mt-2 mb-2">
-                    {% for item in pedido.items %}
-                        <li class="list-group-item p-1">
-                            {{ item.producto.nombre }} - ${{ item.producto.precio }}
-                        </li>
-                    {% endfor %}
-                </ul>
-                <strong>Total: ${{ pedido.total }}</strong>
-            </div>
+          <ul class="list-group list-group-flush order-items">
+            {% for item in pedido.items %}
+              <li class="list-group-item">
+                <span>{% if item.cantidad > 1 %}{{ item.cantidad }}x {% endif %}{{ item.producto.nombre }}</span>
+                <strong>${{ item.producto.precio * item.cantidad }}</strong>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <div class="order-total">
+            <span>Total</span>
+            <strong>${{ pedido.total }}</strong>
+          </div>
         </div>
+      </div>
     {% else %}
-        <p>{{ _('No hay pedidos para este filtro.') }}</p>
+      <p class="empty-state">{{ _('No hay pedidos para este filtro.') }}</p>
     {% endfor %}
     </div>
+  </section>
 </div>
 
-<!-- Modal -->
 <div class="modal fade" id="pedidoModal" tabindex="-1" aria-labelledby="pedidoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -66,6 +91,7 @@
         <ul id="modal-productos" class="list-group mb-2"></ul>
         <p id="modal-ticket"></p>
         <p id="modal-titular"></p>
+        <p id="modal-transferencia-nombre"></p>
         <p id="modal-transferencia"></p>
         <p id="modal-deuda"></p>
       </div>
@@ -78,36 +104,36 @@
 
 <script>
 document.querySelectorAll('.historial-card').forEach(card => {
-    card.addEventListener('click', function() {
-        const mesa = card.getAttribute('data-mesa');
-        const nombre = card.getAttribute('data-nombre');
-        const direccion = card.getAttribute('data-direccion');
-        const metodo_pago = card.getAttribute('data-metodo_pago');
-        const ticket = card.getAttribute('data-ticket');
-        const titular = card.getAttribute('data-titular');
-        const transferencia = card.getAttribute('data-transferencia');
-        const deuda = card.getAttribute('data-deuda');
+  card.addEventListener('click', function() {
+    const mesa = card.getAttribute('data-mesa');
+    const nombre = card.getAttribute('data-nombre');
+    const direccion = card.getAttribute('data-direccion');
+    const metodoPago = card.getAttribute('data-metodo_pago');
+    const ticket = card.getAttribute('data-ticket');
+    const titular = card.getAttribute('data-titular');
+    const transferenciaNombre = card.getAttribute('data-transferencia_nombre');
+    const transferencia = card.getAttribute('data-transferencia');
+    const deuda = card.getAttribute('data-deuda');
 
-        // Productos
-        const productosList = document.getElementById('modal-productos');
-        productosList.innerHTML = '';
-        card.querySelectorAll('.list-group-item').forEach(li => {
-            productosList.innerHTML += `<li class="list-group-item">${li.textContent}</li>`;
-        });
-
-        // Mostrar solo si hay datos
-        document.getElementById('modal-mesa').textContent = mesa ? `{{ _('Mesa:') }} ${mesa}` : '';
-        document.getElementById('modal-nombre').textContent = nombre ? `{{ _('Cliente:') }} ${nombre}` : '';
-        document.getElementById('modal-direccion').textContent = direccion ? `{{ _('Dirección:') }} ${direccion}` : '';
-        document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `{{ _('Método de pago:') }} ${metodo_pago}` : '';
-        document.getElementById('modal-ticket').textContent = ticket ? `{{ _('Ticket:') }} ${ticket}` : '';
-        document.getElementById('modal-titular').textContent = titular ? `{{ _('Titular:') }} ${titular}` : '';
-        document.getElementById('modal-transferencia').textContent = transferencia ? `{{ _('Comprobante:') }} ${transferencia}` : '';
-        document.getElementById('modal-deuda').textContent = deuda ? `{{ _('Deudor:') }} ${deuda}` : '';
-
-        const modal = new bootstrap.Modal(document.getElementById('pedidoModal'));
-        modal.show();
+    const productosList = document.getElementById('modal-productos');
+    productosList.innerHTML = '';
+    card.querySelectorAll('.list-group-item').forEach(li => {
+      productosList.innerHTML += `<li class="list-group-item">${li.textContent}</li>`;
     });
+
+    document.getElementById('modal-mesa').textContent = mesa ? `{{ _('Mesa:') }} ${mesa}` : '';
+    document.getElementById('modal-nombre').textContent = nombre ? `{{ _('Cliente:') }} ${nombre}` : '';
+    document.getElementById('modal-direccion').textContent = direccion ? `{{ _('Direccion:') }} ${direccion}` : '';
+    document.getElementById('modal-metodo_pago').textContent = metodoPago ? `{{ _('Metodo de pago:') }} ${metodoPago}` : '';
+    document.getElementById('modal-ticket').textContent = ticket ? `{{ _('Ticket:') }} ${ticket}` : '';
+    document.getElementById('modal-titular').textContent = titular ? `{{ _('Titular:') }} ${titular}` : '';
+    document.getElementById('modal-transferencia-nombre').textContent = transferenciaNombre ? `{{ _('Transferencia de:') }} ${transferenciaNombre}` : '';
+    document.getElementById('modal-transferencia').textContent = transferencia ? `{{ _('Comprobante:') }} ${transferencia}` : '';
+    document.getElementById('modal-deuda').textContent = deuda ? `{{ _('Deudor:') }} ${deuda}` : '';
+
+    const modal = new bootstrap.Modal(document.getElementById('pedidoModal'));
+    modal.show();
+  });
 });
 </script>
 {% endblock %}

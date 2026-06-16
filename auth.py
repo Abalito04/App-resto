@@ -1,7 +1,7 @@
 # auth.py - Sistema de autenticación
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto
+from models import db, Usuario, Restaurante, ConfiguracionRestaurante, Producto, DeudaCliente
 from werkzeug.security import generate_password_hash
 import re
 import traceback
@@ -880,6 +880,7 @@ def admin_eliminar_restaurante():
         
         # Eliminar la configuración del restaurante
         ConfiguracionRestaurante.query.filter_by(restaurante_id=restaurante_id).delete()
+        DeudaCliente.query.filter_by(restaurante_id=restaurante_id).delete()
         
         # Finalmente eliminar el restaurante
         db.session.delete(restaurante)

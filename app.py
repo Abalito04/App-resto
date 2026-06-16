@@ -2,7 +2,9 @@
 import os
 import logging
 import socket
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+import csv
+from io import StringIO
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, Response
 from flask_login import LoginManager, login_required, current_user
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -137,7 +139,7 @@ else:
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Importar modelos DESPUÉS de configurar la app
-from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante
+from models import db, Usuario, Restaurante, Pedido, Item, Producto, ConfiguracionRestaurante, DeudaCliente
 from auth import auth_bp, crear_slug
 
 PRODUCTO_CATEGORIAS = [
@@ -234,6 +236,37 @@ def get_local_time(restaurante_id=None):
         # Fallback a hora del servidor
         return datetime.now()
 
+def normalizar_nombre_cliente(nombre):
+    return " ".join((nombre or "").strip().lower().split())
+
+def registrar_deuda_pedido(pedido):
+    if pedido.metodo_pago != "Deuda" or pedido.deuda_registrada:
+        return
+
+    nombre = (pedido.deuda_nombre or pedido.nombre_cliente or "").strip()
+    if not nombre:
+        return
+
+    nombre_normalizado = normalizar_nombre_cliente(nombre)
+    deuda = DeudaCliente.query.filter_by(
+        restaurante_id=pedido.restaurante_id,
+        nombre_normalizado=nombre_normalizado
+    ).first()
+
+    if not deuda:
+        deuda = DeudaCliente(
+            nombre=nombre,
+            nombre_normalizado=nombre_normalizado,
+            saldo=0,
+            restaurante_id=pedido.restaurante_id
+        )
+        db.session.add(deuda)
+
+    deuda.nombre = nombre
+    deuda.saldo = (deuda.saldo or 0) + pedido.total
+    deuda.fecha_actualizacion = datetime.now()
+    pedido.deuda_registrada = True
+
 # =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
 def init_db():
     """Inicializar base de datos con manejo de errores"""
@@ -241,6 +274,7 @@ def init_db():
         with app.app_context():
             db.create_all()
             ensure_producto_columns()
+            ensure_pedido_columns()
             print("Base de datos inicializada correctamente")
     except Exception as e:
         print(f"Error inicializando base de datos: {e}")
@@ -255,6 +289,23 @@ def ensure_producto_columns():
         db.session.execute(text(
             "ALTER TABLE producto ADD COLUMN categoria VARCHAR(30) NOT NULL DEFAULT 'comida'"
         ))
+        db.session.commit()
+
+def ensure_pedido_columns():
+    inspector = inspect(db.engine)
+    if not inspector.has_table("pedido"):
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("pedido")}
+    statements = []
+    if "transferencia_nombre" not in columns:
+        statements.append("ALTER TABLE pedido ADD COLUMN transferencia_nombre VARCHAR(100)")
+    if "deuda_registrada" not in columns:
+        statements.append("ALTER TABLE pedido ADD COLUMN deuda_registrada BOOLEAN DEFAULT 0")
+
+    for statement in statements:
+        db.session.execute(text(statement))
+    if statements:
         db.session.commit()
 
 # Llamar a init_db al importar
@@ -320,11 +371,15 @@ def index_logueado():
         pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id)\
                              .filter(Pedido.estado != "Entregado")\
                              .order_by(Pedido.fecha.desc()).all()
+        deudas_activas = DeudaCliente.query.filter_by(restaurante_id=restaurante_id)\
+                                           .filter(DeudaCliente.saldo > 0)\
+                                           .order_by(DeudaCliente.nombre.asc()).all()
         return render_template(
             "index.html",
             productos=productos,
             pedidos=pedidos,
-            categorias=PRODUCTO_CATEGORIAS
+            categorias=PRODUCTO_CATEGORIAS,
+            deudas_activas=deudas_activas
         )
     except Exception as e:
         flash(f'Error cargando dashboard: {str(e)}', 'error')
@@ -549,6 +604,7 @@ def crear_pedido():
     # Campos de pago extra
     ticket_numero = request.form.get("ticket_numero")
     titular = request.form.get("titular")
+    transferencia_nombre = request.form.get("transferencia_nombre")
     transferencia_info = request.form.get("transferencia_info")
     deuda_nombre = request.form.get("deuda_nombre")
 
@@ -557,6 +613,21 @@ def crear_pedido():
     # Validación: si es local, la mesa es obligatoria
     if tipo_consumo == "Local" and (not mesa or mesa.strip() == ""):
         return "Debe ingresar el número de mesa", 400
+
+    if metodo_pago == "Transferencia" and (not transferencia_nombre or not transferencia_info):
+        flash("Para transferencia, completa nombre y apellido y numero de comprobante.", "error")
+        return redirect(url_for("index_redirect"))
+
+    if metodo_pago == "Deuda" and not deuda_nombre:
+        flash("Para deuda, completa nombre y apellido del cliente.", "error")
+        return redirect(url_for("index_redirect"))
+
+    if metodo_pago != "Transferencia":
+        transferencia_nombre = None
+        transferencia_info = None
+
+    if metodo_pago != "Deuda":
+        deuda_nombre = None
 
     if not items:
         return redirect(url_for("index_redirect"))
@@ -585,6 +656,7 @@ def crear_pedido():
             tipo_consumo=tipo_consumo,
             ticket_numero=ticket_numero,
             titular=titular,
+            transferencia_nombre=transferencia_nombre,
             transferencia_info=transferencia_info,
             deuda_nombre=deuda_nombre,
             restaurante_id=restaurante_id,
@@ -592,6 +664,13 @@ def crear_pedido():
         )
         db.session.add(pedido)
         db.session.commit()
+    else:
+        pedido.metodo_pago = metodo_pago
+        pedido.ticket_numero = ticket_numero
+        pedido.titular = titular
+        pedido.transferencia_nombre = transferencia_nombre
+        pedido.transferencia_info = transferencia_info
+        pedido.deuda_nombre = deuda_nombre
 
     # 3. Agregar productos al pedido existente (sumar ítems correctamente)
     conteo = Counter(items)  # Cuenta cuántas veces se seleccionó cada producto
@@ -640,6 +719,9 @@ def editar_pedido(pedido_id):
     restaurante_id = get_user_restaurante()
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=restaurante_id).first_or_404()
     productos = Producto.query.filter_by(restaurante_id=restaurante_id, activo=True).all()
+    deudas_activas = DeudaCliente.query.filter_by(restaurante_id=restaurante_id)\
+                                       .filter(DeudaCliente.saldo > 0)\
+                                       .order_by(DeudaCliente.nombre.asc()).all()
     
     if request.method == "POST":
         pedido.mesa = request.form.get("mesa")
@@ -647,6 +729,9 @@ def editar_pedido(pedido_id):
         pedido.direccion_cliente = request.form.get("direccion_cliente")
         pedido.tipo_consumo = request.form.get("tipo_consumo")
         pedido.metodo_pago = request.form.get("metodo_pago")
+        pedido.transferencia_nombre = request.form.get("transferencia_nombre")
+        pedido.transferencia_info = request.form.get("transferencia_info")
+        pedido.deuda_nombre = request.form.get("deuda_nombre")
         
         if pedido.metodo_pago == "Tarjeta":
             pedido.ticket_numero = request.form.get("ticket_numero")
@@ -654,6 +739,14 @@ def editar_pedido(pedido_id):
         else:
             pedido.ticket_numero = None
             pedido.titular = None
+
+        if pedido.metodo_pago != "Transferencia":
+            pedido.transferencia_nombre = None
+            pedido.transferencia_info = None
+
+        if pedido.metodo_pago != "Deuda":
+            pedido.deuda_nombre = None
+            pedido.deuda_registrada = False
         
         # Eliminar items existentes y agregar los nuevos
         Item.query.filter_by(pedido_id=pedido.id).delete()
@@ -667,12 +760,13 @@ def editar_pedido(pedido_id):
         db.session.commit()
         return redirect(url_for("index_redirect"))
     
-    return render_template("editar.html", pedido=pedido, productos=productos)
+    return render_template("editar.html", pedido=pedido, productos=productos, deudas_activas=deudas_activas)
 
 @app.route("/entregado/<int:pedido_id>", methods=["POST"])
 @login_required
 def entregado(pedido_id):
     pedido = Pedido.query.filter_by(id=pedido_id, restaurante_id=get_user_restaurante()).first_or_404()
+    registrar_deuda_pedido(pedido)
     pedido.estado = "Entregado"
     db.session.commit()
     return redirect(request.referrer or url_for("index_redirect"))
@@ -693,21 +787,7 @@ def llegada_cocina(pedido_id):
 def historial():
     restaurante_id = get_user_restaurante()
     filtro = request.args.get("filtro", "todos")
-    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id, estado="Entregado")\
-                         .order_by(Pedido.fecha.desc()).all()
-    
-    fecha_inicio_semana = datetime.now() - timedelta(days=7)
-    pedidos_semana = [p for p in pedidos if p.fecha >= fecha_inicio_semana]
-    
-    fecha_inicio_mes = datetime.now() - timedelta(days=30)
-    pedidos_mes = [p for p in pedidos if p.fecha >= fecha_inicio_mes]
-
-    if filtro == "semana":
-        pedidos_filtrados = pedidos_semana
-    elif filtro == "mes":
-        pedidos_filtrados = pedidos_mes
-    else:
-        pedidos_filtrados = pedidos
+    pedidos_filtrados, pedidos_semana, pedidos_mes = obtener_pedidos_historial(restaurante_id, filtro)
 
     return render_template(
         "historial.html",
@@ -716,6 +796,123 @@ def historial():
         pedidos_mes=pedidos_mes,
         filtro=filtro
     )
+
+def obtener_pedidos_historial(restaurante_id, filtro):
+    pedidos = Pedido.query.filter_by(restaurante_id=restaurante_id, estado="Entregado")\
+                         .order_by(Pedido.fecha.desc()).all()
+
+    fecha_inicio_semana = datetime.now() - timedelta(days=7)
+    pedidos_semana = [p for p in pedidos if p.fecha >= fecha_inicio_semana]
+
+    fecha_inicio_mes = datetime.now() - timedelta(days=30)
+    pedidos_mes = [p for p in pedidos if p.fecha >= fecha_inicio_mes]
+
+    if filtro == "semana":
+        return pedidos_semana, pedidos_semana, pedidos_mes
+    if filtro == "mes":
+        return pedidos_mes, pedidos_semana, pedidos_mes
+    return pedidos, pedidos_semana, pedidos_mes
+
+def filas_historial_export(pedidos):
+    filas = []
+    for pedido in pedidos:
+        productos = "; ".join(
+            f"{item.cantidad}x {item.producto.nombre}" for item in pedido.items
+        )
+        filas.append({
+            "Fecha": pedido.fecha.strftime("%Y-%m-%d %H:%M"),
+            "Pedido": pedido.id,
+            "Consumo": pedido.tipo_consumo or "",
+            "Mesa": pedido.mesa or "",
+            "Cliente": pedido.nombre_cliente or pedido.deuda_nombre or pedido.transferencia_nombre or "",
+            "Direccion": pedido.direccion_cliente or "",
+            "Metodo de pago": pedido.metodo_pago or "",
+            "Transferencia nombre": pedido.transferencia_nombre or "",
+            "Transferencia comprobante": pedido.transferencia_info or "",
+            "Deudor": pedido.deuda_nombre or "",
+            "Productos": productos,
+            "Total": pedido.total,
+        })
+    return filas
+
+@app.route("/historial/exportar.csv")
+@login_required
+def exportar_historial_csv():
+    filtro = request.args.get("filtro", "todos")
+    pedidos, _, _ = obtener_pedidos_historial(get_user_restaurante(), filtro)
+    filas = filas_historial_export(pedidos)
+    fieldnames = [
+        "Fecha", "Pedido", "Consumo", "Mesa", "Cliente", "Direccion", "Metodo de pago",
+        "Transferencia nombre", "Transferencia comprobante", "Deudor", "Productos", "Total"
+    ]
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(filas)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=historial_pedidos.csv"}
+    )
+
+@app.route("/historial/exportar.xls")
+@login_required
+def exportar_historial_excel():
+    filtro = request.args.get("filtro", "todos")
+    pedidos, _, _ = obtener_pedidos_historial(get_user_restaurante(), filtro)
+    filas = filas_historial_export(pedidos)
+    fieldnames = [
+        "Fecha", "Pedido", "Consumo", "Mesa", "Cliente", "Direccion", "Metodo de pago",
+        "Transferencia nombre", "Transferencia comprobante", "Deudor", "Productos", "Total"
+    ]
+    rows = ["<table><thead><tr>"]
+    rows.extend(f"<th>{name}</th>" for name in fieldnames)
+    rows.append("</tr></thead><tbody>")
+    for fila in filas:
+        rows.append("<tr>")
+        rows.extend(f"<td>{fila.get(name, '')}</td>" for name in fieldnames)
+        rows.append("</tr>")
+    rows.append("</tbody></table>")
+    return Response(
+        "".join(rows),
+        mimetype="application/vnd.ms-excel",
+        headers={"Content-Disposition": "attachment; filename=historial_pedidos.xls"}
+    )
+
+@app.route("/deudas")
+@login_required
+def deudas():
+    deudas_clientes = DeudaCliente.query.filter_by(restaurante_id=get_user_restaurante())\
+                                        .filter(DeudaCliente.saldo > 0)\
+                                        .order_by(DeudaCliente.fecha_actualizacion.desc()).all()
+    total_deudas = sum(deuda.saldo or 0 for deuda in deudas_clientes)
+    return render_template("deudas.html", deudas=deudas_clientes, total_deudas=total_deudas)
+
+@app.route("/deudas/<int:deuda_id>/pago", methods=["POST"])
+@login_required
+def registrar_pago_deuda(deuda_id):
+    deuda = DeudaCliente.query.filter_by(id=deuda_id, restaurante_id=get_user_restaurante()).first_or_404()
+    accion = request.form.get("accion", "pago")
+
+    if accion == "saldar":
+        deuda.saldo = 0
+        flash(f"Deuda de {deuda.nombre} saldada.", "success")
+    else:
+        try:
+            monto = float(request.form.get("monto", 0))
+        except ValueError:
+            monto = 0
+
+        if monto <= 0:
+            flash("Ingresa un monto valido para registrar el pago.", "error")
+            return redirect(url_for("deudas"))
+
+        deuda.saldo = max((deuda.saldo or 0) - monto, 0)
+        flash(f"Pago registrado para {deuda.nombre}.", "success")
+
+    deuda.fecha_actualizacion = datetime.now()
+    db.session.commit()
+    return redirect(url_for("deudas"))
 
 # =================== PRODUCTOS ===================
 @app.route("/productos")

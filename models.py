@@ -142,8 +142,10 @@ class Pedido(db.Model):
     tipo_consumo = db.Column(db.String(20))
     ticket_numero = db.Column(db.String(100))
     titular = db.Column(db.String(100))
+    transferencia_nombre = db.Column(db.String(100))
     transferencia_info = db.Column(db.String(100))
     deuda_nombre = db.Column(db.String(100))
+    deuda_registrada = db.Column(db.Boolean, default=False)
     hora_cocina = db.Column(db.DateTime)
     
     # Multitenancy: cada pedido pertenece a un restaurante
@@ -169,6 +171,16 @@ class Item(db.Model):
     
     # Relaciones
     producto = db.relationship('Producto')
+
+class DeudaCliente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120), nullable=False)
+    nombre_normalizado = db.Column(db.String(120), nullable=False)
+    saldo = db.Column(db.Float, default=0)
+    fecha_actualizacion = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    restaurante_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    restaurante = db.relationship('Restaurante')
 
 # Configuración por restaurante
 class ConfiguracionRestaurante(db.Model):

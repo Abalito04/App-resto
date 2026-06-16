@@ -12,6 +12,19 @@
     </div>
   </header>
 
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      <div class="settings-alerts">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   <form method="POST" action="{{ url_for('crear_pedido') }}" class="order-layout">
     <section class="surface order-form">
       <div class="section-heading">
@@ -56,6 +69,23 @@
         <div class="col-md-4" id="div_titular" style="display:none;">
           <label class="form-label">{{ _('Titular:') }}</label>
           <input type="text" name="titular" class="form-control" placeholder="Titular de tarjeta">
+        </div>
+        <div class="col-md-4 payment-extra" id="div_transferencia_nombre" style="display:none;">
+          <label class="form-label">{{ _('Nombre y apellido') }}</label>
+          <input type="text" name="transferencia_nombre" id="transferencia_nombre" class="form-control" placeholder="Quien transfiere">
+        </div>
+        <div class="col-md-4 payment-extra" id="div_transferencia_info" style="display:none;">
+          <label class="form-label">{{ _('Nro de comprobante') }}</label>
+          <input type="text" name="transferencia_info" id="transferencia_info" class="form-control" placeholder="Comprobante">
+        </div>
+        <div class="col-md-4 payment-extra" id="div_deuda_nombre" style="display:none;">
+          <label class="form-label">{{ _('Nombre y apellido') }}</label>
+          <input type="text" name="deuda_nombre" id="deuda_nombre" class="form-control" placeholder="Cliente con deuda" list="deudores-list">
+          <datalist id="deudores-list">
+            {% for deuda in deudas_activas %}
+            <option value="{{ deuda.nombre }}">Saldo: $ {{ "%.2f"|format(deuda.saldo) }}</option>
+            {% endfor %}
+          </datalist>
         </div>
       </div>
     </section>
@@ -111,6 +141,7 @@
              data-fecha="{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}"
              data-ticket="{{ pedido.ticket_numero or '' }}"
              data-titular="{{ pedido.titular or '' }}"
+             data-transferencia_nombre="{{ pedido.transferencia_nombre or '' }}"
              data-transferencia="{{ pedido.transferencia_info or '' }}"
              data-deuda="{{ pedido.deuda_nombre or '' }}">
           <div class="order-card-head">
@@ -177,6 +208,7 @@
         <ul id="modal-productos" class="list-group mb-2"></ul>
         <p id="modal-ticket"></p>
         <p id="modal-titular"></p>
+        <p id="modal-transferencia-nombre"></p>
         <p id="modal-transferencia"></p>
         <p id="modal-deuda"></p>
       </div>
@@ -208,16 +240,31 @@
     const metodoPago = document.getElementById('metodo_pago');
     const divTicket = document.getElementById('div_tarjeta');
     const divTitular = document.getElementById('div_titular');
+    const divTransferenciaNombre = document.getElementById('div_transferencia_nombre');
+    const divTransferenciaInfo = document.getElementById('div_transferencia_info');
+    const divDeudaNombre = document.getElementById('div_deuda_nombre');
+    const transferenciaNombreInput = document.getElementById('transferencia_nombre');
+    const transferenciaInfoInput = document.getElementById('transferencia_info');
+    const deudaNombreInput = document.getElementById('deuda_nombre');
 
-    metodoPago.addEventListener('change', function() {
-        if(this.value === 'Tarjeta') {
-            divTicket.style.display = 'block';
-            divTitular.style.display = 'block';
-        } else {
-            divTicket.style.display = 'none';
-            divTitular.style.display = 'none';
-        }
-    });
+    function togglePagoFields() {
+        const isTarjeta = metodoPago.value === 'Tarjeta';
+        const isTransferencia = metodoPago.value === 'Transferencia';
+        const isDeuda = metodoPago.value === 'Deuda';
+
+        divTicket.style.display = isTarjeta ? 'block' : 'none';
+        divTitular.style.display = isTarjeta ? 'block' : 'none';
+        divTransferenciaNombre.style.display = isTransferencia ? 'block' : 'none';
+        divTransferenciaInfo.style.display = isTransferencia ? 'block' : 'none';
+        divDeudaNombre.style.display = isDeuda ? 'block' : 'none';
+
+        transferenciaNombreInput.required = isTransferencia;
+        transferenciaInfoInput.required = isTransferencia;
+        deudaNombreInput.required = isDeuda;
+    }
+
+    metodoPago.addEventListener('change', togglePagoFields);
+    togglePagoFields();
 
     const formPedido = document.querySelector('form[action="{{ url_for("crear_pedido") }}"]');
     const mesaInput = document.getElementById('mesa_input');
@@ -242,6 +289,7 @@
             const metodo_pago = card.getAttribute('data-metodo_pago');
             const ticket = card.getAttribute('data-ticket');
             const titular = card.getAttribute('data-titular');
+            const transferenciaNombre = card.getAttribute('data-transferencia_nombre');
             const transferencia = card.getAttribute('data-transferencia');
             const deuda = card.getAttribute('data-deuda');
 
@@ -257,6 +305,7 @@
             document.getElementById('modal-metodo_pago').textContent = metodo_pago ? `{{ _('Metodo de pago:') }} ${metodo_pago}` : '';
             document.getElementById('modal-ticket').textContent = ticket ? `{{ _('Ticket:') }} ${ticket}` : '';
             document.getElementById('modal-titular').textContent = titular ? `{{ _('Titular:') }} ${titular}` : '';
+            document.getElementById('modal-transferencia-nombre').textContent = transferenciaNombre ? `{{ _('Transferencia de:') }} ${transferenciaNombre}` : '';
             document.getElementById('modal-transferencia').textContent = transferencia ? `{{ _('Comprobante:') }} ${transferencia}` : '';
             document.getElementById('modal-deuda').textContent = deuda ? `{{ _('Deudor:') }} ${deuda}` : '';
 

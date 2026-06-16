@@ -904,6 +904,47 @@ label {
   white-space: nowrap;
 }
 
+/* History and debts */
+.history-toolbar,
+.debt-admin {
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+.history-date {
+  color: var(--muted);
+  display: block;
+  font-weight: 700;
+  margin-top: .35rem;
+}
+
+.debt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.debt-actions form {
+  align-items: center;
+  display: flex;
+  gap: .45rem;
+  margin: 0;
+}
+
+.debt-actions .form-control {
+  min-height: 38px;
+  width: 130px;
+}
+
+.debt-table td {
+  vertical-align: middle;
+}
+
 .list-group-item {
   background: transparent;
 }
@@ -997,6 +1038,14 @@ label {
   }
 
   .settings-actions .btn {
+    width: 100%;
+  }
+
+  .history-actions .btn,
+  .debt-actions,
+  .debt-actions form,
+  .debt-actions .btn,
+  .debt-actions .form-control {
     width: 100%;
   }
 

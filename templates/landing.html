@@ -5,18 +5,18 @@
 <section class="landing-hero">
   <div class="hero-food-bg" aria-hidden="true"></div>
   <div class="landing-copy">
-    <h1>Pedidos claros. Cocina sincronizada.</h1>
+    <h1>{{ _('Pedidos claros. Cocina sincronizada.') }}</h1>
     <p>
-      Gestiona mesas, delivery, productos y cobros desde un panel rapido para tu restaurante.
+      {{ _('Gestiona mesas, delivery, productos y cobros desde un panel rapido para tu restaurante.') }}
     </p>
     <div class="landing-actions">
-      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.registro') }}">Probar ahora</a>
-      <a class="btn btn-outline-dark btn-lg" href="{{ url_for('auth.planes') if current_user.is_authenticated else url_for('auth.login') }}">Ingresar</a>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.registro') }}">{{ _('Probar ahora') }}</a>
+      <a class="btn btn-outline-dark btn-lg" href="{{ url_for('auth.planes') if current_user.is_authenticated else url_for('auth.login') }}">{{ _('Ingresar') }}</a>
     </div>
     <div class="landing-proof">
-      <span><strong>Salon</strong> mesas y takeaway</span>
-      <span><strong>Cocina</strong> comandas claras</span>
-      <span><strong>Caja</strong> cobros al dia</span>
+      <span><strong>{{ _('Salon') }}</strong> {{ _('mesas y takeaway') }}</span>
+      <span><strong>{{ _('Cocina') }}</strong> {{ _('comandas claras') }}</span>
+      <span><strong>{{ _('Caja') }}</strong> {{ _('cobros al dia') }}</span>
     </div>
   </div>
   <div class="hero-ticket-stack" aria-hidden="true">
@@ -35,53 +35,53 @@
 
 <section class="product-showcase">
   <div class="showcase-copy">
-    <span class="section-label">Panel central</span>
-    <h2>Un sistema para el ritmo real del servicio</h2>
-    <p>Desde el primer pedido hasta el historial, todo queda organizado en vistas simples para mozos, cocina y administracion.</p>
+    <span class="section-label">{{ _('Panel central') }}</span>
+    <h2>{{ _('Un sistema para el ritmo real del servicio') }}</h2>
+    <p>{{ _('Desde el primer pedido hasta el historial, todo queda organizado en vistas simples para mozos, cocina y administracion.') }}</p>
   </div>
   <div class="landing-product-preview" aria-label="Vista previa fiel del panel Resto App">
     <div class="preview-topbar">
       <strong>Resto App</strong>
-      <span>Pedido</span>
-      <span>Cocina</span>
-      <span>Historial</span>
-      <span>Deudas</span>
+      <span>{{ _('Pedido') }}</span>
+      <span>{{ _('Cocina') }}</span>
+      <span>{{ _('Historial') }}</span>
+      <span>{{ _('Deudas') }}</span>
     </div>
     <div class="preview-grid">
       <section class="preview-panel preview-order">
-        <h3>Tomar pedido</h3>
-        <div class="preview-field">Mesa <strong>7</strong></div>
-        <div class="preview-field">Metodo de pago <strong>Transferencia</strong></div>
-        <div class="preview-field">Comprobante <strong>TR-1025</strong></div>
+        <h3>{{ _('Tomar pedido') }}</h3>
+        <div class="preview-field">{{ _('Mesa') }} <strong>7</strong></div>
+        <div class="preview-field">{{ _('Metodo de pago') }} <strong>{{ _('Transferencia') }}</strong></div>
+        <div class="preview-field">{{ _('Comprobante') }} <strong>TR-1025</strong></div>
         <div class="preview-products">
           <span>Pizza Muzzarella <b>$2500</b></span>
           <span>Hamburguesa Completa <b>$3200</b></span>
           <span>Coca-Cola 500ml <b>$1200</b></span>
         </div>
-        <button type="button">Agregar pedido</button>
+        <button type="button">{{ _('Agregar pedido') }}</button>
       </section>
       <section class="preview-panel preview-active">
-        <h3>Pedidos activos</h3>
+        <h3>{{ _('Pedidos activos') }}</h3>
         <div class="preview-ticket">
           <strong>Mesa 7</strong>
-          <span>Transferencia</span>
+          <span>{{ _('Transferencia') }}</span>
           <b>$6900</b>
         </div>
         <div class="preview-ticket">
-          <strong>Para llevar</strong>
-          <span>Efectivo</span>
+          <strong>{{ _('Para llevar') }}</strong>
+          <span>{{ _('Efectivo') }}</span>
           <b>$4400</b>
         </div>
       </section>
       <section class="preview-panel preview-debts">
-        <h3>Deudas</h3>
+        <h3>{{ _('Deudas') }}</h3>
         <div><span>Juan Perez</span><strong>$8200</strong></div>
         <div><span>Maria Lopez</span><strong>$3500</strong></div>
       </section>
       <section class="preview-panel preview-products-table">
-        <h3>Productos</h3>
-        <div><span>Pizza Muzzarella</span><small>Comida</small><strong>$2500</strong></div>
-        <div><span>Coca-Cola 500ml</span><small>Bebidas</small><strong>$1200</strong></div>
+        <h3>{{ _('Productos') }}</h3>
+        <div><span>Pizza Muzzarella</span><small>{{ _('Comida') }}</small><strong>$2500</strong></div>
+        <div><span>Coca-Cola 500ml</span><small>{{ _('Bebidas') }}</small><strong>$1200</strong></div>
       </section>
     </div>
   </div>
@@ -91,22 +91,22 @@
   <article>
     <i class="fas fa-utensils"></i>
     <div>
-      <h2>Pedidos sin ruido</h2>
-      <p>Mesas, takeaway y pagos ordenados en un flujo rapido para el salon.</p>
+      <h2>{{ _('Pedidos sin ruido') }}</h2>
+      <p>{{ _('Mesas, takeaway y pagos ordenados en un flujo rapido para el salon.') }}</p>
     </div>
   </article>
   <article>
     <i class="fas fa-kitchen-set"></i>
     <div>
-      <h2>Cocina al dia</h2>
-      <p>Los pedidos activos llegan a una vista preparada para recibir y entregar.</p>
+      <h2>{{ _('Cocina al dia') }}</h2>
+      <p>{{ _('Los pedidos activos llegan a una vista preparada para recibir y entregar.') }}</p>
     </div>
   </article>
   <article>
     <i class="fas fa-chart-line"></i>
     <div>
-      <h2>Control simple</h2>
-      <p>Productos, historial y configuracion del restaurante siempre a mano.</p>
+      <h2>{{ _('Control simple') }}</h2>
+      <p>{{ _('Productos, historial y configuracion del restaurante siempre a mano.') }}</p>
     </div>
   </article>
 </section>

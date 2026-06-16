@@ -5,9 +5,9 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header text-center">
-                    <h3>Crear Cuenta - Nuevo Restaurante</h3>
+                    <h3>{{ _('Crear cuenta - nuevo restaurante') }}</h3>
                     <a href="{{ url_for('index_redirect') }}" class="btn btn-outline-dark btn-sm mt-2">
-                        <i class="fas fa-arrow-left"></i> Volver a inicio
+                        <i class="fas fa-arrow-left"></i> {{ _('Volver a inicio') }}
                     </a>
                 </div>
                 <div class="card-body">
@@ -22,16 +22,16 @@
                     {% endwith %}
 
                     <form method="POST">
-                        <h5>Datos del Administrador</h5>
+                        <h5>{{ _('Datos del administrador') }}</h5>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Nombre Completo:</label>
+                                <label>{{ _('Nombre completo:') }}</label>
                                 <input type="text" name="nombre" id="nombre" class="form-control" required>
-                                <small class="text-muted">Solo letras y espacios</small>
+                                <small class="text-muted">{{ _('Solo letras y espacios') }}</small>
                                 <div class="invalid-feedback" id="nombre-error"></div>
                             </div>
                             <div class="col-md-6">
-                                <label>Email:</label>
+                                <label>{{ _('Email:') }}</label>
                                 <div class="input-group">
                                     <input type="email" name="email" id="email" class="form-control" required>
                                     <span class="input-group-text" id="email-status" style="display: none;">
@@ -40,48 +40,48 @@
                                         <i class="fas fa-spinner fa-spin text-primary" id="email-loading-icon" style="display: none;"></i>
                                     </span>
                                 </div>
-                                <small class="text-muted">Formato: usuario@dominio.com</small>
+                                <small class="text-muted">{{ _('Formato: usuario@dominio.com') }}</small>
                                 <div class="invalid-feedback" id="email-error"></div>
                                 <div class="valid-feedback" id="email-success"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Contraseña:</label>
+                                <label>{{ _('Contrasena:') }}</label>
                                 <input type="password" name="password" id="password" class="form-control" required>
-                                <small class="text-muted">Mínimo 8 caracteres, letras y números</small>
+                                <small class="text-muted">{{ _('Minimo 8 caracteres, letras y numeros') }}</small>
                                 <div class="invalid-feedback" id="password-error"></div>
                             </div>
                             <div class="col-md-6">
-                                <label>Confirmar Contraseña:</label>
+                                <label>{{ _('Confirmar contrasena:') }}</label>
                                 <input type="password" name="confirmar_password" id="confirmar_password" class="form-control" required>
                                 <div class="invalid-feedback" id="confirmar_password-error"></div>
                             </div>
                         </div>
 
-                        <h5>Datos del Restaurante</h5>
+                        <h5>{{ _('Datos del restaurante') }}</h5>
                         <div class="mb-3">
-                            <label>Nombre del Restaurante:</label>
+                            <label>{{ _('Nombre del restaurante:') }}</label>
                             <input type="text" name="nombre_restaurante" class="form-control" required>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-8">
-                                <label>Dirección:</label>
+                                <label>{{ _('Direccion:') }}</label>
                                 <input type="text" name="direccion" class="form-control">
                             </div>
                             <div class="col-md-4">
-                                <label>Teléfono:</label>
+                                <label>{{ _('Telefono:') }}</label>
                                 <input type="text" name="telefono" id="telefono" class="form-control">
-                                <small class="text-muted">Solo números, espacios, guiones y paréntesis</small>
+                                <small class="text-muted">{{ _('Solo numeros, espacios, guiones y parentesis') }}</small>
                                 <div class="invalid-feedback" id="telefono-error"></div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-success w-100">Crear Cuenta</button>
+                        <button type="submit" class="btn btn-success w-100">{{ _('Crear cuenta') }}</button>
                     </form>
                 </div>
                 <div class="card-footer text-center">
-                    <a href="{{ url_for('auth.login') }}">¿Ya tienes cuenta? Inicia sesión</a>
+                    <a href="{{ url_for('auth.login') }}">{{ _('Ya tienes cuenta? Inicia sesion') }}</a>
                 </div>
             </div>
         </div>

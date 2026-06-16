@@ -5,7 +5,7 @@
     <div class="section-heading">
       <span class="section-label">Resto App</span>
       <h1>{{ _('Ingresar') }}</h1>
-      <p>Accede al panel de pedidos de tu restaurante.</p>
+      <p>{{ _('Accede al panel de pedidos de tu restaurante.') }}</p>
     </div>
     <a href="{{ url_for('index_redirect') }}" class="btn btn-outline-dark btn-sm mb-3">
       <i class="fas fa-arrow-left"></i> {{ _('Volver a inicio') }}
@@ -35,12 +35,12 @@
   </section>
 
   <aside class="auth-aside">
-    <h2>Todo listo para el servicio</h2>
-    <p>Pedidos, cocina, historial y productos en una interfaz pensada para trabajar rapido.</p>
+    <h2>{{ _('Todo listo para el servicio') }}</h2>
+    <p>{{ _('Pedidos, cocina, historial y productos en una interfaz pensada para trabajar rapido.') }}</p>
     <ul>
-      <li><i class="fas fa-check"></i> Vista de pedidos activos</li>
-      <li><i class="fas fa-check"></i> Flujo para salon y takeaway</li>
-      <li><i class="fas fa-check"></i> Gestion de productos simple</li>
+      <li><i class="fas fa-check"></i> {{ _('Vista de pedidos activos') }}</li>
+      <li><i class="fas fa-check"></i> {{ _('Flujo para salon y takeaway') }}</li>
+      <li><i class="fas fa-check"></i> {{ _('Gestion de productos simple') }}</li>
     </ul>
   </aside>
 </div>
@@ -61,11 +61,11 @@
   }
 
   function showEmailSentMessage() {
-    appendEmailMessage('alert-success', 'Email de confirmacion enviado. Revisa tu correo.');
+    appendEmailMessage('alert-success', '{{ _("Email de confirmacion enviado. Revisa tu correo.") }}');
   }
 
   function showEmailError() {
-    appendEmailMessage('alert-warning', 'No se pudo enviar el email automaticamente. Usa el enlace de reenvio.');
+    appendEmailMessage('alert-warning', '{{ _("No se pudo enviar el email automaticamente. Usa el enlace de reenvio.") }}');
   }
 
   function sendConfirmationEmail(email, token) {

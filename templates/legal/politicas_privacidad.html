@@ -2,33 +2,33 @@
 {% block content %}
 <section class="surface legal-page">
   <div class="section-heading">
-    <span class="section-label">Legal</span>
-    <h1>Politicas de privacidad</h1>
-    <p>Ultima actualizacion: 16/06/2026</p>
+    <span class="section-label">{{ _('Legal') }}</span>
+    <h1>{{ _('Politicas de privacidad') }}</h1>
+    <p>{{ _('Ultima actualizacion: 16/06/2026') }}</p>
   </div>
 
   <div class="legal-content">
-    <h2>Datos que se recopilan</h2>
-    <p>La aplicacion puede almacenar datos de cuenta, restaurante, productos, pedidos, metodos de pago, deudas de clientes y configuraciones operativas.</p>
+    <h2>{{ _('Datos que se recopilan') }}</h2>
+    <p>{{ _('La aplicacion puede almacenar datos de cuenta, restaurante, productos, pedidos, metodos de pago, deudas de clientes y configuraciones operativas.') }}</p>
 
-    <h2>Finalidad</h2>
-    <p>Los datos se utilizan para permitir el funcionamiento del panel, registrar operaciones, generar historial, administrar deudas y facilitar exportaciones.</p>
+    <h2>{{ _('Finalidad') }}</h2>
+    <p>{{ _('Los datos se utilizan para permitir el funcionamiento del panel, registrar operaciones, generar historial, administrar deudas y facilitar exportaciones.') }}</p>
 
-    <h2>Acceso a la informacion</h2>
-    <p>La informacion se muestra a usuarios autorizados del restaurante correspondiente. Las claves de acceso y API keys deben mantenerse privadas.</p>
+    <h2>{{ _('Acceso a la informacion') }}</h2>
+    <p>{{ _('La informacion se muestra a usuarios autorizados del restaurante correspondiente. Las claves de acceso y API keys deben mantenerse privadas.') }}</p>
 
-    <h2>Conservacion</h2>
-    <p>Los datos se conservan mientras la cuenta o restaurante permanezcan activos, salvo eliminacion manual o solicitud especifica de baja.</p>
+    <h2>{{ _('Conservacion') }}</h2>
+    <p>{{ _('Los datos se conservan mientras la cuenta o restaurante permanezcan activos, salvo eliminacion manual o solicitud especifica de baja.') }}</p>
 
-    <h2>Servicios externos</h2>
-    <p>La aplicacion puede usar servicios externos para correo, hosting, base de datos o integraciones necesarias para operar el sistema.</p>
+    <h2>{{ _('Servicios externos') }}</h2>
+    <p>{{ _('La aplicacion puede usar servicios externos para correo, hosting, base de datos o integraciones necesarias para operar el sistema.') }}</p>
 
-    <h2>Contacto</h2>
-    <p>Para consultas sobre privacidad, correccion o eliminacion de datos, contacta al administrador del sistema.</p>
+    <h2>{{ _('Contacto') }}</h2>
+    <p>{{ _('Para consultas sobre privacidad, correccion o eliminacion de datos, contacta al administrador del sistema.') }}</p>
   </div>
 
   <a href="{{ url_for('index_redirect') }}" class="btn btn-primary">
-    <i class="fas fa-arrow-left"></i> Volver a inicio
+    <i class="fas fa-arrow-left"></i> {{ _('Volver a inicio') }}
   </a>
 </section>
 {% endblock %}

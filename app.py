@@ -151,6 +151,7 @@ PRODUCTO_CATEGORIAS = [
 ]
 
 PRODUCTO_CATEGORIA_KEYS = {key for key, _ in PRODUCTO_CATEGORIAS}
+SCHEMA_READY = False
 
 # Inicializar extensiones
 db.init_app(app)
@@ -272,44 +273,68 @@ def init_db():
     """Inicializar base de datos con manejo de errores"""
     try:
         with app.app_context():
-            db.create_all()
-            ensure_producto_columns()
-            ensure_pedido_columns()
+            ensure_app_schema()
             print("Base de datos inicializada correctamente")
     except Exception as e:
+        db.session.rollback()
         print(f"Error inicializando base de datos: {e}")
 
-def ensure_producto_columns():
-    inspector = inspect(db.engine)
-    if not inspector.has_table("producto"):
-        return
+def ensure_app_schema():
+    db.create_all()
+    ensure_producto_columns()
+    ensure_pedido_columns()
 
-    columns = {column["name"] for column in inspector.get_columns("producto")}
-    if "categoria" not in columns:
-        db.session.execute(text(
-            "ALTER TABLE producto ADD COLUMN categoria VARCHAR(30) NOT NULL DEFAULT 'comida'"
-        ))
-        db.session.commit()
+def ensure_producto_columns():
+    try:
+        inspector = inspect(db.engine)
+        if not inspector.has_table("producto"):
+            return
+
+        columns = {column["name"] for column in inspector.get_columns("producto")}
+        if "categoria" not in columns:
+            db.session.execute(text(
+                "ALTER TABLE producto ADD COLUMN categoria VARCHAR(30) NOT NULL DEFAULT 'comida'"
+            ))
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
 def ensure_pedido_columns():
-    inspector = inspect(db.engine)
-    if not inspector.has_table("pedido"):
-        return
+    try:
+        inspector = inspect(db.engine)
+        if not inspector.has_table("pedido"):
+            return
 
-    columns = {column["name"] for column in inspector.get_columns("pedido")}
-    statements = []
-    if "transferencia_nombre" not in columns:
-        statements.append("ALTER TABLE pedido ADD COLUMN transferencia_nombre VARCHAR(100)")
-    if "deuda_registrada" not in columns:
-        statements.append("ALTER TABLE pedido ADD COLUMN deuda_registrada BOOLEAN DEFAULT 0")
+        columns = {column["name"] for column in inspector.get_columns("pedido")}
+        statements = []
+        if "transferencia_nombre" not in columns:
+            statements.append("ALTER TABLE pedido ADD COLUMN transferencia_nombre VARCHAR(100)")
+        if "deuda_registrada" not in columns:
+            statements.append("ALTER TABLE pedido ADD COLUMN deuda_registrada BOOLEAN DEFAULT FALSE")
 
-    for statement in statements:
-        db.session.execute(text(statement))
-    if statements:
-        db.session.commit()
+        for statement in statements:
+            db.session.execute(text(statement))
+        if statements:
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
 # Llamar a init_db al importar
 init_db()
+
+@app.before_request
+def ensure_schema_before_request():
+    global SCHEMA_READY
+    if SCHEMA_READY or request.endpoint == "static":
+        return
+
+    try:
+        ensure_app_schema()
+        SCHEMA_READY = True
+    except Exception as e:
+        app.logger.error("Error verificando migraciones: %s", e)
 
 # Inicializar traducciones de forma segura
 def init_translations():

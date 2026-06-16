@@ -40,7 +40,7 @@
                                 <label for="restaurante_id" class="form-label">{{ _('Restaurante') }}</label>
                                 <select class="form-select" id="restaurante_id" name="restaurante_id" onchange="toggleNuevoRestaurante()">
                                     <option value="">{{ _('Sin restaurante') }}</option>
-                                    <option value="nuevo">➕ Crear nuevo restaurante</option>
+                                    <option value="nuevo">{{ _('Crear nuevo restaurante') }}</option>
                                     {% for restaurante in restaurantes %}
                                         <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
                                     {% endfor %}
@@ -52,7 +52,7 @@
                         <div id="nuevo-restaurante" style="display: none;">
                             <div class="row">
                                 <div class="col-12 mb-3">
-                                    <h5 class="text-primary">📋 Datos del Nuevo Restaurante</h5>
+                                    <h5 class="text-primary">{{ _('Datos del nuevo restaurante') }}</h5>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="nombre_restaurante" class="form-label">{{ _('Nombre del restaurante') }} *</label>

@@ -5,7 +5,7 @@
     <div>
       <span class="section-label">Carta</span>
       <h1>{{ _('Gestionar productos') }}</h1>
-      <p>Actualiza precios, agrega platos y mantene la carta lista para tomar pedidos.</p>
+      <p>{{ _('Actualiza precios, agrega platos y mantene la carta lista para tomar pedidos.') }}</p>
     </div>
     <div class="page-stats">
       <span>{{ _('Total') }}</span>
@@ -16,7 +16,7 @@
   <section class="surface product-admin">
     <div class="section-heading">
       <h2>{{ _('Agregar producto') }}</h2>
-      <p>Carga un nuevo item para que aparezca en el panel del mozo.</p>
+      <p>{{ _('Carga un nuevo item para que aparezca en el panel del mozo.') }}</p>
     </div>
 
     <form method="POST" action="{{ url_for('agregar_producto_index') }}" class="quick-add product-page-add">
@@ -36,7 +36,7 @@
   <section class="surface product-admin">
     <div class="section-heading">
       <h2>{{ _('Productos cargados') }}</h2>
-      <p>Edita nombre o precio y guarda cada fila por separado.</p>
+      <p>{{ _('Edita nombre o precio y guarda cada fila por separado.') }}</p>
     </div>
 
     <div class="product-tools">

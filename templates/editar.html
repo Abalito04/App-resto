@@ -63,7 +63,7 @@
         <input type="text" name="deuda_nombre" id="deuda_nombre" class="form-control" value="{{ pedido.deuda_nombre or '' }}" list="deudores-list">
         <datalist id="deudores-list">
           {% for deuda in deudas_activas %}
-          <option value="{{ deuda.nombre }}">Saldo: $ {{ "%.2f"|format(deuda.saldo) }}</option>
+          <option value="{{ deuda.nombre }}">{{ _('Saldo') }}: $ {{ "%.2f"|format(deuda.saldo) }}</option>
           {% endfor %}
         </datalist>
       </div>
@@ -71,7 +71,7 @@
 
     <div class="section-heading mt-4">
       <h2>{{ _('Productos') }}</h2>
-      <p>Actualiza los productos incluidos en el pedido.</p>
+      <p>{{ _('Actualiza los productos incluidos en el pedido.') }}</p>
     </div>
 
     <div class="product-grid">

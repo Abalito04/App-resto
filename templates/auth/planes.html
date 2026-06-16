@@ -94,7 +94,7 @@
                     {% elif current_user.es_superadmin %}
                         <a href="{{ url_for('auth.cambiar_plan', plan=plan_id) }}" 
                            class="btn btn-outline-primary"
-                           onclick="return confirm('¿Estás seguro de cambiar al plan {{ plan.nombre }}?')">
+                           onclick="return confirm('{{ _('Estas seguro de cambiar al plan') }} {{ plan.nombre }}?')">
                             {{ _('Cambiar a') }} {{ plan.nombre }}
                         </a>
                     {% else %}

@@ -29,7 +29,7 @@
     <section class="surface order-form">
       <div class="section-heading">
         <h2>{{ _('Datos del pedido') }}</h2>
-        <p>Define consumo, mesa o cliente y forma de pago.</p>
+        <p>{{ _('Define consumo, mesa o cliente y forma de pago.') }}</p>
       </div>
 
       <div class="row g-3">
@@ -42,16 +42,16 @@
         </div>
         <div class="col-md-4" id="div_mesa">
           <label class="form-label">{{ _('Mesa:') }}</label>
-          <input type="text" name="mesa" id="mesa_input" class="form-control" placeholder="Ej: 12">
+          <input type="text" name="mesa" id="mesa_input" class="form-control" placeholder="{{ _('Ej: 12') }}">
           <small id="mesa_error" class="text-danger" style="display:none;">{{ _('Debe ingresar el numero de mesa') }}</small>
         </div>
         <div class="col-md-4" id="div_cliente" style="display:none;">
           <label class="form-label">{{ _('Nombre Cliente:') }}</label>
-          <input type="text" name="nombre_cliente" class="form-control" placeholder="Nombre del cliente">
+          <input type="text" name="nombre_cliente" class="form-control" placeholder="{{ _('Nombre del cliente') }}">
         </div>
         <div class="col-md-4" id="div_direccion" style="display:none;">
           <label class="form-label">{{ _('Direccion:') }}</label>
-          <input type="text" name="direccion_cliente" class="form-control" placeholder="Direccion de entrega">
+          <input type="text" name="direccion_cliente" class="form-control" placeholder="{{ _('Direccion de entrega') }}">
         </div>
         <div class="col-md-4">
           <label class="form-label">{{ _('Metodo de pago:') }}</label>
@@ -64,26 +64,26 @@
         </div>
         <div class="col-md-4" id="div_tarjeta" style="display:none;">
           <label class="form-label">{{ _('N de Ticket:') }}</label>
-          <input type="text" name="ticket_numero" class="form-control" placeholder="Ticket">
+          <input type="text" name="ticket_numero" class="form-control" placeholder="{{ _('Ticket') }}">
         </div>
         <div class="col-md-4" id="div_titular" style="display:none;">
           <label class="form-label">{{ _('Titular:') }}</label>
-          <input type="text" name="titular" class="form-control" placeholder="Titular de tarjeta">
+          <input type="text" name="titular" class="form-control" placeholder="{{ _('Titular de tarjeta') }}">
         </div>
         <div class="col-md-4 payment-extra" id="div_transferencia_nombre" style="display:none;">
           <label class="form-label">{{ _('Nombre y apellido') }}</label>
-          <input type="text" name="transferencia_nombre" id="transferencia_nombre" class="form-control" placeholder="Quien transfiere">
+          <input type="text" name="transferencia_nombre" id="transferencia_nombre" class="form-control" placeholder="{{ _('Quien transfiere') }}">
         </div>
         <div class="col-md-4 payment-extra" id="div_transferencia_info" style="display:none;">
           <label class="form-label">{{ _('Nro de comprobante') }}</label>
-          <input type="text" name="transferencia_info" id="transferencia_info" class="form-control" placeholder="Comprobante">
+          <input type="text" name="transferencia_info" id="transferencia_info" class="form-control" placeholder="{{ _('Comprobante') }}">
         </div>
         <div class="col-md-4 payment-extra" id="div_deuda_nombre" style="display:none;">
           <label class="form-label">{{ _('Nombre y apellido') }}</label>
-          <input type="text" name="deuda_nombre" id="deuda_nombre" class="form-control" placeholder="Cliente con deuda" list="deudores-list">
+          <input type="text" name="deuda_nombre" id="deuda_nombre" class="form-control" placeholder="{{ _('Cliente con deuda') }}" list="deudores-list">
           <datalist id="deudores-list">
             {% for deuda in deudas_activas %}
-            <option value="{{ deuda.nombre }}">Saldo: $ {{ "%.2f"|format(deuda.saldo) }}</option>
+            <option value="{{ deuda.nombre }}">{{ _('Saldo') }}: $ {{ "%.2f"|format(deuda.saldo) }}</option>
             {% endfor %}
           </datalist>
         </div>
@@ -93,7 +93,7 @@
     <section class="surface product-picker">
       <div class="section-heading">
         <h2>{{ _('Productos:') }}</h2>
-        <p>Selecciona los items para cargar el pedido.</p>
+        <p>{{ _('Selecciona los items para cargar el pedido.') }}</p>
       </div>
       <div class="product-category-list">
         {% for key, label in categorias %}
@@ -128,7 +128,7 @@
   <section class="surface active-orders">
     <div class="section-heading">
       <h2>{{ _('Pedidos activos') }}</h2>
-      <p>Click en una tarjeta para ver el detalle completo.</p>
+      <p>{{ _('Click en una tarjeta para ver el detalle completo.') }}</p>
     </div>
     <div class="row g-3">
       {% for pedido in pedidos %}

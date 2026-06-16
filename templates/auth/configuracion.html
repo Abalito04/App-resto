@@ -60,7 +60,7 @@
     <section class="surface settings-card">
       <div class="section-heading">
         <h2>{{ _('Impresion de comandas') }}</h2>
-        <p>Red/Ethernet puede imprimir directo por IP. USB necesita un cliente local junto a la impresora.</p>
+        <p>{{ _('Red/Ethernet puede imprimir directo por IP. USB necesita un cliente local junto a la impresora.') }}</p>
       </div>
 
       <div class="printer-status">
@@ -100,7 +100,7 @@
 
       <div class="printer-note">
         <strong>{{ _('Como probar sin impresora') }}</strong>
-        <p>Usa el boton de prueba para validar que la configuracion esta completa. Cuando tengas una impresora de red, la prueba real sera crear un pedido y revisar que salga la comanda.</p>
+        <p>{{ _('Usa el boton de prueba para validar que la configuracion esta completa. Cuando tengas una impresora de red, la prueba real sera crear un pedido y revisar que salga la comanda.') }}</p>
       </div>
 
       <div class="settings-actions">
@@ -117,7 +117,7 @@
   <section class="surface settings-card">
     <div class="section-heading">
       <h2>{{ _('Plan e integraciones') }}</h2>
-      <p>Uso actual del plan y clave para conectar sistemas externos.</p>
+      <p>{{ _('Uso actual del plan y clave para conectar sistemas externos.') }}</p>
     </div>
 
     <div class="plan-grid">
@@ -138,7 +138,7 @@
     <div class="api-key-box">
       <label class="form-label">{{ _('API Key') }}</label>
       <code>{{ current_user.restaurante.api_key }}</code>
-      <small>No compartas esta clave. Permite leer pedidos y configuracion publica del restaurante.</small>
+      <small>{{ _('No compartas esta clave. Permite leer pedidos y configuracion publica del restaurante.') }}</small>
     </div>
 
     <a href="{{ url_for('auth.planes') }}" class="btn btn-outline-dark">

@@ -27,7 +27,7 @@
                     <p><strong>{{ _('Plan actual:') }}</strong> <span class="badge bg-info">{{ restaurante.plan|title }}</span></p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>{{ _('Límite de usuarios:') }}</strong> {{ limits.usuarios if limits.usuarios != -1 else 'Ilimitado' }}</p>
+                    <p><strong>{{ _('Límite de usuarios:') }}</strong> {{ limits.usuarios if limits.usuarios != -1 else _('Ilimitado') }}</p>
                     <p><strong>{{ _('Usuarios actuales:') }}</strong> {{ usuarios|length }}</p>
                 </div>
             </div>

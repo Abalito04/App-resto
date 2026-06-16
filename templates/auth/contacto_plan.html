@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3>📧 Solicitar Cambio de Plan</h3>
+                    <h3>{{ _('Solicitar cambio de plan') }}</h3>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=True) %}
@@ -21,14 +21,14 @@
                     {% endwith %}
 
                     <p class="text-muted mb-4">
-                        Completa el formulario para solicitar un cambio de plan. Nos pondremos en contacto contigo pronto.
+                        {{ _('Completa el formulario para solicitar un cambio de plan. Nos pondremos en contacto contigo pronto.') }}
                     </p>
 
                     <form method="POST">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="nombre" class="form-label">Nombre completo *</label>
+                                    <label for="nombre" class="form-label">{{ _('Nombre completo') }} *</label>
                                     <input type="text" class="form-control" id="nombre" name="nombre" 
                                            value="{{ current_user.nombre }}" required>
                                 </div>
@@ -45,16 +45,16 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="restaurante" class="form-label">Restaurante *</label>
+                                    <label for="restaurante" class="form-label">{{ _('Restaurante') }} *</label>
                                     <input type="text" class="form-control" id="restaurante" name="restaurante" 
                                            value="{{ current_user.restaurante.nombre if current_user.restaurante else '' }}" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="plan_solicitado" class="form-label">Plan solicitado *</label>
+                                    <label for="plan_solicitado" class="form-label">{{ _('Plan solicitado') }} *</label>
                                     <select class="form-select" id="plan_solicitado" name="plan_solicitado" required>
-                                        <option value="">Selecciona un plan</option>
+                                        <option value="">{{ _('Selecciona un plan') }}</option>
                                         <option value="Premium 1">Premium 1 - $29/mes (30 productos, 3 usuarios)</option>
                                         <option value="Premium Full">Premium Full - $99/mes (Hasta 10 usuarios)</option>
                                     </select>
@@ -63,17 +63,17 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="mensaje" class="form-label">Mensaje *</label>
+                            <label for="mensaje" class="form-label">{{ _('Mensaje') }} *</label>
                             <textarea class="form-control" id="mensaje" name="mensaje" rows="5" 
-                                      placeholder="Cuéntanos por qué necesitas cambiar de plan y cualquier información adicional..." required></textarea>
+                                      placeholder="{{ _('Cuentanos por que necesitas cambiar de plan y cualquier informacion adicional...') }}" required></textarea>
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('auth.planes') }}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-arrow-left me-1"></i>Volver
+                                <i class="fas fa-arrow-left me-1"></i>{{ _('Volver') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane me-1"></i>Enviar Solicitud
+                                <i class="fas fa-paper-plane me-1"></i>{{ _('Enviar solicitud') }}
                             </button>
                         </div>
                     </form>

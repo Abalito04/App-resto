@@ -5,7 +5,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="fas fa-user-plus me-2"></i>Crear Nuevo Usuario</h3>
+                    <h3><i class="fas fa-user-plus me-2"></i>{{ _('Crear nuevo usuario') }}</h3>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -22,7 +22,7 @@
                     <form method="POST">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nombre" class="form-label">Nombre Completo *</label>
+                                <label for="nombre" class="form-label">{{ _('Nombre completo') }} *</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" required>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -33,13 +33,13 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Contraseña *</label>
+                                <label for="password" class="form-label">{{ _('Contrasena') }} *</label>
                                 <input type="password" class="form-control" id="password" name="password" required minlength="6">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="restaurante_id" class="form-label">Restaurante</label>
+                                <label for="restaurante_id" class="form-label">{{ _('Restaurante') }}</label>
                                 <select class="form-select" id="restaurante_id" name="restaurante_id" onchange="toggleNuevoRestaurante()">
-                                    <option value="">Sin restaurante</option>
+                                    <option value="">{{ _('Sin restaurante') }}</option>
                                     <option value="nuevo">➕ Crear nuevo restaurante</option>
                                     {% for restaurante in restaurantes %}
                                         <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
@@ -55,11 +55,11 @@
                                     <h5 class="text-primary">📋 Datos del Nuevo Restaurante</h5>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="nombre_restaurante" class="form-label">Nombre del Restaurante *</label>
+                                    <label for="nombre_restaurante" class="form-label">{{ _('Nombre del restaurante') }} *</label>
                                     <input type="text" class="form-control" id="nombre_restaurante" name="nombre_restaurante">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="zona_horaria" class="form-label">Zona Horaria</label>
+                                    <label for="zona_horaria" class="form-label">{{ _('Zona horaria') }}</label>
                                     <select class="form-select" id="zona_horaria" name="zona_horaria">
                                         <option value="America/Argentina/Buenos_Aires">Argentina (Buenos Aires)</option>
                                         <option value="America/Mexico_City">México (Ciudad de México)</option>
@@ -72,11 +72,11 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="direccion_restaurante" class="form-label">Dirección</label>
+                                    <label for="direccion_restaurante" class="form-label">{{ _('Direccion') }}</label>
                                     <input type="text" class="form-control" id="direccion_restaurante" name="direccion_restaurante">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="telefono_restaurante" class="form-label">Teléfono</label>
+                                    <label for="telefono_restaurante" class="form-label">{{ _('Telefono') }}</label>
                                     <input type="text" class="form-control" id="telefono_restaurante" name="telefono_restaurante">
                                 </div>
                             </div>
@@ -87,7 +87,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="es_admin" name="es_admin">
                                     <label class="form-check-label" for="es_admin">
-                                        Es Admin
+                                        {{ _('Es admin') }}
                                     </label>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="es_superadmin" name="es_superadmin">
                                     <label class="form-check-label" for="es_superadmin">
-                                        Es Superadmin
+                                        {{ _('Es superadmin') }}
                                     </label>
                                 </div>
                             </div>
@@ -103,10 +103,10 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ url_for('auth.admin_usuarios') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                                <i class="fas fa-arrow-left me-1"></i>{{ _('Cancelar') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Crear Usuario
+                                <i class="fas fa-save me-1"></i>{{ _('Crear usuario') }}
                             </button>
                         </div>
                     </form>

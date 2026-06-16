@@ -34,7 +34,7 @@
                         </li>
                     {% endfor %}
                 </ul>
-                <strong>Total: ${{ item.pedido.total }}</strong>
+                <strong>{{ _('Total') }}: ${{ item.pedido.total }}</strong>
 
                 <div class="d-flex gap-2 mt-2">
                     {% if not item.pedido.hora_cocina %}

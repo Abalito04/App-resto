@@ -89,6 +89,18 @@
 </div>
 
 <script>
+const I18N = {
+    onlyLetters: "{{ _('Solo se permiten letras y espacios') }}",
+    invalidEmail: "{{ _('Formato de email invalido') }}",
+    emailAvailable: "{{ _('Email disponible') }}",
+    passwordMin: "{{ _('Minimo 8 caracteres con letras y numeros') }}",
+    passwordsMismatch: "{{ _('Las contrasenas no coinciden') }}",
+    phoneChars: "{{ _('Solo numeros, espacios, guiones y parentesis') }}",
+    nameRule: "{{ _('El nombre solo puede contener letras y espacios') }}",
+    passwordRule: "{{ _('La contrasena debe tener al menos 8 caracteres y contener letras y numeros') }}",
+    phoneRule: "{{ _('El telefono solo puede contener numeros, espacios, guiones y parentesis') }}"
+};
+
 // Funciones de validación
 function validarNombre(nombre) {
     const pattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
@@ -139,7 +151,7 @@ function limpiarError(campoId) {
 // Validación en tiempo real
 document.getElementById('nombre').addEventListener('input', function() {
     if (this.value && !validarNombre(this.value)) {
-        mostrarError('nombre', 'Solo se permiten letras y espacios');
+        mostrarError('nombre', I18N.onlyLetters);
     } else {
         limpiarError('nombre');
     }
@@ -158,7 +170,7 @@ document.getElementById('email').addEventListener('input', function() {
     
     // Validación básica de formato
     if (email && !validarEmail(email)) {
-        mostrarError('email', 'Formato de email inválido');
+        mostrarError('email', I18N.invalidEmail);
         return;
     }
     
@@ -228,7 +240,7 @@ function mostrarEmailDisponible() {
     
     emailField.classList.remove('is-invalid');
     emailField.classList.add('is-valid');
-    successDiv.textContent = 'Email disponible';
+    successDiv.textContent = I18N.emailAvailable;
     successDiv.style.display = 'block';
 }
 
@@ -267,7 +279,7 @@ function ocultarEmailStatus() {
 
 document.getElementById('password').addEventListener('input', function() {
     if (this.value && !validarPassword(this.value)) {
-        mostrarError('password', 'Mínimo 8 caracteres con letras y números');
+        mostrarError('password', I18N.passwordMin);
     } else {
         limpiarError('password');
     }
@@ -276,7 +288,7 @@ document.getElementById('password').addEventListener('input', function() {
 document.getElementById('confirmar_password').addEventListener('input', function() {
     const password = document.getElementById('password').value;
     if (this.value && this.value !== password) {
-        mostrarError('confirmar_password', 'Las contraseñas no coinciden');
+        mostrarError('confirmar_password', I18N.passwordsMismatch);
     } else {
         limpiarError('confirmar_password');
     }
@@ -284,7 +296,7 @@ document.getElementById('confirmar_password').addEventListener('input', function
 
 document.getElementById('telefono').addEventListener('input', function() {
     if (this.value && !validarTelefono(this.value)) {
-        mostrarError('telefono', 'Solo números, espacios, guiones y paréntesis');
+        mostrarError('telefono', I18N.phoneChars);
     } else {
         limpiarError('telefono');
     }
@@ -297,35 +309,35 @@ document.querySelector('form').addEventListener('submit', function(e) {
     // Validar nombre
     const nombre = document.getElementById('nombre').value;
     if (!validarNombre(nombre)) {
-        mostrarError('nombre', 'El nombre solo puede contener letras y espacios');
+        mostrarError('nombre', I18N.nameRule);
         esValido = false;
     }
     
     // Validar email
     const email = document.getElementById('email').value;
     if (!validarEmail(email)) {
-        mostrarError('email', 'Formato de email inválido');
+        mostrarError('email', I18N.invalidEmail);
         esValido = false;
     }
     
     // Validar contraseña
     const password = document.getElementById('password').value;
     if (!validarPassword(password)) {
-        mostrarError('password', 'La contraseña debe tener al menos 8 caracteres y contener letras y números');
+        mostrarError('password', I18N.passwordRule);
         esValido = false;
     }
     
     // Validar confirmación de contraseña
     const confirmarPassword = document.getElementById('confirmar_password').value;
     if (password !== confirmarPassword) {
-        mostrarError('confirmar_password', 'Las contraseñas no coinciden');
+        mostrarError('confirmar_password', I18N.passwordsMismatch);
         esValido = false;
     }
     
     // Validar teléfono
     const telefono = document.getElementById('telefono').value;
     if (telefono && !validarTelefono(telefono)) {
-        mostrarError('telefono', 'El teléfono solo puede contener números, espacios, guiones y paréntesis');
+        mostrarError('telefono', I18N.phoneRule);
         esValido = false;
     }
     

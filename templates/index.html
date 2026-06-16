@@ -28,7 +28,7 @@
   <form method="POST" action="{{ url_for('crear_pedido') }}" class="order-layout">
     <section class="surface order-form">
       <div class="section-heading">
-        <h2>Datos del pedido</h2>
+        <h2>{{ _('Datos del pedido') }}</h2>
         <p>Define consumo, mesa o cliente y forma de pago.</p>
       </div>
 
@@ -116,7 +116,7 @@
           {% endif %}
         {% endfor %}
         {% if not productos %}
-        <p class="empty-state">Aun no hay productos cargados.</p>
+        <p class="empty-state">{{ _('Aun no hay productos cargados.') }}</p>
         {% endif %}
       </div>
       <button type="submit" class="btn btn-primary btn-lg order-submit">
@@ -165,7 +165,7 @@
           </ul>
 
           <div class="order-total">
-            <span>Total</span>
+            <span>{{ _('Total') }}</span>
             <strong>${{ pedido.total }}</strong>
           </div>
 

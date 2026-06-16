@@ -178,28 +178,21 @@ def load_user(user_id):
 def inject_user():
     # Función de traducción simplificada
     def translate_text(text):
-        # Usar sistema simple para traducciones del perfil
-        if text in ['Perfil de', 'Email:', 'Teléfono:', 'Restaurante:', 'Dirección:', 'Moneda:', 'No registrado', 'No registrada', 'Configuración', 'Salir']:
+        try:
+            import simple_translations
+            translated = simple_translations.get_translation(text, get_locale())
+            if translated != text:
+                return translated
+        except:
+            pass
+
+        if not use_simple_translations and BABEL_AVAILABLE:
             try:
-                import simple_translations
-                return simple_translations.get_translation(text, get_locale())
+                return gettext(text)
             except:
-                return text
-        
-        if use_simple_translations:
-            try:
-                import simple_translations
-                return simple_translations.get_translation(text, get_locale())
-            except:
-                return text
-        else:
-            # Usar Babel si está disponible
-            if BABEL_AVAILABLE:
-                try:
-                    return gettext(text)
-                except:
-                    return text
-            return text
+                pass
+
+        return text
     
     return {
         'current_user': current_user,

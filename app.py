@@ -3,6 +3,7 @@ import os
 import logging
 import socket
 import csv
+import secrets
 from io import StringIO
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, Response
 from flask_login import LoginManager, login_required, current_user
@@ -51,7 +52,7 @@ except Exception as e:
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'tu-clave-secreta-muy-segura')
+app.secret_key = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 
 # Configuración de idiomas (siempre disponible)
 app.config['LANGUAGES'] = {

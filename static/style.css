@@ -265,9 +265,32 @@ label {
   align-items: center;
   display: grid;
   gap: clamp(2rem, 5vw, 4rem);
-  grid-template-columns: minmax(0, .85fr) minmax(320px, 1.15fr);
+  grid-template-columns: minmax(0, .95fr) minmax(300px, .7fr);
   min-height: calc(100vh - 72px);
   padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 6vw, 5rem) 3rem;
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-food-bg {
+  background:
+    linear-gradient(90deg, rgba(247, 248, 244, .98) 0%, rgba(247, 248, 244, .92) 38%, rgba(247, 248, 244, .68) 62%, rgba(247, 248, 244, .28) 100%),
+    url("/static/hero-food-bg.png") center / cover no-repeat;
+  inset: 0;
+  position: absolute;
+  z-index: -2;
+}
+
+.landing-hero::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(247, 248, 244, .98) 100%);
+  bottom: -1px;
+  content: "";
+  height: 9rem;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  z-index: -1;
 }
 
 .landing-copy {
@@ -296,13 +319,101 @@ label {
   gap: .8rem;
 }
 
+.landing-proof {
+  display: grid;
+  gap: .7rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 2rem;
+  max-width: 660px;
+}
+
+.landing-proof span {
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid rgba(223, 229, 220, .9);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(21, 42, 34, .08);
+  color: var(--muted);
+  display: grid;
+  font-size: .88rem;
+  min-height: 78px;
+  padding: .85rem;
+}
+
+.landing-proof strong {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.hero-ticket-stack {
+  align-self: end;
+  display: grid;
+  gap: .85rem;
+  justify-self: end;
+  max-width: 340px;
+  padding-bottom: 2rem;
+  width: 100%;
+}
+
+.mini-ticket {
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 44px rgba(21, 42, 34, .14);
+  display: grid;
+  gap: .2rem;
+  padding: 1rem;
+}
+
+.mini-ticket span {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.mini-ticket strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.mini-ticket small {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.ticket-amber {
+  border-left-color: var(--amber);
+  margin-left: 2rem;
+}
+
+.product-showcase {
+  align-items: center;
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: minmax(280px, .48fr) minmax(0, 1fr);
+  padding: clamp(2rem, 5vw, 4.5rem) clamp(1rem, 6vw, 5rem);
+}
+
+.showcase-copy h2 {
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.showcase-copy p {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 1rem 0 0;
+}
+
 .landing-preview {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 26px 70px rgba(19, 56, 47, .20);
   overflow: hidden;
-  transform: rotate(1deg);
 }
 
 .landing-preview img {
@@ -604,6 +715,7 @@ label {
 
 @media (max-width: 991px) {
   .landing-hero,
+  .product-showcase,
   .order-layout,
   .auth-shell {
     grid-template-columns: 1fr;
@@ -615,6 +727,12 @@ label {
 
   .landing-preview {
     transform: none;
+  }
+
+  .hero-ticket-stack {
+    justify-self: stretch;
+    max-width: none;
+    padding-bottom: 0;
   }
 
   .landing-features {
@@ -646,8 +764,22 @@ label {
     padding: 2rem 1rem;
   }
 
+  .hero-food-bg {
+    background:
+      linear-gradient(180deg, rgba(247, 248, 244, .96) 0%, rgba(247, 248, 244, .9) 55%, rgba(247, 248, 244, .72) 100%),
+      url("/static/hero-food-bg.png") center right / cover no-repeat;
+  }
+
   .landing-copy h1 {
     font-size: 2.45rem;
+  }
+
+  .landing-proof {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-amber {
+    margin-left: 0;
   }
 
   .quick-add {

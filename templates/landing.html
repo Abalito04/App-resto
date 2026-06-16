@@ -3,6 +3,7 @@
 {% block main_class %}landing-main{% endblock %}
 {% block content %}
 <section class="landing-hero">
+  <div class="hero-food-bg" aria-hidden="true"></div>
   <div class="landing-copy">
     <h1>Pedidos claros. Cocina sincronizada.</h1>
     <p>
@@ -12,6 +13,31 @@
       <a class="btn btn-primary btn-lg" href="{{ url_for('auth.registro') }}">Probar ahora</a>
       <a class="btn btn-outline-dark btn-lg" href="{{ url_for('auth.planes') if current_user.is_authenticated else url_for('auth.login') }}">Ingresar</a>
     </div>
+    <div class="landing-proof">
+      <span><strong>Salon</strong> mesas y takeaway</span>
+      <span><strong>Cocina</strong> comandas claras</span>
+      <span><strong>Caja</strong> cobros al dia</span>
+    </div>
+  </div>
+  <div class="hero-ticket-stack" aria-hidden="true">
+    <div class="mini-ticket ticket-red">
+      <span>#1025 Mesa 7</span>
+      <strong>En preparacion</strong>
+      <small>3 productos · $30.250</small>
+    </div>
+    <div class="mini-ticket ticket-amber">
+      <span>#1026 Delivery</span>
+      <strong>Listo para retirar</strong>
+      <small>2 productos · $18.400</small>
+    </div>
+  </div>
+</section>
+
+<section class="product-showcase">
+  <div class="showcase-copy">
+    <span class="section-label">Panel central</span>
+    <h2>Un sistema para el ritmo real del servicio</h2>
+    <p>Desde el primer pedido hasta el historial, todo queda organizado en vistas simples para mozos, cocina y administracion.</p>
   </div>
   <div class="landing-preview" aria-label="Vista previa del panel Resto App">
     <img src="{{ url_for('static', filename='landing-preview.png') }}" alt="Vista previa de Resto App">

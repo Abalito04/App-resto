@@ -274,8 +274,8 @@ def index_redirect():
                 return redirect(url_for('setup_inicial'))
         except Exception as e:
             print(f"Error verificando usuarios: {e}")
-            # Si hay error de DB, va al login de todas formas
-        return redirect(url_for('auth.login'))
+            # Si hay error de DB, muestra la landing de todas formas
+        return render_template("landing.html")
     return index_logueado()
 
 @app.route("/clear-session")

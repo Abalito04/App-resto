@@ -1,148 +1,118 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4" style="max-width:480px">
-  <h3>{{ _('Ingresar') }}</h3>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for c,m in messages %}
-      <div class="alert alert-{{ 'danger' if c=='error' else c }}">{{ m }}</div>
-    {% endfor %}
-  {% endwith %}
-  <form method="POST">
-    <div class="mb-3">
-      <label>{{ _('Email') }}</label>
-      <input class="form-control" type="email" name="email" value="{{ pending_email or '' }}" required>
+<div class="auth-shell">
+  <section class="auth-card">
+    <div class="section-heading">
+      <span class="section-label">Resto App</span>
+      <h1>{{ _('Ingresar') }}</h1>
+      <p>Accede al panel de pedidos de tu restaurante.</p>
     </div>
-    <div class="mb-3">
-      <label>{{ _('Contraseña') }}</label>
-      <input class="form-control" type="password" name="password" required>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for c,m in messages %}
+        <div class="alert alert-{{ 'danger' if c=='error' else c }}">{{ m }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">{{ _('Email') }}</label>
+        <input class="form-control" type="email" name="email" value="{{ pending_email or '' }}" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ _('Contraseña') }}</label>
+        <input class="form-control" type="password" name="password" required>
+      </div>
+      <button class="btn btn-primary w-100" type="submit">{{ _('Entrar') }}</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <a href="{{ url_for('auth.resend_confirm') }}">{{ _('No recibiste el email de confirmacion?') }}</a>
     </div>
-    <button class="btn btn-primary w-100" type="submit">{{ _('Entrar') }}</button>
-  </form>
-  <div class="text-center mt-3">
-    <a href="{{ url_for('auth.resend_confirm') }}">{{ _('¿No recibiste el email de confirmación?') }}</a>
-  </div>
+  </section>
+
+  <aside class="auth-aside">
+    <h2>Todo listo para el servicio</h2>
+    <p>Pedidos, cocina, historial y productos en una interfaz pensada para trabajar rapido.</p>
+    <ul>
+      <li><i class="fas fa-check"></i> Vista de pedidos activos</li>
+      <li><i class="fas fa-check"></i> Flujo para salon y takeaway</li>
+      <li><i class="fas fa-check"></i> Gestion de productos simple</li>
+    </ul>
+  </aside>
 </div>
 
-<!-- EmailJS para envío de emails de confirmación -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="text/javascript">
-  // Inicializar EmailJS
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
   (function() {
-    emailjs.init("79cmvTkckyQwZrWM7"); // Reemplazar con tu clave pública de EmailJS
+    if (window.emailjs) {
+      emailjs.init("79cmvTkckyQwZrWM7");
+    }
   })();
 
-  // Función para enviar email de confirmación
+  function appendEmailMessage(className, text) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${className} mt-3`;
+    alertDiv.textContent = text;
+    document.querySelector('.auth-card').appendChild(alertDiv);
+  }
+
+  function showEmailSentMessage() {
+    appendEmailMessage('alert-success', 'Email de confirmacion enviado. Revisa tu correo.');
+  }
+
+  function showEmailError() {
+    appendEmailMessage('alert-warning', 'No se pudo enviar el email automaticamente. Usa el enlace de reenvio.');
+  }
+
   function sendConfirmationEmail(email, token) {
-    console.log('Iniciando envío de email para:', email, 'con token:', token);
-    
-    // Obtener datos del email desde el servidor
+    if (!window.emailjs) {
+      showEmailError();
+      return;
+    }
+
     fetch(`/auth/email_data/${token}`)
       .then(response => {
-        console.log('Respuesta del servidor:', response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
         return response.json();
       })
       .then(data => {
-        console.log('Datos recibidos:', data);
         if (data.error) {
-          console.error('Error obteniendo datos del email:', data.error);
           showEmailError();
           return;
         }
 
-        // Configurar template de EmailJS - versión corregida
         const templateParams = {
           to_email: data.email,
           to_name: data.nombre || 'Usuario',
           confirm_url: data.confirm_url,
           restaurante: data.restaurante || 'Nuevo Restaurante',
           from_name: 'Sistema de Restaurantes',
-          // Parámetros adicionales que EmailJS podría requerir
           reply_to: data.email,
           user_email: data.email
         };
-        
-        // Verificar que todos los parámetros requeridos estén presentes
-        console.log('=== DIAGNÓSTICO EMAILJS ===');
-        console.log('Credenciales:');
-        console.log('- Service ID: service_vbzkn64');
-        console.log('- Template ID: template_mg7eult');
-        console.log('- Public Key: 79cmvTkckyQwZrWM7');
-        console.log('');
-        console.log('Parámetros enviados:');
-        console.log('- to_email:', templateParams.to_email);
-        console.log('- to_name:', templateParams.to_name);
-        console.log('- confirm_url:', templateParams.confirm_url);
-        console.log('- restaurante:', templateParams.restaurante);
-        console.log('- from_name:', templateParams.from_name);
-        console.log('- reply_to:', templateParams.reply_to);
-        console.log('- user_email:', templateParams.user_email);
-        console.log('');
 
-        console.log('Enviando email con parámetros:', templateParams);
-
-        // Enviar email usando EmailJS
         emailjs.send('service_vbzkn64', 'template_mg7eult', templateParams)
-          .then(function(response) {
-            console.log('✅ Email enviado exitosamente:', response.status, response.text);
-            showEmailSentMessage();
-          }, function(error) {
-            console.error('❌ Error enviando email:', error);
-            console.error('Detalles del error:', {
-              status: error.status,
-              text: error.text,
-              message: error.message
-            });
-            
-            // Intentar con parámetros mínimos como fallback
-            console.log('🔄 Intentando con parámetros mínimos...');
+          .then(showEmailSentMessage)
+          .catch(() => {
             const minimalParams = {
               to_email: data.email,
               to_name: 'Usuario',
               confirm_url: data.confirm_url
             };
-            
             emailjs.send('service_vbzkn64', 'template_mg7eult', minimalParams)
-              .then(function(response) {
-                console.log('✅ Email enviado con parámetros mínimos:', response.status, response.text);
-                showEmailSentMessage();
-              }, function(error2) {
-                console.error('❌ Error también con parámetros mínimos:', error2);
-                showEmailError();
-              });
+              .then(showEmailSentMessage)
+              .catch(showEmailError);
           });
       })
-      .catch(error => {
-        console.error('Error en la petición:', error);
-        showEmailError();
-      });
+      .catch(showEmailError);
   }
 
-  // Mostrar mensaje de email enviado
-  function showEmailSentMessage() {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success mt-3';
-    alertDiv.innerHTML = '✅ Email de confirmación enviado exitosamente. Revisa tu correo.';
-    document.querySelector('.container').appendChild(alertDiv);
-  }
-
-  // Mostrar mensaje de error
-  function showEmailError() {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-warning mt-3';
-    alertDiv.innerHTML = '⚠️ No se pudo enviar el email automáticamente. Usa el enlace de reenvío.';
-    document.querySelector('.container').appendChild(alertDiv);
-  }
-
-  // Verificar si hay un token en la URL (después del registro)
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
   const email = urlParams.get('email');
-  
+
   if (token && email) {
-    // Enviar email automáticamente después del registro
     sendConfirmationEmail(email, token);
   }
 </script>

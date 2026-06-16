@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block body_class %}landing-page{% endblock %}
+{% block main_class %}landing-main{% endblock %}
+{% block content %}
+<section class="landing-hero">
+  <div class="landing-copy">
+    <h1>Pedidos claros. Cocina sincronizada.</h1>
+    <p>
+      Gestiona mesas, delivery, productos y cobros desde un panel rapido para tu restaurante.
+    </p>
+    <div class="landing-actions">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('auth.registro') }}">Probar ahora</a>
+      <a class="btn btn-outline-dark btn-lg" href="{{ url_for('auth.planes') if current_user.is_authenticated else url_for('auth.login') }}">Ingresar</a>
+    </div>
+  </div>
+  <div class="landing-preview" aria-label="Vista previa del panel Resto App">
+    <img src="{{ url_for('static', filename='landing-preview.png') }}" alt="Vista previa de Resto App">
+  </div>
+</section>
+
+<section id="funciones" class="landing-features">
+  <article>
+    <i class="fas fa-utensils"></i>
+    <div>
+      <h2>Pedidos sin ruido</h2>
+      <p>Mesas, takeaway y pagos ordenados en un flujo rapido para el salon.</p>
+    </div>
+  </article>
+  <article>
+    <i class="fas fa-kitchen-set"></i>
+    <div>
+      <h2>Cocina al dia</h2>
+      <p>Los pedidos activos llegan a una vista preparada para recibir y entregar.</p>
+    </div>
+  </article>
+  <article>
+    <i class="fas fa-chart-line"></i>
+    <div>
+      <h2>Control simple</h2>
+      <p>Productos, historial y configuracion del restaurante siempre a mano.</p>
+    </div>
+  </article>
+</section>
+{% endblock %}

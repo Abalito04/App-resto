@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8000}"]
+CMD ["sh", "-c", "gunicorn app:app --bind 0.0.0.0:${PORT:-8000} --access-logfile - --access-logformat '%({X-Forwarded-For}i)s \"%m %U\" %s %b %(D)sus'"]

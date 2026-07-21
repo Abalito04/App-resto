@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 from sqlalchemy import inspect, text
+from sqlalchemy.pool import NullPool
 from collections import Counter
 import pytz
 
@@ -108,12 +109,6 @@ database_url = os.getenv('CUSTOM_DATABASE_URL', '')
 if not database_url:
     database_url = os.getenv('DATABASE_URL', '')  # fallback a la original
 
-# Forzar URL pública si detectamos que Railway está usando la interna
-if database_url and 'railway.internal' in database_url:
-    print("⚠️ Railway está usando URL interna, forzando URL pública...")
-    # Usar la URL pública directamente
-    database_url = os.getenv('DATABASE_URL_PUBLIC', '') or os.getenv('DATABASE_URL', '')
-
 if database_url:
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -125,11 +120,15 @@ if database_url:
     q.setdefault('connect_timeout', '5')
     database_url = urlunparse(parsed._replace(query=urlencode(q)))
 
-    print(f"🔗 Usando URL de DB: {database_url}")
+    print(
+        "🔗 Usando PostgreSQL: "
+        f"host={parsed.hostname} port={parsed.port or 5432} "
+        f"database={parsed.path.lstrip('/')}"
+    )
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         "connect_args": {"sslmode": "require", "connect_timeout": 5},
-        "pool_pre_ping": True,
+        "poolclass": NullPool,
     }
     app.config['DEBUG'] = False
 else:

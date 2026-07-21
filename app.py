@@ -265,13 +265,13 @@ def registrar_deuda_pedido(pedido):
 # =================== CREAR BASE DE DATOS CON MANEJO DE ERRORES ===================
 def init_db():
     """Inicializar base de datos con manejo de errores"""
-    try:
-        with app.app_context():
+    with app.app_context():
+        try:
             ensure_app_schema()
             print("Base de datos inicializada correctamente")
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error inicializando base de datos: {e}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error inicializando base de datos: {e}")
 
 def ensure_app_schema():
     db.create_all()
@@ -314,9 +314,6 @@ def ensure_pedido_columns():
     except Exception:
         db.session.rollback()
         raise
-
-# Llamar a init_db al importar
-init_db()
 
 @app.before_request
 def ensure_schema_before_request():
